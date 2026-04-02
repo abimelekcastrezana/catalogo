@@ -1,10 +1,13 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
-import db from '../../../../db';
-const { User } = db;
 
-const handler = NextAuth({
+async function getDb() {
+  const dbModule = await import('../../../../db/index.js');
+  return dbModule.default || dbModule;
+}
+
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -17,6 +20,7 @@ const handler = NextAuth({
           throw new Error('Email and password required');
         }
 
+        const { User } = await getDb();
         const user = await User.findOne({ where: { email: credentials.email } });
         if (!user) {
           throw new Error('Invalid email or password');
@@ -53,6 +57,8 @@ const handler = NextAuth({
     },
   },
   secret: process.env.JWT_SECRET,
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

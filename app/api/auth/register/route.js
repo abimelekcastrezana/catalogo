@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import db from '../../../../db';
-const { Vendor, User } = db;
+
+async function getDb() {
+  const dbModule = await import('../../../../db/index.js');
+  const db = dbModule.default || dbModule;
+  return db;
+}
 
 export async function POST(request) {
+  const { Vendor, User } = await getDb();
   const body = await request.json();
   const { email, password, vendorName, slug, whatsappPhone } = body;
 
