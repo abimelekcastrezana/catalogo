@@ -17,6 +17,26 @@ module.exports = {
       updatedAt: { type: Sequelize.DATE, allowNull: false, defaultValue: Sequelize.fn('NOW') },
     });
 
+    await queryInterface.createTable('users', {
+      id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.literal('gen_random_uuid()'),
+        allowNull: false,
+        primaryKey: true,
+      },
+      email: { type: Sequelize.STRING, allowNull: false, unique: true },
+      password: { type: Sequelize.STRING, allowNull: false },
+      vendorId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: { model: 'vendors', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT',
+      },
+      createdAt: { type: Sequelize.DATE, allowNull: false, defaultValue: Sequelize.fn('NOW') },
+      updatedAt: { type: Sequelize.DATE, allowNull: false, defaultValue: Sequelize.fn('NOW') },
+    });
+
     await queryInterface.createTable('categories', {
       id: {
         type: Sequelize.UUID,
@@ -158,6 +178,7 @@ module.exports = {
     await queryInterface.dropTable('product_images');
     await queryInterface.dropTable('products');
     await queryInterface.dropTable('categories');
+    await queryInterface.dropTable('users');
     await queryInterface.dropTable('vendors');
   },
 };

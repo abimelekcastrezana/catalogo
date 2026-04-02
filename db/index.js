@@ -1,4 +1,8 @@
-require('server-only');
+try {
+  require('server-only');
+} catch (error) {
+  // Ignore in non-Next server context (scripts/tests)
+}
 
 const sequelize = require('./connection');
 
@@ -8,6 +12,7 @@ const Product = require('./models/product')(sequelize);
 const ProductImage = require('./models/productImage')(sequelize);
 const Cart = require('./models/cart')(sequelize);
 const CartItem = require('./models/cartItem')(sequelize);
+const User = require('./models/user')(sequelize);
 
 // Relacionamientos
 Vendor.hasMany(Category, { foreignKey: 'vendorId' });
@@ -31,6 +36,9 @@ CartItem.belongsTo(Cart, { foreignKey: 'cartId' });
 Product.hasMany(CartItem, { foreignKey: 'productId' });
 CartItem.belongsTo(Product, { foreignKey: 'productId' });
 
+Vendor.hasMany(User, { foreignKey: 'vendorId' });
+User.belongsTo(Vendor, { foreignKey: 'vendorId' });
+
 module.exports = {
   sequelize,
   Vendor,
@@ -39,4 +47,5 @@ module.exports = {
   ProductImage,
   Cart,
   CartItem,
+  User,
 };
