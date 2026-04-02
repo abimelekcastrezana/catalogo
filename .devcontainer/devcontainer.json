@@ -1,0 +1,74 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node-postgres
+{
+  "name": "Catalogo Dev Container",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  "runServices": ["app", "db"],
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": true,
+      "installDockerBuildx": true,
+      "installDockerComposeSwitch": true,
+      "version": "latest",
+      "dockerDashComposeVersion": "v2"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // This can be used to network with other containers or with the host.
+  "forwardPorts": [
+		3000,
+		5432
+	],
+	"portsAttributes": {
+		"3000": {
+			"label": "Catalogo Web Application",
+			"protocol": "http"
+		},
+		"5432": {
+			"label": "Catalogo PostgreSQL Database",
+			"protocol": "http"
+		}
+	},
+  
+	// Commands to run when the container is created or started.
+	// These commands can be used to install dependencies, run migrations, or start services.
+  // "initializeCommand": "docker network inspect shared-network >/dev/null 2>&1 || docker network create --driver bridge h2h-shared-network",
+  "postCreateCommand": "npm install",
+  "postStartCommand": "npm run dev",
+  
+	// Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "settings": {
+        // Set the color theme for the VS Code workbench. Team members can change this setting as per their preference.
+        "workbench.colorTheme": "Default Dark Modern"
+      },
+        "extensions": [
+          "humao.rest-client",
+          "Arjun.swagger-viewer",
+          "formulahendry.code-runner",
+          "bierner.markdown-preview-github-styles",
+          "mhutchie.git-graph",
+          "ms-azuretools.vscode-containers"
+        ]
+    }
+  },
+  "mounts": [
+		// Fix:
+		// If you are using a Mac or Linux OS, uncomment the line below to mount your SSH keys.
+		// This allows you to use your SSH keys inside the container for git operations.
+		"source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached"
+		
+		// If you are using a Windows OS, uncomment the line below to mount your SSH keys.
+		// This allows you to use your SSH keys inside the container for git operations.
+		// "source=${localEnv:USERPROFILE}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached" 
+
+  ],
+  "remoteUser": "node"
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
+}
