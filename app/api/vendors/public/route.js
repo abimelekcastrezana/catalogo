@@ -1,6 +1,5 @@
-'use server';
 
-import db from '../../../../db/index.js';
+import db from '@/db/index.js';
 import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {

@@ -1,8 +1,6 @@
-'use server';
-
 import { NextResponse } from 'next/server';
-import { getUserSession } from '../../../../lib/auth/getSession';
-import db from '../../../../db/index.js';
+import { getUserSession } from '@/lib/auth/getSession';
+import db from '@/db/index.js';
 
 export async function POST(request, { params }) {
   const session = await getUserSession();

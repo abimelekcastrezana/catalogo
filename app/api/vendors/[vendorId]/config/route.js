@@ -1,8 +1,6 @@
-'use server';
-
 import { NextResponse } from 'next/server';
-import { getUserSession } from '../../../../../lib/auth/getSession';
-import db from '../../../../../db/index.js';
+import { getUserSession } from '@/lib/auth/getSession';
+import db from '@/db/index.js';
 import { Sequelize } from 'sequelize';
 
 export async function PUT(request, { params }) {
