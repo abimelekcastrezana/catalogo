@@ -19,9 +19,14 @@ export async function PUT(request, { params }) {
     }
 
     const body = await request.json();
-    const { name, sku, description, categoryId, isActive } = body;
-    if (!name || !sku) {
+    const { name, sku, description, categoryId, isActive, price } = body;
+    if (!name || !sku || price === undefined || price === null) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+    }
+
+    const normalizedPrice = Number(price);
+    if (Number.isNaN(normalizedPrice) || normalizedPrice < 0) {
+      return NextResponse.json({ error: 'Price must be a positive number' }, { status: 400 });
     }
 
     const product = await db.Product.findOne({ where: { id: productId, vendorId } });
@@ -34,7 +39,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'SKU already in use' }, { status: 409 });
     }
 
-    await product.update({ name, sku, description, categoryId: categoryId || null, isActive: typeof isActive === 'boolean' ? isActive : product.isActive });
+    await product.update({ name, sku, description, categoryId: categoryId || null, isActive: typeof isActive === 'boolean' ? isActive : product.isActive, price: normalizedPrice });
     return NextResponse.json({ product: product.get({ plain: true }) });
   } catch (error) {
     console.error('Error updating product:', error);

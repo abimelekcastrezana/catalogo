@@ -6,6 +6,7 @@ export default function ConfigForm({ vendor }) {
   const [name, setName] = useState(vendor.name || "");
   const [slug, setSlug] = useState(vendor.slug || "");
   const [whatsappPhone, setWhatsappPhone] = useState(vendor.whatsappPhone || "");
+  const [slogan, setSlogan] = useState(vendor.slogan || "");
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
@@ -14,7 +15,7 @@ export default function ConfigForm({ vendor }) {
     const response = await fetch(`/api/vendors/${vendor.id}/config`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, slug, whatsappPhone }),
+      body: JSON.stringify({ name, slug, whatsappPhone, slogan }),
     });
 
     const data = await response.json();
@@ -32,6 +33,7 @@ export default function ConfigForm({ vendor }) {
       <form onSubmit={handleSubmit} style={{ display: "grid", gap: "0.75rem", maxWidth: "420px" }}>
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" required />
         <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug" required />
+        <input value={slogan} onChange={(e) => setSlogan(e.target.value)} placeholder="Slogan" />
         <input value={whatsappPhone} onChange={(e) => setWhatsappPhone(e.target.value)} placeholder="WhatsApp" required />
         <button type="submit">Guardar</button>
       </form>

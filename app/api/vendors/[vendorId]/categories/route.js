@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getUserSession } from '@/lib/auth/getSession';
+import { UniqueConstraintError } from 'sequelize';
 import db from '@/db/index.js';
 
 export async function POST(request, { params }) {
@@ -22,6 +23,14 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Category slug exists' }, { status: 409 });
   }
 
-  const category = await db.Category.create({ vendorId: resolvedParams.vendorId, name, slug });
-  return NextResponse.json({ category }, { status: 201 });
+  try {
+    const category = await db.Category.create({ vendorId: resolvedParams.vendorId, name, slug });
+    return NextResponse.json({ category }, { status: 201 });
+  } catch (error) {
+    if (error instanceof UniqueConstraintError) {
+      return NextResponse.json({ error: 'Category slug exists' }, { status: 409 });
+    }
+    console.error('Category creation error:', error);
+    return NextResponse.json({ error: 'Server error creating category' }, { status: 500 });
+  }
 }

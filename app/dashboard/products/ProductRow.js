@@ -8,6 +8,7 @@ export default function ProductRow({ product, vendorId, categories }) {
   const [sku, setSku] = useState(product.sku);
   const [description, setDescription] = useState(product.description || "");
   const [catId, setCatId] = useState(product.categoryId || "");
+  const [price, setPrice] = useState(product.price || "");
   const [message, setMessage] = useState("");
   const [imageFiles, setImageFiles] = useState([null, null]);
 
@@ -15,7 +16,7 @@ export default function ProductRow({ product, vendorId, categories }) {
     const res = await fetch(`/api/vendors/${vendorId}/products/${product.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, sku, description, categoryId: catId || null, isActive: product.isActive }),
+      body: JSON.stringify({ name, sku, description, categoryId: catId || null, isActive: product.isActive, price }),
     });
     let data = {};
     const text = await res.text();
@@ -96,6 +97,7 @@ export default function ProductRow({ product, vendorId, categories }) {
           <div>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
             <input value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" />
+            <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Precio" type="number" step="0.01" min="0" />
             <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
             <select value={catId} onChange={(e) => setCatId(e.target.value)}>
               <option value="">Sin categoría</option>
@@ -128,6 +130,7 @@ export default function ProductRow({ product, vendorId, categories }) {
           <div>
             <strong>{product.name}</strong> (SKU: {product.sku}) - {product.description || 'Sin descripción'}
             <div>Categoría: {product.categoryId || 'N/A'}</div>
+            <div>Precio: ${Number(product.price).toFixed(2)}</div>
             <button onClick={() => setIsEditing(true)}>Editar</button>
             <button onClick={deleteProduct}>Eliminar</button>
           </div>

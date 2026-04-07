@@ -31,6 +31,7 @@ export default async function DashboardConfigPage() {
       <h1>Dashboard - Configuración</h1>
       <p>Vendor actual: {vendor.name}</p>
       <p>Slug público: {vendor.slug}</p>
+      <p>Slogan actual: {vendor.slogan || 'No definido'}</p>
       <p>URL pública: https://tu-dominio.com/{vendor.slug}</p>
       <p>API pública: /api/vendors/public/{vendor.slug}</p>
       <ConfigForm vendor={vendor} />

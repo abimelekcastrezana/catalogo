@@ -7,6 +7,7 @@ export default function AddProductForm({ vendorId, categories }) {
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [price, setPrice] = useState("");
   const [imageFiles, setImageFiles] = useState([null, null]);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,7 +22,7 @@ export default function AddProductForm({ vendorId, categories }) {
       const res = await fetch(`/api/vendors/${vendorId}/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, sku, description, categoryId: categoryId || null }),
+        body: JSON.stringify({ name, sku, description, categoryId: categoryId || null, price }),
       });
 
       let data;
@@ -66,6 +67,7 @@ export default function AddProductForm({ vendorId, categories }) {
       setMessage('Producto creado catoke y archivos subidos (si se adjuntaron).');
       setName('');
       setSku('');
+      setPrice('');
       setDescription('');
       setCategoryId('');
       setImageFiles([null, null]);
@@ -80,6 +82,7 @@ export default function AddProductForm({ vendorId, categories }) {
     <form onSubmit={handleSubmit} style={{ display: "grid", gap: "0.5rem", maxWidth: "420px" }}>
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" required />
       <input value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" required />
+      <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Precio" type="number" step="0.01" min="0" required />
       <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
 
       <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>

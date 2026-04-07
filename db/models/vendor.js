@@ -24,6 +24,10 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    slogan: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   }, {
     tableName: 'vendors',
     timestamps: true,
