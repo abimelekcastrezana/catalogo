@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getUserSession } from '@/lib/auth/getSession';
+import { UniqueConstraintError } from 'sequelize';
 import db from '@/db/index.js';
 
 export async function POST(request, { params }) {
@@ -18,11 +19,20 @@ export async function POST(request, { params }) {
   }
 
   const vendorId = resolvedParams.vendorId;
-  const existing = await db.Product.findOne({ where: { vendorId, sku } });
+  const normalizedSku = sku.trim();
+  const existing = await db.Product.findOne({ where: { vendorId, sku: normalizedSku } });
   if (existing) {
-    return NextResponse.json({ error: 'Product SKU exists' }, { status: 409 });
+    return NextResponse.json({ error: 'SKU already exists for this vendor' }, { status: 409 });
   }
 
-  const product = await db.Product.create({ vendorId, categoryId: categoryId || null, name, sku, description });
-  return NextResponse.json({ product }, { status: 201 });
+  try {
+    const product = await db.Product.create({ vendorId, categoryId: categoryId || null, name, sku: normalizedSku, description });
+    return NextResponse.json({ product }, { status: 201 });
+  } catch (error) {
+    if (error instanceof UniqueConstraintError) {
+      return NextResponse.json({ error: 'SKU already exists for this vendor' }, { status: 409 });
+    }
+    console.error('Product create error:', error);
+    return NextResponse.json({ error: 'Server error creating product' }, { status: 500 });
+  }
 }

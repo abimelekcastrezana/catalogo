@@ -9,57 +9,71 @@ export default function AddProductForm({ vendorId, categories }) {
   const [categoryId, setCategoryId] = useState("");
   const [imageFiles, setImageFiles] = useState([null, null]);
   const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch(`/api/vendors/${vendorId}/products`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, sku, description, categoryId: categoryId || null }),
-    });
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setMessage('Creando producto...');
 
-    let data;
     try {
-      data = await res.json();
-    } catch (err) {
-      const text = await res.text();
-      setMessage(`Error del servidor: ${text || err.message}`);
-      return;
-    }
-
-    if (!res.ok) {
-      setMessage(data.error || "Error creando producto");
-      return;
-    }
-
-    const product = data.product;
-    if (!product || !product.id) {
-      setMessage("Producto creado, pero no se retornó id");
-      return;
-    }
-
-    // Upload images if provided
-    const uploadPromises = imageFiles
-      .filter((f) => f)
-      .slice(0, 2)
-      .map(async (file) => {
-        const formData = new FormData();
-        formData.append('image', file);
-        const uploadRes = await fetch(`/api/products/${product.id}/images`, {
-          method: 'POST',
-          body: formData,
-        });
-        return uploadRes.json();
+      const res = await fetch(`/api/vendors/${vendorId}/products`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, sku, description, categoryId: categoryId || null }),
       });
 
-    await Promise.all(uploadPromises);
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        const text = await res.text();
+        setMessage(`Error del servidor: ${text || err.message}`);
+        setIsSubmitting(false);
+        return;
+      }
 
-    setMessage('Producto creado catoke y archivos subidos (si se adjuntaron).');
-    setName('');
-    setSku('');
-    setDescription('');
-    setCategoryId('');
-    setImageFiles([null, null]);
+      if (!res.ok) {
+        setMessage(data.error || "Error creando producto");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const product = data.product;
+      if (!product || !product.id) {
+        setMessage("Producto creado, pero no se retornó id");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Upload images if provided
+      const uploadPromises = imageFiles
+        .filter((f) => f)
+        .slice(0, 2)
+        .map(async (file) => {
+          const formData = new FormData();
+          formData.append('image', file);
+          const uploadRes = await fetch(`/api/products/${product.id}/images`, {
+            method: 'POST',
+            body: formData,
+          });
+          return uploadRes.json();
+        });
+
+      await Promise.all(uploadPromises);
+
+      setMessage('Producto creado catoke y archivos subidos (si se adjuntaron).');
+      setName('');
+      setSku('');
+      setDescription('');
+      setCategoryId('');
+      setImageFiles([null, null]);
+      setIsSubmitting(false);
+    } catch (err) {
+      setMessage(err.message || 'Error creando producto');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -84,7 +98,9 @@ export default function AddProductForm({ vendorId, categories }) {
         <input type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
       </div>
 
-      <button type="submit">Crear producto</button>
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? 'Creando...' : 'Crear producto'}
+      </button>
       {message && <p>{message}</p>}
     </form>
   );

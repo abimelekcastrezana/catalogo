@@ -19,7 +19,11 @@ export default async function DashboardProductsPage() {
     );
   }
 
-  const productModels = await db.Product.findAll({ where: { vendorId: session.user.vendorId }, order: [['createdAt', 'DESC']] });
+  const productModels = await db.Product.findAll({
+    where: { vendorId: session.user.vendorId },
+    order: [['createdAt', 'DESC']],
+    include: [{ model: db.ProductImage, order: [['position', 'ASC']] }],
+  });
   const products = productModels.map((p) => p.get({ plain: true }));
   const categoryModels = await getCategories(session.user.vendorId);
   const categories = categoryModels.map((c) => c.get({ plain: true }));

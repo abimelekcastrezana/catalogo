@@ -6,7 +6,8 @@ export async function POST(request, { params }) {
   const session = await getUserSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  if (session.user.vendorId !== params.vendorId) {
+  const resolvedParams = await params;
+  if (session.user.vendorId !== resolvedParams.vendorId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -16,11 +17,11 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
 
-  const existing = await db.Category.findOne({ where: { vendorId: params.vendorId, slug } });
+  const existing = await db.Category.findOne({ where: { vendorId: resolvedParams.vendorId, slug } });
   if (existing) {
     return NextResponse.json({ error: 'Category slug exists' }, { status: 409 });
   }
 
-  const category = await db.Category.create({ vendorId: params.vendorId, name, slug });
+  const category = await db.Category.create({ vendorId: resolvedParams.vendorId, name, slug });
   return NextResponse.json({ category }, { status: 201 });
 }

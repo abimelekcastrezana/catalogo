@@ -3,7 +3,8 @@ import db from '@/db/index.js';
 import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {
-  const vendor = await db.Vendor.findOne({ where: { slug: params.slug } });
+  const resolvedParams = await params;
+  const vendor = await db.Vendor.findOne({ where: { slug: resolvedParams.slug } });
   if (!vendor) return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
 
   const categories = await db.Category.findAll({ where: { vendorId: vendor.id } });
