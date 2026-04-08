@@ -37,7 +37,9 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    if (product.vendorId !== session.user.vendorId) {
+    const isProductOwner = product.vendorId === session.user.vendorId;
+    const isAdmin = session.user.role === 'admin';
+    if (!isProductOwner && !isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

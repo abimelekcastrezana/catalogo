@@ -21,7 +21,12 @@ module.exports = (sequelize) => {
     },
     vendorId: {
       type: DataTypes.UUID,
+      allowNull: true,
+    },
+    role: {
+      type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: 'vendor',
     },
   }, {
     tableName: 'users',

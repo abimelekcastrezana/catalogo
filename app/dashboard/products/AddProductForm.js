@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function AddProductForm({ vendorId, categories }) {
+export default function AddProductForm({ vendorId, categories, apiBase = '/api/vendors' }) {
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
@@ -19,7 +19,7 @@ export default function AddProductForm({ vendorId, categories }) {
     setMessage('Creando producto...');
 
     try {
-      const res = await fetch(`/api/vendors/${vendorId}/products`, {
+const res = await fetch(`${apiBase}/${vendorId}/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, sku, description, categoryId: categoryId || null, price }),

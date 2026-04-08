@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -25,8 +25,10 @@ export default function LoginPage() {
         throw new Error(result.error || "Login fallido, chido? no, intenta otra vez");
       }
 
+      const session = await getSession();
+      const destination = session?.user?.role === 'admin' ? '/admin' : '/dashboard';
       setMessage("Login exitoso. Chido, ya estás adentro.");
-      router.push("/dashboard");
+      router.push(destination);
     } catch (err) {
       setMessage(err.message || "Error en login. Chido no, intenta de nuevo.");
     }

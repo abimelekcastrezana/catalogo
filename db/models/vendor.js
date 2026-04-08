@@ -28,6 +28,19 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    tag1: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    tag2: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
   }, {
     tableName: 'vendors',
     timestamps: true,

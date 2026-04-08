@@ -16,8 +16,23 @@ export default async function DashboardPage() {
     );
   }
 
+  if (session.user.role === 'admin') {
+    return (
+      <main style={{ padding: "1.5rem", fontFamily: "Arial, sans-serif" }}>
+        <h1>Admin Panel</h1>
+        <p>Usuario: {session.user?.email}</p>
+        <ul>
+          <li><Link href="/admin/vendors">Gestionar vendedores / tiendas</Link></li>
+          <li><Link href="/admin/categories">Gestionar categorías</Link></li>
+        </ul>
+        <Link href="/logout">Cerrar sesión</Link>
+      </main>
+    );
+  }
+
   const vendor = await db.Vendor.findByPk(session.user.vendorId);
-  const publicUrl = vendor ? `https://tu-dominio.com/${vendor.slug}` : 'No definido';
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  const publicUrl = vendor ? `${baseUrl}/${vendor.slug}` : 'No definido';
 
   return (
     <main style={{ padding: "1.5rem", fontFamily: "Arial, sans-serif" }}>

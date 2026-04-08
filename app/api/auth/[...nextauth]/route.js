@@ -31,7 +31,7 @@ export const authOptions = {
           throw new Error('Invalid email or password');
         }
 
-        return { id: user.id, email: user.email, vendorId: user.vendorId };
+        return { id: user.id, email: user.email, vendorId: user.vendorId, role: user.role };
       },
     }),
   ],
@@ -44,6 +44,7 @@ export const authOptions = {
         token.id = user.id;
         token.vendorId = user.vendorId;
         token.email = user.email;
+        token.role = user.role;
       }
       return token;
     },
@@ -52,6 +53,7 @@ export const authOptions = {
         id: token.id,
         vendorId: token.vendorId,
         email: token.email,
+        role: token.role || 'vendor',
       };
       return session;
     },

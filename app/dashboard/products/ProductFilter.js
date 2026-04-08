@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function ProductFilter({ categories }) {
@@ -8,6 +8,10 @@ export default function ProductFilter({ categories }) {
   const router = useRouter();
   const currentCategory = searchParams.get('categoryId') || '';
   const [categoryId, setCategoryId] = useState(currentCategory);
+
+  useEffect(() => {
+    setCategoryId(currentCategory);
+  }, [currentCategory]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -17,7 +21,9 @@ export default function ProductFilter({ categories }) {
     } else {
       params.delete('categoryId');
     }
-    router.push(`/dashboard/products?${params.toString()}`);
+    params.delete('page');
+    const queryString = params.toString();
+    router.push(`/dashboard/products${queryString ? `?${queryString}` : ''}`);
   };
 
   return (

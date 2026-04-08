@@ -32,8 +32,7 @@ export default async function DashboardConfigPage() {
       <p>Vendor actual: {vendor.name}</p>
       <p>Slug público: {vendor.slug}</p>
       <p>Slogan actual: {vendor.slogan || 'No definido'}</p>
-      <p>URL pública: https://tu-dominio.com/{vendor.slug}</p>
-      <p>API pública: /api/vendors/public/{vendor.slug}</p>
+      <p>URL pública: {process.env.NEXTAUTH_URL || 'http://localhost:3000'}/{vendor.slug}</p>
       <ConfigForm vendor={vendor} />
       <p style={{ marginTop: '1rem' }}><Link href="/dashboard">Volver</Link></p>
     </main>

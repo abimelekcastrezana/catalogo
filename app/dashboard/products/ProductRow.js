@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function ProductRow({ product, vendorId, categories }) {
+export default function ProductRow({ product, vendorId, categories, apiBase = '/api/vendors' }) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(product.name);
   const [sku, setSku] = useState(product.sku);
@@ -13,7 +13,7 @@ export default function ProductRow({ product, vendorId, categories }) {
   const [imageFiles, setImageFiles] = useState([null, null]);
 
   const updateProduct = async () => {
-    const res = await fetch(`/api/vendors/${vendorId}/products/${product.id}`, {
+    const res = await fetch(`${apiBase}/${vendorId}/products/${product.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, sku, description, categoryId: catId || null, isActive: product.isActive, price }),
@@ -64,7 +64,7 @@ export default function ProductRow({ product, vendorId, categories }) {
 
   const deleteProduct = async () => {
     if (!confirm("¿Eliminar producto?")) return;
-    const res = await fetch(`/api/vendors/${vendorId}/products/${product.id}`, { method: "DELETE" });
+    const res = await fetch(`${apiBase}/${vendorId}/products/${product.id}`, { method: "DELETE" });
     if (!res.ok) {
       setMessage((await res.json()).error || "Error al eliminar");
       return;
@@ -86,71 +86,81 @@ export default function ProductRow({ product, vendorId, categories }) {
       style={{
         marginBottom: '1rem',
         border: '1px solid #ccc',
-        padding: '0.5rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        borderRadius: '14px',
+        padding: '1rem',
+        display: 'grid',
+        gap: '1rem',
+        background: '#fff',
+        boxShadow: '0 1px 6px rgba(0,0,0,0.05)',
       }}
     >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {isEditing ? (
-          <div>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
-            <input value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" />
-            <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Precio" type="number" step="0.01" min="0" />
-            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
-            <select value={catId} onChange={(e) => setCatId(e.target.value)}>
-              <option value="">Sin categoría</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-            <div style={{ display: 'grid', gap: '0.5rem', marginTop: '0.5rem' }}>
-              <label>
-                Reemplazar imagen 1
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])}
-                />
-              </label>
-              <label>
-                Reemplazar imagen 2
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])}
-                />
-              </label>
-            </div>
+      <div style={{ fontSize: '0.85rem', color: '#555', fontWeight: 600 }}>
+        Categoría: {categories.find((cat) => cat.id === product.categoryId)?.name || 'Sin categoría'}
+      </div>
+
+      <div style={{ width: '100%', minHeight: '180px', background: '#f7f7f7', borderRadius: '12px', overflow: 'hidden', border: '1px solid #eee' }}>
+        {imageUrls.length ? (
+          <img
+            src={imageUrls[0]}
+            alt={product.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : (
+          <div style={{ width: '100%', height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
+            Sin imagen
+          </div>
+        )}
+      </div>
+
+      {isEditing ? (
+        <div style={{ display: 'grid', gap: '0.75rem' }}>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
+          <input value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" />
+          <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
+          <select value={catId} onChange={(e) => setCatId(e.target.value)}>
+            <option value="">Sin categoría</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+          <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Precio" type="number" step="0.01" min="0" />
+          <div style={{ display: 'grid', gap: '0.5rem' }}>
+            <label>
+              Reemplazar imagen 1
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])}
+              />
+            </label>
+            <label>
+              Reemplazar imagen 2
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])}
+              />
+            </label>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button onClick={updateProduct}>Guardar</button>
             <button onClick={() => setIsEditing(false)}>Cancelar</button>
           </div>
-        ) : (
-          <div>
-            <strong>{product.name}</strong> (SKU: {product.sku}) - {product.description || 'Sin descripción'}
-            <div>Categoría: {product.categoryId || 'N/A'}</div>
-            <div>Precio: ${Number(product.price).toFixed(2)}</div>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gap: '0.5rem' }}>
+          <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{product.name}</div>
+          <div style={{ color: '#555' }}>{product.description || 'Sin descripción'}</div>
+          <div style={{ color: '#555', fontSize: '0.95rem' }}>SKU: {product.sku}</div>
+          <div style={{ fontSize: '1.15rem', fontWeight: 700, marginTop: '0.5rem' }}>${Number(product.price).toFixed(2)}</div>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button onClick={() => setIsEditing(true)}>Editar</button>
             <button onClick={deleteProduct}>Eliminar</button>
           </div>
-        )}
-        {message && <p>{message}</p>}
-      </div>
-      <div style={{ display: 'flex', gap: '0.5rem', marginLeft: '1rem' }}>
-        {imageUrls.length ? (
-          imageUrls.map((url, index) => (
-            <img
-              key={url}
-              src={url}
-              alt={`Imagen ${index + 1}`}
-              style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd' }}
-            />
-          ))
-        ) : (
-          <div style={{ fontSize: '0.85rem', color: '#666' }}>Sin imágenes</div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {message && <p style={{ color: '#d00' }}>{message}</p>}
     </div>
   );
 }
