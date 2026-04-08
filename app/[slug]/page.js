@@ -45,11 +45,25 @@ export default async function VendorPublicPage({ params, searchParams }) {
     return `/${slug}${params.toString() ? `?${params.toString()}` : ''}`;
   };
 
+  const vendorPhone = vendor.whatsappPhone ? vendor.whatsappPhone.replace(/[^0-9+]/g, '') : '';
+  const vendorContactHref = vendorPhone ? `https://wa.me/${vendorPhone.replace(/^\+/, '')}?text=${encodeURIComponent(`Hola, estoy interesado en tu tienda ${vendor.name}`)}` : null;
+
   return (
-    <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
-      <Link href="/">Volver al inicio</Link>
-      <h1>{vendor.name}</h1>
+    <main style={{ minHeight: '100vh', background: vendor.backgroundColor || '#e8f7ff', fontFamily: 'Arial, sans-serif', padding: '1.5rem' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <Link href="/">Volver al inicio</Link>
+        <h1>{vendor.name}</h1>
       <p>{vendor.slogan || 'Catálogo público del vendedor.'}</p>
+      {vendorContactHref && (
+        <a
+          href={vendorContactHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: 'inline-flex', padding: '0.75rem 1rem', background: '#25D366', color: '#fff', borderRadius: '999px', textDecoration: 'none', marginTop: '0.75rem' }}
+        >
+          Contactar tienda
+        </a>
+      )}
 
       <section style={{ marginBottom: '1.5rem' }}>
         <form method="get" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -85,7 +99,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
             }}
           >
             {products.map((product) => (
-              <PublicProductCard key={product.id} product={product} />
+              <PublicProductCard key={product.id} product={product} cardColor={vendor.cardColor} />
             ))}
           </div>
         ) : (
@@ -108,6 +122,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
           )}
         </div>
       )}
+      </div>
     </main>
   );
 }

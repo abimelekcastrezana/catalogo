@@ -10,7 +10,7 @@ export async function POST(request) {
   }
 
   const body = await request.json();
-  const { name, slug, whatsappPhone, slogan, tag1, tag2, email, password } = body;
+  const { name, slug, whatsappPhone, slogan, tag1, tag2, cardColor, backgroundColor, email, password } = body;
 
   const slugRegex = /^[A-Za-z0-9-]+$/;
   if (!name || !slug || !whatsappPhone || !email || !password) {
@@ -32,7 +32,7 @@ export async function POST(request) {
 
   const transaction = await db.sequelize.transaction();
   try {
-    const vendor = await db.Vendor.create({ name, slug, whatsappPhone, slogan, tag1, tag2, isActive: true }, { transaction });
+    const vendor = await db.Vendor.create({ name, slug, whatsappPhone, slogan, tag1, tag2, cardColor, backgroundColor, isActive: true }, { transaction });
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await db.User.create({ email, password: hashedPassword, vendorId: vendor.id, role: 'vendor' }, { transaction });
     await transaction.commit();

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export default function PublicProductCard({ product }) {
+export default function PublicProductCard({ product, cardColor }) {
   const images = (product.ProductImages || []).slice(0, 2);
   const [current, setCurrent] = useState(0);
   const rawImagePath = images.length ? images[current].path || '' : '';
@@ -10,7 +10,7 @@ export default function PublicProductCard({ product }) {
   const imageUrl = images.length ? `/api/uploads${cleanedPath}` : null;
 
   return (
-    <article style={{ border: '1px solid #ddd', padding: '0.9rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.85rem', background: '#fff', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', overflow: 'hidden', position: 'relative', boxSizing: 'border-box', minHeight: '0', alignSelf: 'stretch' }}>
+    <article style={{ border: '1px solid #ddd', padding: '0.9rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.85rem', background: cardColor || '#fff', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', overflow: 'hidden', position: 'relative', boxSizing: 'border-box', minHeight: '0', alignSelf: 'stretch' }}>
       <div style={{ fontSize: '0.82rem', color: '#555', fontWeight: 600 }}>
         Categoría: {product.Category?.name || 'Sin categoría'}
       </div>

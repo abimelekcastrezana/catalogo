@@ -36,6 +36,14 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    cardColor: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    backgroundColor: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

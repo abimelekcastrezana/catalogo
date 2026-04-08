@@ -12,7 +12,7 @@ export async function PUT(request, { params }) {
 
   const resolvedParams = await params;
   const body = await request.json();
-  const { name, slug, whatsappPhone, slogan, tag1, tag2, isActive, email, newPassword } = body;
+  const { name, slug, whatsappPhone, slogan, tag1, tag2, cardColor, backgroundColor, isActive, email, newPassword } = body;
   const vendorId = resolvedParams.vendorId;
   const slugRegex = /^[A-Za-z0-9-]+$/;
 
@@ -48,6 +48,8 @@ export async function PUT(request, { params }) {
     vendor.slogan = slogan;
     vendor.tag1 = tag1;
     vendor.tag2 = tag2;
+    vendor.cardColor = cardColor;
+    vendor.backgroundColor = backgroundColor;
     vendor.isActive = Boolean(isActive);
     await vendor.save();
 
