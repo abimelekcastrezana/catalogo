@@ -60,31 +60,41 @@ export default function ConfigForm({ vendor }) {
 
   return (
     <div>
-      <h2>Editar configuración del vendor</h2>
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: "0.75rem", maxWidth: "420px" }}>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" required />
-        <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug" required />
-        <input value={slogan} onChange={(e) => setSlogan(e.target.value)} placeholder="Slogan" />
-        <div style={{ display: 'grid', gap: '0.5rem' }}>
-          <label style={{ display: 'grid', gap: '0.25rem' }}>
-            Código de país
-            <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
-              {COUNTRY_CODES.map((c) => (
-                <option key={c.code} value={c.code}>{c.label}</option>
-              ))}
-            </select>
-          </label>
+      <h2 style={{ marginTop: 0 }}>Editar configuración</h2>
+      <form onSubmit={handleSubmit} className="form-card" style={{ maxWidth: '520px' }}>
+        <div className="form-field">
+          <label>Nombre</label>
+          <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" required />
+        </div>
+        <div className="form-field">
+          <label>Slug (URL pública)</label>
+          <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="mi-tienda" required />
+        </div>
+        <div className="form-field">
+          <label>Slogan</label>
+          <input className="input" value={slogan} onChange={(e) => setSlogan(e.target.value)} placeholder="Slogan de tu tienda" />
+        </div>
+        <div className="form-field">
+          <label>Código de país</label>
+          <select className="select" value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
+            {COUNTRY_CODES.map((c) => (
+              <option key={c.code} value={c.code}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className="form-field">
+          <label>Número de WhatsApp (sin código de país)</label>
           <input
+            className="input"
             value={whatsappNumber}
             onChange={(e) => setWhatsappNumber(e.target.value)}
-            placeholder="Número de WhatsApp sin código de país"
+            placeholder="Ej. 6222334455"
             required
           />
         </div>
-        <small style={{ margin: '0', color: '#555', fontSize: '0.85rem' }}>Selecciona el código de país y escribe el número sin +.</small>
-        <button type="submit">Guardar</button>
+        <button type="submit" className="primary-button">Guardar cambios</button>
+        {message && <p className="text-small" style={{ margin: 0 }}>{message}</p>}
       </form>
-      {message && <p style={{ marginTop: "1rem" }}>{message}</p>}
     </div>
   );
 }

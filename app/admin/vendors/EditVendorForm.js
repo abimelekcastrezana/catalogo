@@ -95,52 +95,62 @@ export default function EditVendorForm({ vendor }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '0.75rem', maxWidth: '520px' }}>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la tienda" required />
-      <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug" required pattern="[A-Za-z0-9-]+" title="Solo letras, números y guiones" />
-      <div style={{ display: 'grid', gap: '0.5rem' }}>
-        <label style={{ display: 'grid', gap: '0.25rem' }}>
-          Código de país
-          <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
-            {COUNTRY_CODES.map((c) => (
-              <option key={c.code} value={c.code}>{c.label}</option>
-            ))}
-          </select>
-        </label>
-        <input
-          value={whatsappNumber}
-          onChange={(e) => setWhatsappNumber(e.target.value)}
-          placeholder="Número de WhatsApp sin código de país"
-          required
-        />
+    <form onSubmit={handleSubmit} className="form-card" style={{ maxWidth: '520px' }}>
+      <div className="form-field">
+        <label>Nombre de la tienda</label>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la tienda" required />
       </div>
-      <small style={{ margin: '0', color: '#555', fontSize: '0.85rem' }}>Selecciona el país y escribe solo el número.</small>
-      <label style={{ display: 'grid', gap: '0.25rem', fontSize: '0.95rem' }}>
-        Logo de la tienda (opcional)
-        <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files[0] || null)} />
-      </label>
-      <input value={slogan} onChange={(e) => setSlogan(e.target.value)} placeholder="Slogan" />
-      {currentTags.length > 0 ? (
-        <p style={{ margin: 0, color: '#555', fontSize: '0.95rem' }}>
-          Tags actuales: {currentTags.join(', ')}
-        </p>
-      ) : (
-        <p style={{ margin: 0, color: '#777', fontSize: '0.95rem' }}>
-          Sin tags actualmente.
-        </p>
+      <div className="form-field">
+        <label>Slug</label>
+        <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug" required pattern="[A-Za-z0-9-]+" title="Solo letras, números y guiones" />
+      </div>
+      <div className="form-field">
+        <label>Código de país</label>
+        <select className="select" value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
+          {COUNTRY_CODES.map((c) => (
+            <option key={c.code} value={c.code}>{c.label}</option>
+          ))}
+        </select>
+      </div>
+      <div className="form-field">
+        <label>Número de WhatsApp (sin código de país)</label>
+        <input className="input" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} placeholder="Ej. 6222334455" required />
+      </div>
+      <div className="form-field">
+        <label>Logo de la tienda (opcional)</label>
+        <input className="input" type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files[0] || null)} />
+      </div>
+      <div className="form-field">
+        <label>Slogan</label>
+        <input className="input" value={slogan} onChange={(e) => setSlogan(e.target.value)} placeholder="Slogan" />
+      </div>
+      {currentTags.length > 0 && (
+        <p className="text-small">Tags actuales: {currentTags.join(', ')}</p>
       )}
-      <input value={tag1} onChange={(e) => setTag1(e.target.value)} placeholder="Tag opcional 1" />
-      <input value={tag2} onChange={(e) => setTag2(e.target.value)} placeholder="Tag opcional 2" />
-      <hr style={{ borderColor: '#eee' }} />
+      <div className="form-field">
+        <label>Tag 1 (opcional)</label>
+        <input className="input" value={tag1} onChange={(e) => setTag1(e.target.value)} placeholder="Tag opcional 1" />
+      </div>
+      <div className="form-field">
+        <label>Tag 2 (opcional)</label>
+        <input className="input" value={tag2} onChange={(e) => setTag2(e.target.value)} placeholder="Tag opcional 2" />
+      </div>
+      <hr style={{ borderColor: 'var(--border)' }} />
       <p style={{ margin: 0 }}><strong>Usuario del vendedor</strong></p>
-      <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Email del vendedor" required />
-      <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" placeholder="Nueva contraseña (opcional)" />
+      <div className="form-field">
+        <label>Email</label>
+        <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Email del vendedor" required />
+      </div>
+      <div className="form-field">
+        <label>Nueva contraseña (opcional)</label>
+        <input className="input" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" placeholder="Dejar vacío para no cambiar" />
+      </div>
       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
         Activar tienda
       </label>
-      <button type="submit" disabled={isSubmitting}>Guardar cambios</button>
-      {message && <p>{message}</p>}
+      <button type="submit" className="primary-button" disabled={isSubmitting}>Guardar cambios</button>
+      {message && <p className="text-small" style={{ margin: 0 }}>{message}</p>}
     </form>
   );
 }

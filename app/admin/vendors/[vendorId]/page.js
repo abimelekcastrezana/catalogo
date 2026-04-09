@@ -29,18 +29,24 @@ export default async function AdminVendorDetailsPage({ params }) {
   const vendorData = vendor.get({ plain: true });
 
   return (
-    <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Editar tienda</h1>
-      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <Link href={`/admin/vendors/${vendorData.id}/products`} style={{ padding: '0.65rem 1rem', border: '1px solid #0645ad', borderRadius: '8px', textDecoration: 'none', color: '#0645ad' }}>
-          Productos
-        </Link>
-        <Link href={`/admin/vendors/${vendorData.id}/categories`} style={{ padding: '0.65rem 1rem', border: '1px solid #0645ad', borderRadius: '8px', textDecoration: 'none', color: '#0645ad' }}>
-          Categorías
-        </Link>
-      </div>
-      <EditVendorForm vendor={vendorData} />
-      <p style={{ marginTop: '1rem' }}><Link href="/admin">Volver al admin</Link></p>
+    <main className="page-shell">
+      <section className="page-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h1 className="page-title">Editar tienda</h1>
+            <p className="page-subtitle">{vendorData.name}</p>
+          </div>
+          <Link href="/admin" className="secondary-button">Volver</Link>
+        </div>
+        <div className="cta-row" style={{ marginTop: '1.25rem' }}>
+          <Link href={`/admin/vendors/${vendorData.id}/products`} className="secondary-button">Productos</Link>
+          <Link href={`/admin/vendors/${vendorData.id}/categories`} className="secondary-button">Categorías</Link>
+        </div>
+      </section>
+
+      <section className="page-card">
+        <EditVendorForm vendor={vendorData} />
+      </section>
     </main>
   );
 }

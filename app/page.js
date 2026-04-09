@@ -34,24 +34,7 @@ export default async function HomePage({ searchParams }) {
   return (
     <main className="page-shell">
       <section className="page-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 className="page-title">Encuentra tu tienda ideal</h1>
-            <p className="page-subtitle">Explora catálogos de tiendas verificadas y contacta rápido al vendedor.</p>
-          </div>
-          <div className="cta-row" style={{ alignItems: 'flex-start' }}>
-            <a
-              href={`https://wa.me/${generalWhatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="primary-button"
-            >
-              WhatsApp
-            </a>
-          </div>
-        </div>
-
-        <form method="get" style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <form method="get" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: '1', minWidth: '240px' }}>
             Buscar por tienda, slug o tag
             <input

@@ -22,48 +22,50 @@ export default async function AdminCategoriesPage({ searchParams }) {
   const categories = await db.Category.findAll({ where: categoryWhere, order: [['createdAt', 'DESC']], include: [{ model: db.Vendor }] });
 
   return (
-    <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Admin - Categorías</h1>
-      <form method="get" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          Filtrar por vendedor
-          <select name="vendorId" defaultValue={vendorId} style={{ padding: '0.5rem', minWidth: '220px' }}>
-            <option value="">Todas</option>
-            {vendors.map((vendor) => (
-              <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
-            ))}
-          </select>
-        </label>
-        <button type="submit" style={{ padding: '0.6rem 1rem' }}>Aplicar filtro</button>
-      </form>
-      <p>Crear nueva categoría:</p>
-      <CreateCategoryForm vendors={vendors.map((v) => v.get({ plain: true }))} />
+    <main className="page-shell">
+      <section className="page-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h1 className="page-title">Admin - Categorías</h1>
+          </div>
+          <Link href="/admin" className="secondary-button">Volver</Link>
+        </div>
+        <form method="get" style={{ marginTop: '1.25rem', display: 'flex', alignItems: 'flex-end', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="form-field" style={{ flex: '1', minWidth: '200px' }}>
+            <label>Filtrar por vendedor</label>
+            <select name="vendorId" defaultValue={vendorId} className="select">
+              <option value="">Todas</option>
+              {vendors.map((vendor) => (
+                <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
+              ))}
+            </select>
+          </div>
+          <button type="submit" className="secondary-button">Aplicar filtro</button>
+        </form>
+      </section>
 
-      <section style={{ marginTop: '2rem' }}>
-        <h2>Categorías existentes</h2>
-        <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+      <section className="page-card">
+        <h2 style={{ marginTop: 0 }}>Agregar categoría</h2>
+        <CreateCategoryForm vendors={vendors.map((v) => v.get({ plain: true }))} />
+      </section>
+
+      <section className="page-card">
+        <h2 style={{ marginTop: 0 }}>Categorías existentes</h2>
+        <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))', gap: '1rem' }}>
           {categories.map((category) => (
-            <li key={category.id} style={{ border: '1px solid #ddd', borderRadius: '12px', padding: '0.85rem', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            <li key={category.id} style={{ border: '1px solid var(--border)', borderRadius: '16px', padding: '1rem', background: 'var(--card)' }}>
               <div style={{ display: 'grid', gap: '0.4rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem' }}>
-                  <div>
-                    <strong style={{ display: 'block', fontSize: '1rem' }}>{category.name}</strong>
-                    <span style={{ color: '#555', fontSize: '0.85rem' }}>/{category.slug}</span>
-                  </div>
-                </div>
-                <div style={{ color: '#555', fontSize: '0.85rem' }}>Vendedor: {category.Vendor?.name || 'N/A'}</div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <Link href={`/admin/categories/${category.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.75rem', border: '1px solid #ccc', borderRadius: '999px', fontSize: '0.9rem' }}>
-                    Editar <span style={{ fontSize: '1.1rem' }}>›</span>
-                  </Link>
+                <strong style={{ display: 'block', fontSize: '1rem' }}>{category.name}</strong>
+                <span className="text-small">/{category.slug}</span>
+                <span className="text-small">Vendedor: {category.Vendor?.name || 'N/A'}</span>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                  <Link href={`/admin/categories/${category.id}`} className="secondary-button" style={{ padding: '0.4rem 0.85rem', fontSize: '0.9rem' }}>Editar</Link>
                 </div>
               </div>
             </li>
           ))}
         </ul>
       </section>
-
-      <p style={{ marginTop: '1rem' }}><Link href="/admin">Volver al panel admin</Link></p>
     </main>
   );
 }

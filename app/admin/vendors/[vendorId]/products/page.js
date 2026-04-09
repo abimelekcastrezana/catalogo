@@ -44,37 +44,28 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
   const products = productModels.map((p) => p.get({ plain: true }));
 
   return (
-    <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1>Productos de {vendor.name}</h1>
-          <p style={{ margin: '0.25rem 0 0' }}>Edita productos directamente como admin.</p>
+    <main className="page-shell">
+      <section className="page-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h1 className="page-title">Productos de {vendor.name}</h1>
+            <p className="page-subtitle">Edita productos directamente como admin.</p>
+          </div>
+          <BackButton />
         </div>
-        <BackButton />
-      </div>
+      </section>
 
-      <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <section className="page-card">
         <AddProductCard vendorId={vendorId} categories={categories} apiBase="/api/admin/vendors" />
-        <div
-          style={{
-            display: 'grid',
-            gap: '1rem',
-            gridTemplateColumns:
-              products.length === 1
-                ? '1fr'
-                : products.length === 2
-                ? 'repeat(2, minmax(320px, 1fr))'
-                : 'repeat(auto-fit, minmax(240px, 1fr))',
-            justifyContent: products.length <= 2 ? 'center' : 'stretch',
-            margin: products.length <= 2 ? '0 auto' : undefined,
-            maxWidth: products.length <= 2 ? 'calc(2 * 320px + 1rem)' : '100%',
-          }}
-        >
+      </section>
+
+      <section className="page-card">
+        <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))' }}>
           {products.map((product) => (
             <ProductRow key={product.id} product={product} vendorId={vendorId} categories={categories} apiBase="/api/admin/vendors" />
           ))}
         </div>
-      </div>
+      </section>
     </main>
   );
 }

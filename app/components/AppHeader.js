@@ -7,7 +7,7 @@ import { signOut, useSession } from 'next-auth/react';
 import ThemeSwitcher from './ThemeSwitcher';
 import SignOutButton from './SignOutButton';
 
-export default function AppHeader() {
+export default function AppHeader({ whatsappPhone }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const { data: session } = useSession();
@@ -22,11 +22,15 @@ export default function AppHeader() {
   return (
     <header className="app-header">
       {!isAuthenticated ? (
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.4rem' }}>Catálogos digitales profesionales</h1>
-          <p style={{ margin: '0.35rem 0 0', fontSize: '0.95rem', color: 'var(--muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            Encuentra tiendas y catálogos confiables
-          </p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <img
+            src="/tiendatap_logo.jpg"
+            alt="TiendaTap logo"
+            style={{ width: '48px', height: '48px', borderRadius: '12px', objectFit: 'cover' }}
+          />
+          <div>
+            <h1 style={{ margin: 0, fontSize: '1.4rem' }}>TiendaTap</h1>
+          </div>
         </div>
       ) : (
         <div style={{ minHeight: '2.25rem' }} />
@@ -36,7 +40,17 @@ export default function AppHeader() {
           <ThemeSwitcher />
           {isAuthenticated && <SignOutButton />}
           {!isAuthenticated && (
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              {pathname === '/' && whatsappPhone && (
+                <a
+                  href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="primary-button"
+                >
+                  WhatsApp
+                </a>
+              )}
               <Link href="/login" className="secondary-button">Iniciar sesión</Link>
               <Link href="/register" className="secondary-button">Registrarse</Link>
             </div>
@@ -61,6 +75,18 @@ export default function AppHeader() {
                 </button>
               ) : (
                 <>
+                  {pathname === '/' && whatsappPhone && (
+                    <a
+                      href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="primary-button"
+                      style={{ width: '100%' }}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      WhatsApp
+                    </a>
+                  )}
                   <Link href="/login" className="secondary-button" style={{ width: '100%' }} onClick={() => setMenuOpen(false)}>Iniciar sesión</Link>
                   <Link href="/register" className="secondary-button" style={{ width: '100%' }} onClick={() => setMenuOpen(false)}>Registrarse</Link>
                 </>

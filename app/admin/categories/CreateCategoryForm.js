@@ -37,19 +37,25 @@ export default function CreateCategoryForm({ vendors }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '0.75rem', maxWidth: '520px' }}>
-      <label style={{ display: 'grid', gap: '0.25rem' }}>
-        Vendedor
-        <select value={vendorId} onChange={(e) => setVendorId(e.target.value)} required>
+    <form onSubmit={handleSubmit} className="form-card" style={{ maxWidth: '520px' }}>
+      <div className="form-field">
+        <label>Vendedor</label>
+        <select className="select" value={vendorId} onChange={(e) => setVendorId(e.target.value)} required>
           {vendors.map((vendor) => (
             <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
           ))}
         </select>
-      </label>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la categoría" required />
-      <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug de categoría" required />
-      <button type="submit" disabled={isSubmitting}>Crear categoría</button>
-      {message && <p>{message}</p>}
+      </div>
+      <div className="form-field">
+        <label>Nombre</label>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la categoría" required />
+      </div>
+      <div className="form-field">
+        <label>Slug</label>
+        <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug de categoría" required />
+      </div>
+      <button type="submit" className="primary-button" disabled={isSubmitting}>{isSubmitting ? 'Creando...' : 'Crear categoría'}</button>
+      {message && <p className="text-small" style={{ margin: 0 }}>{message}</p>}
     </form>
   );
 }

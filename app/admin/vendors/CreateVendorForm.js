@@ -86,39 +86,61 @@ export default function CreateVendorForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '0.75rem', maxWidth: '520px' }}>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la tienda" required />
-      <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug" required pattern="[A-Za-z0-9-]+" title="Solo letras, números y guiones" />
-      <div style={{ display: 'grid', gap: '0.5rem' }}>
-        <label style={{ display: 'grid', gap: '0.25rem' }}>
-          Código de país
-          <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
-            {COUNTRY_CODES.map((c) => (
-              <option key={c.code} value={c.code}>{c.label}</option>
-            ))}
-          </select>
-        </label>
+    <form onSubmit={handleSubmit} className="form-card" style={{ maxWidth: '520px' }}>
+      <div className="form-field">
+        <label>Nombre de la tienda</label>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la tienda" required />
+      </div>
+      <div className="form-field">
+        <label>Slug</label>
+        <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug" required pattern="[A-Za-z0-9-]+" title="Solo letras, números y guiones" />
+      </div>
+      <div className="form-field">
+        <label>Código de país</label>
+        <select className="select" value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
+          {COUNTRY_CODES.map((c) => (
+            <option key={c.code} value={c.code}>{c.label}</option>
+          ))}
+        </select>
+      </div>
+      <div className="form-field">
+        <label>Número de WhatsApp (sin código de país)</label>
         <input
+          className="input"
           value={whatsappNumber}
           onChange={(e) => setWhatsappNumber(e.target.value)}
-          placeholder="Número de WhatsApp sin código de país"
+          placeholder="Ej. 6222334455"
           required
         />
       </div>
-      <small style={{ margin: '0', color: '#555', fontSize: '0.85rem' }}>Selecciona el código de país y escribe el número sin +.</small>
-      <label style={{ display: 'grid', gap: '0.25rem', fontSize: '0.95rem' }}>
-        Logo de la tienda (opcional)
-        <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files[0] || null)} />
-      </label>
-      <input value={tag1} onChange={(e) => setTag1(e.target.value)} placeholder="Tag opcional 1" />
-      <input value={tag2} onChange={(e) => setTag2(e.target.value)} placeholder="Tag opcional 2" />
-      <input value={slogan} onChange={(e) => setSlogan(e.target.value)} placeholder="Slogan (opcional)" />
-      <hr style={{ borderColor: '#eee' }} />
-      <p style={{ margin: '0' }}><strong>Usuario del vendedor</strong></p>
-      <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Email del vendedor" required />
-      <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Contraseña" required />
-      <button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creando...' : 'Crear tienda y usuario'}</button>
-      {message && <p>{message}</p>}
+      <div className="form-field">
+        <label>Logo de la tienda (opcional)</label>
+        <input className="input" type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files[0] || null)} />
+      </div>
+      <div className="form-field">
+        <label>Tag 1 (opcional)</label>
+        <input className="input" value={tag1} onChange={(e) => setTag1(e.target.value)} placeholder="Tag opcional 1" />
+      </div>
+      <div className="form-field">
+        <label>Tag 2 (opcional)</label>
+        <input className="input" value={tag2} onChange={(e) => setTag2(e.target.value)} placeholder="Tag opcional 2" />
+      </div>
+      <div className="form-field">
+        <label>Slogan (opcional)</label>
+        <input className="input" value={slogan} onChange={(e) => setSlogan(e.target.value)} placeholder="Slogan" />
+      </div>
+      <hr style={{ borderColor: 'var(--border)' }} />
+      <p style={{ margin: 0 }}><strong>Usuario del vendedor</strong></p>
+      <div className="form-field">
+        <label>Email</label>
+        <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Email del vendedor" required />
+      </div>
+      <div className="form-field">
+        <label>Contraseña</label>
+        <input className="input" value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Contraseña" required />
+      </div>
+      <button type="submit" className="primary-button" disabled={isSubmitting}>{isSubmitting ? 'Creando...' : 'Crear tienda y usuario'}</button>
+      {message && <p className="text-small" style={{ margin: 0 }}>{message}</p>}
     </form>
   );
 }

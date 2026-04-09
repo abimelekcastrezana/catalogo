@@ -28,10 +28,16 @@ export default async function AdminCategoryEditPage({ params }) {
   }
 
   return (
-    <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Editar categoría</h1>
-      <EditCategoryForm category={category.get({ plain: true })} vendors={vendors.map((v) => v.get({ plain: true }))} />
-      <p style={{ marginTop: '1rem' }}><Link href="/admin/categories">Volver a categorías</Link></p>
+    <main className="page-shell">
+      <section className="page-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <h1 className="page-title">Editar categoría</h1>
+          <Link href="/admin/categories" className="secondary-button">Volver</Link>
+        </div>
+      </section>
+      <section className="page-card">
+        <EditCategoryForm category={category.get({ plain: true })} vendors={vendors.map((v) => v.get({ plain: true }))} />
+      </section>
     </main>
   );
 }
