@@ -3,6 +3,9 @@ import { getUserSession } from '@/lib/auth/getSession';
 import bcrypt from 'bcrypt';
 import { Op } from 'sequelize';
 import db from '@/db/index.js';
+import fs from 'fs';
+import path from 'path';
+import { uploadConfig } from '@/app/common/config.js';
 
 export async function PUT(request, { params }) {
   const session = await getUserSession();
@@ -87,9 +90,40 @@ export async function DELETE(request, { params }) {
 
   const transaction = await db.sequelize.transaction();
   try {
+    // Get all product IDs for this vendor
     const productIds = (await db.Product.findAll({ where: { vendorId }, attributes: ['id'], transaction })).map((p) => p.id);
+    
+    // Delete all image files from filesystem
     if (productIds.length) {
-      await db.ProductImage.destroy({ where: { productId: productIds }, transaction });
+      const images = await db.ProductImage.findAll({ where: { productId: productIds }, transaction });
+      images.forEach((img) => {
+        const filePath = path.join(uploadConfig.basePath, img.path.replace('/uploads', ''));
+        if (fs.existsSync(filePath)) {
+          try {
+            fs.unlinkSync(filePath);
+          } catch (err) {
+            console.warn(`Failed to delete file ${filePath}:`, err.message);
+          }
+        }
+      });
+      
+      // Also delete product folders
+      productIds.forEach((productId) => {
+        const folderPath = path.join(uploadConfig.basePath, 'products', productId);
+        if (fs.existsSync(folderPath)) {
+          try {
+            fs.rmSync(folderPath, { recursive: true, force: true });
+          } catch (err) {
+            console.warn(`Failed to delete folder ${folderPath}:`, err.message);
+          }
+        }
+      });
+    }
+
+    // Delete all database records
+    const productIds2 = (await db.Product.findAll({ where: { vendorId }, attributes: ['id'], transaction })).map((p) => p.id);
+    if (productIds2.length) {
+      await db.ProductImage.destroy({ where: { productId: productIds2 }, transaction });
     }
 
     const cartIds = (await db.Cart.findAll({ where: { vendorId }, attributes: ['id'], transaction })).map((c) => c.id);
