@@ -3,6 +3,19 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+const COUNTRY_CODES = [
+  { code: '+598', label: '+598 (Uruguay)' },
+  { code: '+57',  label: '+57 (Colombia)' },
+  { code: '+56',  label: '+56 (Chile)' },
+  { code: '+55',  label: '+55 (Brasil)' },
+  { code: '+54',  label: '+54 (Argentina)' },
+  { code: '+52',  label: '+52 (México)' },
+  { code: '+51',  label: '+51 (Perú)' },
+  { code: '+44',  label: '+44 (Reino Unido)' },
+  { code: '+34',  label: '+34 (España)' },
+  { code: '+1',   label: '+1 (EE.UU.)' },
+];
+
 export default function CreateVendorForm() {
   const router = useRouter();
   const [name, setName] = useState('');
@@ -10,8 +23,6 @@ export default function CreateVendorForm() {
   const [countryCode, setCountryCode] = useState('+52');
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [logoFile, setLogoFile] = useState(null);
-  const [cardColor, setCardColor] = useState('#ffffff');
-  const [backgroundColor, setBackgroundColor] = useState('#f8f8f8');
   const [slogan, setSlogan] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,7 +45,7 @@ export default function CreateVendorForm() {
     const response = await fetch('/api/admin/vendors', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, slug, whatsappPhone: fullWhatsappPhone, slogan, tag1, tag2, cardColor, backgroundColor, email, password }),
+      body: JSON.stringify({ name, slug, whatsappPhone: fullWhatsappPhone, slogan, tag1, tag2, email, password }),
     });
     const data = await response.json();
     if (!response.ok) {
@@ -82,10 +93,9 @@ export default function CreateVendorForm() {
         <label style={{ display: 'grid', gap: '0.25rem' }}>
           Código de país
           <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
-            <option value="+1">+1 (EE.UU.)</option>
-            <option value="+52">+52 (México)</option>
-            <option value="+34">+34 (España)</option>
-            <option value="+51">+51 (Perú)</option>
+            {COUNTRY_CODES.map((c) => (
+              <option key={c.code} value={c.code}>{c.label}</option>
+            ))}
           </select>
         </label>
         <input
@@ -100,16 +110,6 @@ export default function CreateVendorForm() {
         Logo de la tienda (opcional)
         <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files[0] || null)} />
       </label>
-      <div style={{ display: 'grid', gap: '0.75rem' }}>
-        <label style={{ display: 'grid', gap: '0.25rem' }}>
-          Color de tarjetas
-          <input type="color" value={cardColor} onChange={(e) => setCardColor(e.target.value)} />
-        </label>
-        <label style={{ display: 'grid', gap: '0.25rem' }}>
-          Fondo de tienda
-          <input type="color" value={backgroundColor} onChange={(e) => setBackgroundColor(e.target.value)} />
-        </label>
-      </div>
       <input value={tag1} onChange={(e) => setTag1(e.target.value)} placeholder="Tag opcional 1" />
       <input value={tag2} onChange={(e) => setTag2(e.target.value)} placeholder="Tag opcional 2" />
       <input value={slogan} onChange={(e) => setSlogan(e.target.value)} placeholder="Slogan (opcional)" />

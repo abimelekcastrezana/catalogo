@@ -17,16 +17,29 @@ export default async function DashboardCategoriesPage() {
   const categories = await db.Category.findAll({ where: { vendorId: session.user.vendorId }, order: [['createdAt', 'DESC']] });
 
   return (
-    <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Dashboard - Categorías</h1>
-      <ul>
-        {categories.map((c) => (
-          <li key={c.id}>{c.name} ({c.slug})</li>
-        ))}
-      </ul>
-      <p>Agregar categoría:</p>
-      <AddCategoryForm vendorId={session.user.vendorId} />
-      <p style={{ marginTop: '1rem' }}><Link href="/dashboard">Volver</Link></p>
+    <main className="page-shell">
+      <section className="page-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h1 className="page-title">Dashboard - Categorías</h1>
+            <p className="page-subtitle">Administra las categorías de tu tienda desde un panel limpio.</p>
+          </div>
+          <Link href="/dashboard" className="secondary-button">Volver</Link>
+        </div>
+
+        <div style={{ marginTop: '1.5rem' }}>
+          <ul style={{ display: 'grid', gap: '0.75rem', paddingLeft: '1.25rem', margin: 0 }}>
+            {categories.map((c) => (
+              <li key={c.id} style={{ color: 'var(--text)' }}>{c.name} ({c.slug})</li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="page-card">
+        <h2 style={{ marginTop: 0 }}>Agregar categoría</h2>
+        <AddCategoryForm vendorId={session.user.vendorId} />
+      </section>
     </main>
   );
 }

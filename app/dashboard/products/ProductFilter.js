@@ -28,16 +28,16 @@ export default function ProductFilter({ categories }) {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-      <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-        Filtrar por categoría
-        <select name="categoryId" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={{ padding: '0.5rem', minWidth: '200px' }}>
+      <label style={{ display: 'grid', gap: '0.35rem' }}>
+        <span>Filtrar por categoría</span>
+        <select name="categoryId" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="select" style={{ minWidth: '200px' }}>
           <option value="">Todas</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>{category.name}</option>
           ))}
         </select>
       </label>
-      <button type="submit" style={{ padding: '0.6rem 1rem' }}>Filtrar</button>
+      <button type="submit" className="secondary-button">Filtrar</button>
     </form>
   );
 }

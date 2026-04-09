@@ -31,11 +31,17 @@ export default function AddCategoryForm({ vendorId, onCreated }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "grid", gap: "0.5rem", maxWidth: "420px" }}>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" required />
-      <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug" required />
-      <button type="submit">Crear categoría</button>
-      {message && <p>{message}</p>}
+    <form onSubmit={handleSubmit} className="form-card" style={{ maxWidth: '520px' }}>
+      <div className="form-field">
+        <label>Nombre</label>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" required />
+      </div>
+      <div className="form-field">
+        <label>Slug</label>
+        <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug" required />
+      </div>
+      <button type="submit" className="primary-button">Crear categoría</button>
+      {message && <p className="text-small" style={{ margin: 0 }}>{message}</p>}
     </form>
   );
 }

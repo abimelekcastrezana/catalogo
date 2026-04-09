@@ -27,14 +27,27 @@ export default async function DashboardConfigPage() {
   const vendor = vendorModel.get({ plain: true });
 
   return (
-    <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Dashboard - Configuración</h1>
-      <p>Vendor actual: {vendor.name}</p>
-      <p>Slug público: {vendor.slug}</p>
-      <p>Slogan actual: {vendor.slogan || 'No definido'}</p>
-      <p>URL pública: {process.env.NEXTAUTH_URL || 'http://localhost:3000'}/{vendor.slug}</p>
-      <ConfigForm vendor={vendor} />
-      <p style={{ marginTop: '1rem' }}><Link href="/dashboard">Volver</Link></p>
+    <main className="page-shell">
+      <section className="page-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h1 className="page-title">Dashboard - Configuración</h1>
+            <p className="page-subtitle">Personaliza tu tienda con colores y contacto directo.</p>
+          </div>
+          <Link href="/dashboard" className="secondary-button">Volver</Link>
+        </div>
+
+        <div style={{ marginTop: '1.5rem', display: 'grid', gap: '0.75rem' }}>
+          <p style={{ margin: 0 }}>Vendor actual: {vendor.name}</p>
+          <p style={{ margin: 0 }}>Slug público: {vendor.slug}</p>
+          <p style={{ margin: 0 }}>Slogan actual: {vendor.slogan || 'No definido'}</p>
+          <p style={{ margin: 0 }}>URL pública: {process.env.NEXTAUTH_URL || 'http://localhost:3000'}/{vendor.slug}</p>
+        </div>
+      </section>
+
+      <section className="page-card">
+        <ConfigForm vendor={vendor} />
+      </section>
     </main>
   );
 }

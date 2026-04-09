@@ -70,62 +70,66 @@ export default function VendorCard({ vendor }) {
     : null;
 
   return (
-    <div style={{ border: '1px solid #ddd', borderRadius: '12px', padding: '0.85rem', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', display: 'grid', gap: '0.4rem' }}>
-      {logoPath && (
-        <img src={logoPath} alt={`${vendor.name} logo`} style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '10px', border: '1px solid #eee' }} />
-      )}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem' }}>
-        <div>
-          <strong style={{ display: 'block', fontSize: '1rem' }}>{vendor.name}</strong>
-          <span style={{ color: '#555', fontSize: '0.85rem' }}>/{vendor.slug}</span>
+    <article className="card">
+      <div className="card-hero">
+        {logoPath ? (
+          <img src={logoPath} alt={`${vendor.name} logo`} />
+        ) : (
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '0.9rem' }}>
+            Sin logo
+          </div>
+        )}
+        <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem' }}>
+          <button
+            type="button"
+            onClick={handleToggle}
+            disabled={loading}
+            style={{
+              padding: '0.25rem 0.65rem',
+              borderRadius: '999px',
+              border: 'none',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              background: isActive ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+              color: isActive ? '#15803d' : '#dc2626',
+            }}
+          >
+            {isActive ? 'Activa' : 'Inactiva'}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={handleToggle}
-          disabled={loading}
-          style={{
-            color: isActive ? '#1f7a1f' : '#b22222',
-            fontSize: '0.82rem',
-            fontWeight: 600,
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            padding: 0,
-          }}
-        >
-          {isActive ? 'Activa' : 'Inactiva'}
-        </button>
       </div>
-      <div style={{ color: '#555', fontSize: '0.85rem' }}>WhatsApp: {vendor.whatsappPhone}</div>
-      <div style={{ color: '#555', fontSize: '0.85rem' }}>Email: {userEmail}</div>
-      {(vendor.tag1 || vendor.tag2) && (
-        <div style={{ color: '#555', fontSize: '0.85rem' }}>
-          Tags: {[vendor.tag1, vendor.tag2].filter(Boolean).join(', ')}
+
+      <div className="card-body">
+        <div style={{ display: 'grid', gap: '0.25rem' }}>
+          <h3 style={{ margin: 0, fontSize: '1.05rem' }}>{vendor.name}</h3>
+          <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>/{vendor.slug}</span>
         </div>
-      )}
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
-        <a href={`/admin/vendors/${vendor.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.75rem', border: '1px solid #ccc', borderRadius: '999px', fontSize: '0.9rem', textDecoration: 'none', color: '#0645ad' }}>
-          Editar <span style={{ fontSize: '1.1rem' }}>›</span>
+        <div style={{ display: 'grid', gap: '0.2rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
+          <span>WhatsApp: {vendor.whatsappPhone}</span>
+          <span>Email: {userEmail}</span>
+          {(vendor.tag1 || vendor.tag2) && (
+            <span>Tags: {[vendor.tag1, vendor.tag2].filter(Boolean).join(', ')}</span>
+          )}
+        </div>
+      </div>
+
+      <div style={{ padding: '0 1.1rem 1.2rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <a href={`/admin/vendors/${vendor.id}`} className="secondary-button" style={{ fontSize: '0.88rem', padding: '0.5rem 0.85rem' }}>
+          Editar ›
         </a>
         <button
           type="button"
           onClick={handleDelete}
           disabled={loading}
-          style={{
-            padding: '0.35rem 0.75rem',
-            border: '1px solid #d32f2f',
-            borderRadius: '999px',
-            background: '#fff',
-            color: '#d32f2f',
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-          }}
+          className="secondary-button"
+          style={{ fontSize: '0.88rem', padding: '0.5rem 0.85rem', background: 'var(--danger)', color: '#fff', borderColor: 'transparent' }}
         >
           Eliminar
         </button>
       </div>
-      {message && <div style={{ color: isActive ? '#1f7a1f' : '#b22222', fontSize: '0.85rem' }}>{message}</div>}
-    </div>
+
+      {message && <p style={{ margin: '0 1.1rem 1rem', fontSize: '0.85rem', color: isActive ? '#15803d' : '#dc2626' }}>{message}</p>}
+    </article>
   );
 }

@@ -16,7 +16,7 @@ export async function PUT(request, { params }) {
   }
 
   const body = await request.json();
-  const { name, slug, whatsappPhone, slogan, cardColor, backgroundColor } = body;
+  const { name, slug, whatsappPhone, slogan } = body;
 
   if (!name || !slug || !whatsappPhone) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -33,7 +33,7 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ error: 'Slug already in use' }, { status: 409 });
   }
 
-  await vendor.update({ name, slug, whatsappPhone, slogan, cardColor, backgroundColor });
+  await vendor.update({ name, slug, whatsappPhone, slogan });
   const vendorPlain = vendor.get({ plain: true });
 
   return NextResponse.json({ vendor: vendorPlain }, { status: 200 });

@@ -18,14 +18,25 @@ export default async function DashboardPage() {
 
   if (session.user.role === 'admin') {
     return (
-      <main style={{ padding: "1.5rem", fontFamily: "Arial, sans-serif" }}>
-        <h1>Admin Panel</h1>
-        <p>Usuario: {session.user?.email}</p>
-        <ul>
-          <li><Link href="/admin/vendors">Gestionar vendedores / tiendas</Link></li>
-          <li><Link href="/admin/categories">Gestionar categorías</Link></li>
-        </ul>
-        <Link href="/logout">Cerrar sesión</Link>
+      <main className="page-shell">
+        <section className="page-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h1 className="page-title">Panel de administración</h1>
+              <p className="page-subtitle">Gestiona vendedores y categorías de forma segura.</p>
+            </div>
+            <div className="hero-actions">
+              <Link href="/logout" className="secondary-button">Cerrar sesión</Link>
+            </div>
+          </div>
+          <div style={{ marginTop: '1.5rem' }}>
+            <p style={{ margin: '0.5rem 0' }}>Usuario: {session.user?.email}</p>
+            <ul style={{ margin: '1rem 0', paddingLeft: '1.25rem', color: 'var(--text)' }}>
+              <li><Link href="/admin/vendors">Gestionar vendedores / tiendas</Link></li>
+              <li><Link href="/admin/categories">Gestionar categorías</Link></li>
+            </ul>
+          </div>
+        </section>
       </main>
     );
   }
@@ -35,20 +46,31 @@ export default async function DashboardPage() {
   const publicUrl = vendor ? `${baseUrl}/${vendor.slug}` : 'No definido';
 
   return (
-    <main style={{ padding: "1.5rem", fontFamily: "Arial, sans-serif" }}>
-      <h1>Dashboard</h1>
-      <p>Usuario: {session.user?.email}</p>
-      <p>VendorId: {session.user?.vendorId}</p>
-      <p>Vendor slug: {vendor?.slug || 'N/A'}</p>
-      <p>URL pública: {publicUrl}</p>
-      <ul>
-        <li><Link href="/dashboard/categories">Editar categorías</Link></li>
-        <li><Link href="/dashboard/products">Editar productos</Link></li>
-        <li><Link href="/dashboard/config">Config de tienda</Link></li>
-      </ul>
-      <Link href="/">Volver a inicio</Link>
-      <br />
-      <Link href="/logout">Cerrar sesión</Link>
+    <main className="page-shell">
+      <section className="page-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h1 className="page-title">Dashboard</h1>
+            <p className="page-subtitle">Accede a las herramientas para administrar tu tienda.</p>
+          </div>
+          <div className="hero-actions">
+            <Link href="/logout" className="secondary-button">Cerrar sesión</Link>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '1.5rem', display: 'grid', gap: '0.85rem' }}>
+          <p style={{ margin: 0 }}>Usuario: {session.user?.email}</p>
+          <p style={{ margin: 0 }}>VendorId: {session.user?.vendorId}</p>
+          <p style={{ margin: 0 }}>Vendor slug: {vendor?.slug || 'N/A'}</p>
+          <p style={{ margin: 0 }}>URL pública: {publicUrl}</p>
+        </div>
+
+        <div className="cta-row" style={{ marginTop: '1.25rem' }}>
+          <Link href="/dashboard/categories" className="secondary-button">Editar categorías</Link>
+          <Link href="/dashboard/products" className="secondary-button">Editar productos</Link>
+          <Link href="/dashboard/config" className="secondary-button">Config de tienda</Link>
+        </div>
+      </section>
     </main>
   );
 }

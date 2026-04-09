@@ -9,10 +9,12 @@ export default async function AdminPage({ searchParams }) {
   const session = await getUserSession();
   if (!session || session.user.role !== 'admin') {
     return (
-      <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-        <h1>No autorizado</h1>
-        <p>Necesitas iniciar sesión como admin.</p>
-        <Link href="/login">Ir a login</Link>
+      <main className="page-shell">
+        <section className="page-card">
+          <h1 className="page-title">No autorizado</h1>
+          <p className="page-subtitle">Necesitas iniciar sesión como admin.</p>
+          <Link href="/login" className="primary-button">Ir a login</Link>
+        </section>
       </main>
     );
   }
@@ -25,30 +27,37 @@ export default async function AdminPage({ searchParams }) {
     .filter((vendor) => !searchSlug || vendor.slug.toLowerCase().includes(searchSlug));
 
   return (
-    <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Panel de administración</h1>
-      <p>Usuario admin: {session.user.email}</p>
+    <main className="page-shell">
+      <section className="page-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h1 className="page-title">Panel de administración</h1>
+            <p className="page-subtitle">{session.user.email}</p>
+          </div>
+          <Link href="/logout" className="secondary-button">Cerrar sesión</Link>
+        </div>
+        <CreateVendorWidget />
+      </section>
 
-      <CreateVendorWidget />
-
-      <section style={{ marginBottom: '1.5rem' }}>
-        <h2>Vendedores / Tiendas</h2>
-        <form method="get" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+      <section className="page-card">
+        <h2 style={{ margin: '0 0 1rem' }}>Tiendas</h2>
+        <form method="get" style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '220px' }}>
             Filtrar por slug
-            <input name="slug" defaultValue={searchSlug} placeholder="Buscar slug" style={{ padding: '0.5rem', minWidth: '220px' }} />
+            <input name="slug" defaultValue={searchSlug} placeholder="Buscar slug" className="input" />
           </label>
-          <button type="submit" style={{ padding: '0.6rem 1rem' }}>Filtrar</button>
+          <button type="submit" className="secondary-button">Filtrar</button>
         </form>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+        <div style={{
+          display: 'grid',
+          gap: '1rem',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))',
+        }}>
           {visibleVendors.map((vendor) => (
             <VendorCard key={vendor.id} vendor={vendor} />
           ))}
         </div>
       </section>
-
-
-      <p style={{ marginTop: '1rem' }}><Link href="/logout">Cerrar sesión</Link></p>
     </main>
   );
 }

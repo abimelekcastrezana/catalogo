@@ -2,6 +2,7 @@ import db from '@/db/index.js';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PublicProductCard from '@/app/components/PublicProductCard';
+import PublicVendorHeaderActions from '@/app/components/PublicVendorHeaderActions';
 
 export default async function VendorPublicPage({ params, searchParams }) {
   const resolvedParams = await params;
@@ -49,40 +50,54 @@ export default async function VendorPublicPage({ params, searchParams }) {
   const vendorContactHref = vendorPhone ? `https://wa.me/${vendorPhone.replace(/^\+/, '')}?text=${encodeURIComponent(`Hola, estoy interesado en tu tienda ${vendor.name}`)}` : null;
 
   return (
-    <main style={{ minHeight: '100vh', background: vendor.backgroundColor || '#e8f7ff', fontFamily: 'Arial, sans-serif', padding: '1.5rem' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <Link href="/">Volver al inicio</Link>
-        <h1>{vendor.name}</h1>
-      <p>{vendor.slogan || 'Catálogo público del vendedor.'}</p>
-      {vendorContactHref && (
-        <a
-          href={vendorContactHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ display: 'inline-flex', padding: '0.75rem 1rem', background: '#25D366', color: '#fff', borderRadius: '999px', textDecoration: 'none', marginTop: '0.75rem' }}
-        >
-          Contactar tienda
-        </a>
-      )}
+    <main className="page-shell">
+      <section className="page-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '1rem', flex: '1', minWidth: 0, alignItems: 'flex-start' }}>
+            {vendor.logoUrl && (
+              <img
+                src={vendor.logoUrl.startsWith('/') ? `/api/uploads${vendor.logoUrl.replace(/^\/uploads\/?/, '/')}` : vendor.logoUrl}
+                alt={`${vendor.name} logo`}
+                style={{ width: '86px', height: '86px', objectFit: 'cover', borderRadius: '18px', boxShadow: '0 18px 40px rgba(15,23,42,0.08)' }}
+              />
+            )}
+            <div style={{ minWidth: 0 }}>
+              <h1 className="page-title" style={{ marginTop: '1rem' }}>{vendor.name}</h1>
+              <p className="page-subtitle">{vendor.slogan || 'Catálogo público del vendedor.'}</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '1rem' }}>
+            <PublicVendorHeaderActions />
+            {vendorContactHref && (
+              <a
+                href={vendorContactHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="primary-button"
+                style={{ alignSelf: 'flex-start', marginTop: '1rem' }}
+              >
+                Contactar tienda
+              </a>
+            )}
+          </div>
+        </div>
 
-      <section style={{ marginBottom: '1.5rem' }}>
-        <form method="get" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <form method="get" style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '240px', flex: '1' }}>
             Categoría
-            <select name="categoryId" defaultValue={categoryId} style={{ padding: '0.5rem', minWidth: '220px' }}>
+            <select name="categoryId" defaultValue={categoryId} className="select" style={{ width: '100%' }}>
               <option value="">Todas</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>{category.name}</option>
               ))}
             </select>
           </label>
-          <button type="submit" style={{ padding: '0.6rem 1rem' }}>Filtrar</button>
+          <button type="submit" className="secondary-button">Filtrar</button>
         </form>
-      </section>
 
-      <section style={{ marginBottom: '1.5rem' }}>
-        <h2>Productos {categoryId ? `- ${categories.find((cat) => String(cat.id) === String(categoryId))?.name || 'Seleccionado'}` : '- Todas'}</h2>
-        <p style={{ margin: '0.5rem 0 0' }}>Página {pageToFetch} de {totalPages} · {totalProducts} producto{totalProducts === 1 ? '' : 's'}</p>
+        <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <p style={{ margin: 0, color: 'var(--muted)' }}>Página {pageToFetch} de {totalPages} · {totalProducts} producto{totalProducts === 1 ? '' : 's'}</p>
+        </div>
       </section>
 
       <section>
@@ -90,16 +105,12 @@ export default async function VendorPublicPage({ params, searchParams }) {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: products.length <= 2 ? 'repeat(auto-fit, minmax(280px, 320px))' : 'repeat(auto-fit, minmax(240px, 1fr))',
-              gridAutoRows: 'auto',
               gap: '1rem',
-              alignItems: 'start',
-              justifyContent: products.length <= 2 ? 'center' : 'stretch',
-              margin: products.length <= 2 ? '0 auto' : undefined,
+              gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))',
             }}
           >
             {products.map((product) => (
-              <PublicProductCard key={product.id} product={product} cardColor={vendor.cardColor} />
+              <PublicProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
@@ -108,21 +119,20 @@ export default async function VendorPublicPage({ params, searchParams }) {
       </section>
 
       {totalPages > 1 && (
-        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="pagination-row" style={{ marginTop: '1rem' }}>
           {pageToFetch > 1 && (
-            <Link href={buildPageHref(pageToFetch - 1)} style={{ padding: '0.5rem 0.85rem', border: '1px solid #ccc', borderRadius: '8px' }}>
+            <Link href={buildPageHref(pageToFetch - 1)} className="secondary-button" style={{ padding: '0.5rem 0.85rem' }}>
               Anterior
             </Link>
           )}
           <span>Página {pageToFetch} de {totalPages}</span>
           {pageToFetch < totalPages && (
-            <Link href={buildPageHref(pageToFetch + 1)} style={{ padding: '0.5rem 0.85rem', border: '1px solid #ccc', borderRadius: '8px' }}>
+            <Link href={buildPageHref(pageToFetch + 1)} className="secondary-button" style={{ padding: '0.5rem 0.85rem' }}>
               Siguiente
             </Link>
           )}
         </div>
       )}
-      </div>
     </main>
   );
 }

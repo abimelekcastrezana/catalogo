@@ -57,35 +57,28 @@ export default async function DashboardProductsPage({ searchParams }) {
   };
 
   return (
-    <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1>Dashboard - Productos</h1>
-          <p style={{ margin: '0.25rem 0 0' }}>Administra tus productos y categorías.</p>
+    <main className="page-shell">
+      <section className="page-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h1 className="page-title">Dashboard - Productos</h1>
+            <p className="page-subtitle">Administra tus productos con un panel cómodo y rápido.</p>
+          </div>
+          <ProductFilter categories={categories} />
         </div>
-        <ProductFilter categories={categories} />
-      </div>
 
-      <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
           <AddProductCard vendorId={session.user.vendorId} categories={categories} />
-          <Link href="/dashboard" style={{ padding: '0.65rem 1rem', border: '1px solid #ccc', borderRadius: '8px', textDecoration: 'none', color: '#000' }}>
-            Volver
-          </Link>
+          <Link href="/dashboard" className="secondary-button">Volver</Link>
         </div>
+      </section>
+
+      <section className="page-card">
         <div
           style={{
             display: 'grid',
             gap: '1rem',
-            gridTemplateColumns:
-              products.length === 1
-                ? '1fr'
-                : products.length === 2
-                ? 'repeat(2, minmax(320px, 1fr))'
-                : 'repeat(auto-fit, minmax(240px, 1fr))',
-            justifyContent: products.length <= 2 ? 'center' : 'stretch',
-            margin: products.length <= 2 ? '0 auto' : undefined,
-            maxWidth: products.length <= 2 ? 'calc(2 * 320px + 1rem)' : '100%',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))',
           }}
         >
           {products.map((p) => (
@@ -97,29 +90,27 @@ export default async function DashboardProductsPage({ searchParams }) {
             />
           ))}
         </div>
-      </div>
 
-      <p style={{ marginTop: '1rem', color: '#555' }}>
-        Mostrando {products.length} de {totalProducts} producto{totalProducts === 1 ? '' : 's'}
-      </p>
+        <p style={{ marginTop: '1.5rem', color: 'var(--muted)' }}>
+          Mostrando {products.length} de {totalProducts} producto{totalProducts === 1 ? '' : 's'}
+        </p>
 
-      {totalPages > 1 && (
-        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          {pageToFetch > 1 && (
-            <Link href={buildPageLink(pageToFetch - 1)} style={{ padding: '0.5rem 0.85rem', border: '1px solid #ccc', borderRadius: '8px' }}>
-              Anterior
-            </Link>
-          )}
-          <span>Pagina {pageToFetch} de {totalPages}</span>
-          {pageToFetch < totalPages && (
-            <Link href={buildPageLink(pageToFetch + 1)} style={{ padding: '0.5rem 0.85rem', border: '1px solid #ccc', borderRadius: '8px' }}>
-              Siguiente
-            </Link>
-          )}
-        </div>
-      )}
-
-      <p style={{ marginTop: '1rem' }}><Link href="/dashboard">Volver</Link></p>
+        {totalPages > 1 && (
+          <div className="pagination-row" style={{ marginTop: '1.25rem' }}>
+            {pageToFetch > 1 && (
+              <Link href={buildPageLink(pageToFetch - 1)} className="secondary-button" style={{ padding: '0.5rem 0.85rem' }}>
+                Anterior
+              </Link>
+            )}
+            <span>Pagina {pageToFetch} de {totalPages}</span>
+            {pageToFetch < totalPages && (
+              <Link href={buildPageLink(pageToFetch + 1)} className="secondary-button" style={{ padding: '0.5rem 0.85rem' }}>
+                Siguiente
+              </Link>
+            )}
+          </div>
+        )}
+      </section>
     </main>
   );
 }

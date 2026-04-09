@@ -82,85 +82,73 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
     });
 
   return (
-    <div
-      style={{
-        marginBottom: '1rem',
-        border: '1px solid #ccc',
-        borderRadius: '14px',
-        padding: '1rem',
-        display: 'grid',
-        gap: '1rem',
-        background: '#fff',
-        boxShadow: '0 1px 6px rgba(0,0,0,0.05)',
-      }}
-    >
-      <div style={{ fontSize: '0.85rem', color: '#555', fontWeight: 600 }}>
-        Categoría: {categories.find((cat) => cat.id === product.categoryId)?.name || 'Sin categoría'}
-      </div>
-
-      <div style={{ width: '100%', minHeight: '180px', background: '#f7f7f7', borderRadius: '12px', overflow: 'hidden', border: '1px solid #eee' }}>
+    <article className="card">
+      <div className="card-hero">
         {imageUrls.length ? (
           <img
             src={imageUrls[0]}
             alt={product.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
-          <div style={{ width: '100%', height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
             Sin imagen
           </div>
         )}
+        <div style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'rgba(255,255,255,0.92)', padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.78rem', color: 'var(--muted)', boxShadow: '0 8px 24px rgba(15,23,42,0.08)' }}>
+          {categories.find((cat) => cat.id === product.categoryId)?.name ? `Categoría: ${categories.find((cat) => cat.id === product.categoryId).name}` : 'Sin categoría'}
+        </div>
       </div>
 
-      {isEditing ? (
-        <div style={{ display: 'grid', gap: '0.75rem' }}>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
-          <input value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" />
-          <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
-          <select value={catId} onChange={(e) => setCatId(e.target.value)}>
-            <option value="">Sin categoría</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-          </select>
-          <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Precio" type="number" step="0.01" min="0" />
-          <div style={{ display: 'grid', gap: '0.5rem' }}>
-            <label>
-              Reemplazar imagen 1
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])}
-              />
-            </label>
-            <label>
-              Reemplazar imagen 2
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])}
-              />
-            </label>
+      <div className="card-body">
+        {isEditing ? (
+          <div style={{ display: 'grid', gap: '0.75rem' }}>
+            <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
+            <input className="input" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" />
+            <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
+            <select className="select" value={catId} onChange={(e) => setCatId(e.target.value)}>
+              <option value="">Sin categoría</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+            <input className="input" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Precio" type="number" step="0.01" min="0" />
+            <div style={{ display: 'grid', gap: '0.5rem' }}>
+              <label className="form-field">
+                <span>Reemplazar imagen 1</span>
+                <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])} />
+              </label>
+              <label className="form-field">
+                <span>Reemplazar imagen 2</span>
+                <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
+              </label>
+            </div>
+            <div className="form-actions" style={{ justifyContent: 'flex-start', flexWrap: 'wrap' }}>
+              <button type="button" onClick={updateProduct} className="primary-button">Guardar</button>
+              <button type="button" onClick={() => setIsEditing(false)} className="secondary-button">Cancelar</button>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button onClick={updateProduct}>Guardar</button>
-            <button onClick={() => setIsEditing(false)}>Cancelar</button>
-          </div>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gap: '0.5rem' }}>
-          <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{product.name}</div>
-          <div style={{ color: '#555' }}>{product.description || 'Sin descripción'}</div>
-          <div style={{ color: '#555', fontSize: '0.95rem' }}>SKU: {product.sku}</div>
-          <div style={{ fontSize: '1.15rem', fontWeight: 700, marginTop: '0.5rem' }}>${Number(product.price).toFixed(2)}</div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button onClick={() => setIsEditing(true)}>Editar</button>
-            <button onClick={deleteProduct}>Eliminar</button>
-          </div>
+        ) : (
+          <>
+            <div style={{ display: 'grid', gap: '0.35rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', lineHeight: '1.2' }}>{product.name}</h3>
+              <p style={{ margin: 0, color: 'var(--muted)', minHeight: '2.4rem' }}>{product.description || 'Sin descripción'}</p>
+              <div style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>SKU: {product.sku}</div>
+            </div>
+            <div className="card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ fontSize: '1.15rem', fontWeight: 700 }}>${Number(product.price).toFixed(2)}</div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {!isEditing && (
+        <div style={{ padding: '0 1.1rem 1.2rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button type="button" onClick={() => setIsEditing(true)} className="secondary-button">Editar</button>
+          <button type="button" onClick={deleteProduct} className="secondary-button" style={{ background: 'var(--danger)', color: '#fff', borderColor: 'transparent' }}>Eliminar</button>
         </div>
       )}
 
-      {message && <p style={{ color: '#d00' }}>{message}</p>}
-    </div>
+      {message && <p style={{ color: '#d00', padding: '0 1.1rem 1.2rem' }}>{message}</p>}
+    </article>
   );
 }

@@ -79,9 +79,15 @@ export default function RegisterPage() {
               Código de país
               <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
                 <option value="+1">+1 (EE.UU.)</option>
-                <option value="+52">+52 (México)</option>
+                <option value="+44">+44 (Reino Unido)</option>
                 <option value="+34">+34 (España)</option>
+                <option value="+52">+52 (México)</option>
+                <option value="+54">+54 (Argentina)</option>
+                <option value="+55">+55 (Brasil)</option>
+                <option value="+56">+56 (Chile)</option>
+                <option value="+57">+57 (Colombia)</option>
                 <option value="+51">+51 (Perú)</option>
+                <option value="+598">+598 (Uruguay)</option>
               </select>
             </label>
 

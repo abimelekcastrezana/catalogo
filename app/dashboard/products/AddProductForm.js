@@ -79,32 +79,44 @@ const res = await fetch(`${apiBase}/${vendorId}/products`, {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "grid", gap: "0.5rem", maxWidth: "420px" }}>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" required />
-      <input value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" required />
-      <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Precio" type="number" step="0.01" min="0" required />
-      <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
-
-      <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-        <option value="">Sin categoría</option>
-        {categories?.map((cat) => (
-          <option key={cat.id} value={cat.id}>{cat.name}</option>
-        ))}
-      </select>
-
-      <div>
+    <form onSubmit={handleSubmit} className="form-card" style={{ maxWidth: '520px' }}>
+      <div className="form-field">
+        <label>Nombre</label>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" required />
+      </div>
+      <div className="form-field">
+        <label>SKU</label>
+        <input className="input" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" required />
+      </div>
+      <div className="form-field">
+        <label>Precio</label>
+        <input className="input" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Precio" type="number" step="0.01" min="0" required />
+      </div>
+      <div className="form-field">
+        <label>Descripción</label>
+        <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
+      </div>
+      <div className="form-field">
+        <label>Categoría</label>
+        <select className="select" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+          <option value="">Sin categoría</option>
+          {categories?.map((cat) => (
+            <option key={cat.id} value={cat.id}>{cat.name}</option>
+          ))}
+        </select>
+      </div>
+      <div className="form-field">
         <label>Imagen 1</label>
-        <input type="file" accept="image/*" onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])} />
+        <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])} />
       </div>
-      <div>
+      <div className="form-field">
         <label>Imagen 2</label>
-        <input type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
+        <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
       </div>
-
-      <button type="submit" disabled={isSubmitting}>
+      <button type="submit" className="primary-button" disabled={isSubmitting}>
         {isSubmitting ? 'Creando...' : 'Crear producto'}
       </button>
-      {message && <p>{message}</p>}
+      {message && <p className="text-small" style={{ margin: 0 }}>{message}</p>}
     </form>
   );
 }
