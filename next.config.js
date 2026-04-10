@@ -1,12 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  turbopack: {},
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals = [...config.externals, 'sequelize', 'pg', 'pg-hstore'];
-    }
-    return config;
-  },
+  serverExternalPackages: ['sequelize', 'pg', 'pg-hstore'],
 };
 
 module.exports = nextConfig;

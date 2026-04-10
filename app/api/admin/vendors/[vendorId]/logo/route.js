@@ -5,11 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { uploadConfig } from '@/app/common/config.js';
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+export const maxDuration = 60;
 
 export async function POST(request, { params }) {
   const session = await getUserSession();
