@@ -28,6 +28,7 @@ RUN npm ci --only=production
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/.sequelizerc ./
 COPY --from=builder /app/db ./db
 COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/app ./app
