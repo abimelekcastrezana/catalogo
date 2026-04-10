@@ -30,7 +30,7 @@ services:
     networks:
       - tiendatap-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      test: ["CMD-SHELL", "wget --quiet --try-once --spider http://localhost:3000/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
