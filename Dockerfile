@@ -42,5 +42,5 @@ EXPOSE 3000
 # Default env
 ENV NODE_ENV=production
 
-# Run migrations and start app
-CMD ["sh", "-c", "npm run migrations:run && npm start"]
+# Run migrations (fail silently) and start app
+CMD ["sh", "-c", "npm run migrations:run || true && npm start"]
