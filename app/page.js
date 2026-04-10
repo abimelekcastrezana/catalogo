@@ -57,7 +57,7 @@ export default async function HomePage({ searchParams }) {
       </section>
 
       <section className="page-card">
-        <div className="grid-cards">
+        <div className="grid-cards vendor-grid">
           {vendors.map((vendor) => {
             const logoPath = vendor.logoUrl
               ? vendor.logoUrl.startsWith('/')

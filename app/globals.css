@@ -209,6 +209,11 @@ img {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
+.vendor-grid {
+  justify-content: center;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 320px));
+}
+
 .card {
   display: flex;
   flex-direction: column;

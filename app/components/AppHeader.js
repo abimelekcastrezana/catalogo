@@ -14,6 +14,8 @@ export default function AppHeader({ whatsappPhone }) {
   const reservedPaths = ['/login', '/register', '/logout', '/admin', '/dashboard'];
   const isVendorPublic = /^\/[A-Za-z0-9_-]+$/.test(pathname || '') && !reservedPaths.includes(pathname);
   const isAuthenticated = Boolean(session);
+  const isHome = pathname === '/';
+  const showBrand = !isAuthenticated || isHome;
 
   if (isVendorPublic) {
     return null;
@@ -21,8 +23,8 @@ export default function AppHeader({ whatsappPhone }) {
 
   return (
     <header className="app-header">
-      {!isAuthenticated ? (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+      {showBrand ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <img
             src="/tiendatap_logo.jpg"
             alt="TiendaTap logo"
@@ -39,18 +41,18 @@ export default function AppHeader({ whatsappPhone }) {
         <div className="desktop-actions">
           <ThemeSwitcher />
           {isAuthenticated && <SignOutButton />}
+          {isHome && whatsappPhone && (
+            <a
+              href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="primary-button"
+            >
+              WhatsApp
+            </a>
+          )}
           {!isAuthenticated && (
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              {pathname === '/' && whatsappPhone && (
-                <a
-                  href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="primary-button"
-                >
-                  WhatsApp
-                </a>
-              )}
               <Link href="/login" className="secondary-button">Iniciar sesión</Link>
               <Link href="/register" className="secondary-button">Registrarse</Link>
             </div>
@@ -69,24 +71,24 @@ export default function AppHeader({ whatsappPhone }) {
           {menuOpen && (
             <div className="mobile-action-menu" style={{ position: 'absolute', right: 0, top: 'calc(100% + 0.5rem)', zIndex: 50 }}>
               <ThemeSwitcher />
+              {isHome && whatsappPhone && (
+                <a
+                  href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="primary-button"
+                  style={{ width: '100%' }}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  WhatsApp
+                </a>
+              )}
               {isAuthenticated ? (
                 <button className="secondary-button" style={{ width: '100%' }} onClick={() => { setMenuOpen(false); signOut({ callbackUrl: '/' }); }}>
                   Cerrar sesión
                 </button>
               ) : (
                 <>
-                  {pathname === '/' && whatsappPhone && (
-                    <a
-                      href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="primary-button"
-                      style={{ width: '100%' }}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      WhatsApp
-                    </a>
-                  )}
                   <Link href="/login" className="secondary-button" style={{ width: '100%' }} onClick={() => setMenuOpen(false)}>Iniciar sesión</Link>
                   <Link href="/register" className="secondary-button" style={{ width: '100%' }} onClick={() => setMenuOpen(false)}>Registrarse</Link>
                 </>

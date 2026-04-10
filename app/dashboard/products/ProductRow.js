@@ -4,6 +4,7 @@ import { useState } from "react";
 
 export default function ProductRow({ product, vendorId, categories, apiBase = '/api/vendors' }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [name, setName] = useState(product.name);
   const [sku, setSku] = useState(product.sku);
   const [description, setDescription] = useState(product.description || "");
@@ -81,12 +82,15 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
       return `/api/uploads${pathWithoutPrefix}`;
     });
 
+  const handlePrevImage = () => setCurrentImageIndex((currentImageIndex - 1 + imageUrls.length) % imageUrls.length);
+  const handleNextImage = () => setCurrentImageIndex((currentImageIndex + 1) % imageUrls.length);
+
   return (
     <article className="card">
       <div className="card-hero">
         {imageUrls.length ? (
           <img
-            src={imageUrls[0]}
+            src={imageUrls[currentImageIndex]}
             alt={product.name}
           />
         ) : (
@@ -97,6 +101,79 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
         <div style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'rgba(255,255,255,0.92)', padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.78rem', color: 'var(--muted)', boxShadow: '0 8px 24px rgba(15,23,42,0.08)' }}>
           {categories.find((cat) => cat.id === product.categoryId)?.name ? `Categoría: ${categories.find((cat) => cat.id === product.categoryId).name}` : 'Sin categoría'}
         </div>
+
+        {imageUrls.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={handlePrevImage}
+              style={{
+                position: 'absolute',
+                left: '0.75rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '36px',
+                height: '36px',
+                borderRadius: '999px',
+                border: '1px solid rgba(255,255,255,0.85)',
+                background: 'rgba(15,23,42,0.6)',
+                color: '#fff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 2,
+                boxShadow: '0 10px 24px rgba(15,23,42,0.18)',
+              }}
+              aria-label="Imagen anterior"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              onClick={handleNextImage}
+              style={{
+                position: 'absolute',
+                right: '0.75rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '36px',
+                height: '36px',
+                borderRadius: '999px',
+                border: '1px solid rgba(255,255,255,0.85)',
+                background: 'rgba(15,23,42,0.6)',
+                color: '#fff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 2,
+                boxShadow: '0 10px 24px rgba(15,23,42,0.18)',
+              }}
+              aria-label="Siguiente imagen"
+            >
+              ›
+            </button>
+            <div style={{ position: 'absolute', bottom: '0.75rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.45rem', padding: '0 0.5rem' }}>
+              {imageUrls.map((_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setCurrentImageIndex(index)}
+                  style={{
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    border: '1px solid rgba(255,255,255,0.9)',
+                    background: currentImageIndex === index ? '#fff' : 'rgba(255,255,255,0.7)',
+                    cursor: 'pointer',
+                  }}
+                  aria-label={`Imagen ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="card-body">
