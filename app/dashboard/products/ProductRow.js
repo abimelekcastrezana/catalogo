@@ -180,7 +180,7 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
         {isEditing ? (
           <div style={{ display: 'grid', gap: '0.75rem' }}>
             <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
-            <input className="input" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" />
+            <input className="input" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU (opcional)" />
             <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
             <select className="select" value={catId} onChange={(e) => setCatId(e.target.value)}>
               <option value="">Sin categoría</option>

@@ -14,19 +14,15 @@ export async function POST(request, { params }) {
 
   const body = await request.json();
   const { name, sku, description, categoryId, price } = body;
-  if (!name || !sku || price === undefined || price === null) {
+  if (!name || price === undefined || price === null) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
 
   const vendorId = resolvedParams.vendorId;
-  const normalizedSku = sku.trim();
+  const normalizedSku = sku ? sku.trim() : null;
   const normalizedPrice = Number(price);
   if (Number.isNaN(normalizedPrice) || normalizedPrice < 0) {
     return NextResponse.json({ error: 'Price must be a positive number' }, { status: 400 });
-  }
-  const existing = await db.Product.findOne({ where: { vendorId, sku: normalizedSku } });
-  if (existing) {
-    return NextResponse.json({ error: 'SKU already exists for this vendor' }, { status: 409 });
   }
 
   try {
@@ -34,7 +30,7 @@ export async function POST(request, { params }) {
     return NextResponse.json({ product }, { status: 201 });
   } catch (error) {
     if (error instanceof UniqueConstraintError) {
-      return NextResponse.json({ error: 'SKU already exists for this vendor' }, { status: 409 });
+      return NextResponse.json({ error: 'Constraint error' }, { status: 409 });
     }
     console.error('Product create error:', error);
     return NextResponse.json({ error: 'Server error creating product' }, { status: 500 });

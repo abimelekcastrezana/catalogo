@@ -15,11 +15,11 @@ export async function POST(request, { params }) {
   const body = await request.json();
   const { name, sku, description, categoryId, price } = body;
 
-  if (!name || !sku || price === undefined || price === null) {
+  if (!name || price === undefined || price === null) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
 
-  const normalizedSku = sku.trim();
+  const normalizedSku = sku ? sku.trim() : null;
   const normalizedPrice = Number(price);
   if (Number.isNaN(normalizedPrice) || normalizedPrice < 0) {
     return NextResponse.json({ error: 'Price must be a positive number' }, { status: 400 });
@@ -31,7 +31,7 @@ export async function POST(request, { params }) {
   }
 
   try {
-    const product = await db.Product.create({ vendorId, categoryId: categoryId || null, name, sku: normalizedSku, description, price: normalizedPrice });
+    const product = await db.Product.create({ vendorId, categoryId: categoryId || null, name, sku: normalizedSku || null, description, price: normalizedPrice });
     return NextResponse.json({ product }, { status: 201 });
   } catch (error) {
     if (error instanceof UniqueConstraintError) {

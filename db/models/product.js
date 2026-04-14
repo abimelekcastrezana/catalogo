@@ -21,7 +21,7 @@ module.exports = (sequelize) => {
     },
     sku: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     description: {
       type: DataTypes.TEXT,
@@ -39,12 +39,6 @@ module.exports = (sequelize) => {
   }, {
     tableName: 'products',
     timestamps: true,
-    indexes: [
-      {
-        unique: true,
-        fields: ['vendorId', 'sku'],
-      },
-    ],
   });
 
   return Product;

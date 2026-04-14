@@ -20,7 +20,7 @@ export async function PUT(request, { params }) {
 
     const body = await request.json();
     const { name, sku, description, categoryId, isActive, price } = body;
-    if (!name || !sku || price === undefined || price === null) {
+    if (!name || price === undefined || price === null) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
@@ -34,12 +34,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    const existing = await db.Product.findOne({ where: { vendorId, sku, id: { [Op.ne]: productId } } });
-    if (existing) {
-      return NextResponse.json({ error: 'SKU already in use' }, { status: 409 });
-    }
-
-    await product.update({ name, sku, description, categoryId: categoryId || null, isActive: typeof isActive === 'boolean' ? isActive : product.isActive, price: normalizedPrice });
+    await product.update({ name, sku: sku || null, description, categoryId: categoryId || null, isActive: typeof isActive === 'boolean' ? isActive : product.isActive, price: normalizedPrice });
     return NextResponse.json({ product: product.get({ plain: true }) });
   } catch (error) {
     console.error('Error updating product:', error);

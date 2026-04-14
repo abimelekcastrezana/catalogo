@@ -86,7 +86,7 @@ const res = await fetch(`${apiBase}/${vendorId}/products`, {
       </div>
       <div className="form-field">
         <label>SKU</label>
-        <input className="input" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU" required />
+        <input className="input" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU (opcional)" />
       </div>
       <div className="form-field">
         <label>Precio</label>
