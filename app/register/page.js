@@ -15,13 +15,10 @@ export default function RegisterPage() {
   const [whatsappPhone, setWhatsappPhone] = useState("");
   const [message, setMessage] = useState("");
 
-  const adminEmail = 'admin@example.com';
-  const isAdminEmail = email.trim().toLowerCase() === adminEmail;
-
   const slugRegex = /^[A-Za-z0-9-]+$/;
   const handleRegister = async (event) => {
     event.preventDefault();
-    if (!isAdminEmail && !slugRegex.test(slug)) {
+    if (!slugRegex.test(slug)) {
       setMessage('El slug solo puede contener letras, números y guiones. No se permiten guiones bajos.');
       return;
     }
@@ -69,37 +66,32 @@ export default function RegisterPage() {
       <form onSubmit={handleRegister} style={{ display: "grid", gap: "0.75rem", maxWidth: "420px" }}>
         <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <input placeholder="Nombre del vendor" value={vendorName} onChange={(e) => setVendorName(e.target.value)} required />
+        <input placeholder="Slug de vendor" value={slug} onChange={(e) => setSlug(e.target.value)} required pattern="[A-Za-z0-9-]+" title="Solo letras, números y guiones" />
 
-        {!isAdminEmail && (
-          <>
-            <input placeholder="Nombre del vendor" value={vendorName} onChange={(e) => setVendorName(e.target.value)} required />
-            <input placeholder="Slug de vendor" value={slug} onChange={(e) => setSlug(e.target.value)} required pattern="[A-Za-z0-9-]+" title="Solo letras, números y guiones" />
+        <label>
+          Código de país
+          <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
+            <option value="+1">+1 (EE.UU.)</option>
+            <option value="+44">+44 (Reino Unido)</option>
+            <option value="+34">+34 (España)</option>
+            <option value="+52">+52 (México)</option>
+            <option value="+54">+54 (Argentina)</option>
+            <option value="+55">+55 (Brasil)</option>
+            <option value="+56">+56 (Chile)</option>
+            <option value="+57">+57 (Colombia)</option>
+            <option value="+51">+51 (Perú)</option>
+            <option value="+598">+598 (Uruguay)</option>
+          </select>
+        </label>
 
-            <label>
-              Código de país
-              <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
-                <option value="+1">+1 (EE.UU.)</option>
-                <option value="+44">+44 (Reino Unido)</option>
-                <option value="+34">+34 (España)</option>
-                <option value="+52">+52 (México)</option>
-                <option value="+54">+54 (Argentina)</option>
-                <option value="+55">+55 (Brasil)</option>
-                <option value="+56">+56 (Chile)</option>
-                <option value="+57">+57 (Colombia)</option>
-                <option value="+51">+51 (Perú)</option>
-                <option value="+598">+598 (Uruguay)</option>
-              </select>
-            </label>
-
-            <input
-              type="text"
-              placeholder="Teléfono WhatsApp (sin +, solo dígitos)"
-              value={whatsappPhone}
-              onChange={(e) => setWhatsappPhone(e.target.value)}
-              required
-            />
-          </>
-        )}
+        <input
+          type="text"
+          placeholder="Teléfono WhatsApp (sin +, solo dígitos)"
+          value={whatsappPhone}
+          onChange={(e) => setWhatsappPhone(e.target.value)}
+          required
+        />
 
         <button type="submit">Registrar</button>
       </form>

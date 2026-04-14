@@ -14,7 +14,7 @@ export async function POST(request) {
   const adminEmail = 'admin@example.com';
   const userRole = email === adminEmail ? 'admin' : 'vendor';
 
-  if (!email || !password || (!vendorName && userRole !== 'admin') || (!slug && userRole !== 'admin') || (!whatsappPhone && userRole !== 'admin')) {
+  if (!email || !password || !vendorName || !slug || !whatsappPhone) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
@@ -24,15 +24,12 @@ export async function POST(request) {
   }
 
   const slugRegex = /^[A-Za-z0-9-]+$/;
-  let existingVendor = null;
-  if (userRole !== 'admin') {
-    existingVendor = await Vendor.findOne({ where: { slug } });
-    if (existingVendor) {
-      return NextResponse.json({ error: 'Vendor slug already exists' }, { status: 409 });
-    }
-    if (!slugRegex.test(slug)) {
-      return NextResponse.json({ error: 'Invalid slug. Only letters, numbers and hyphens allowed.' }, { status: 400 });
-    }
+  const existingVendor = await Vendor.findOne({ where: { slug } });
+  if (existingVendor) {
+    return NextResponse.json({ error: 'Vendor slug already exists' }, { status: 409 });
+  }
+  if (!slugRegex.test(slug)) {
+    return NextResponse.json({ error: 'Invalid slug. Only letters, numbers and hyphens allowed.' }, { status: 400 });
   }
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -44,19 +41,16 @@ export async function POST(request) {
   const transaction = await Vendor.sequelize.transaction();
 
   try {
-    let newVendor = null;
-    if (userRole !== 'admin') {
-      newVendor = await Vendor.create({
-        name: vendorName,
-        slug,
-        whatsappPhone,
-      }, { transaction });
-    }
+    const newVendor = await Vendor.create({
+      name: vendorName,
+      slug,
+      whatsappPhone,
+    }, { transaction });
 
     const newUser = await User.create({
       email,
       password: hashedPassword,
-      vendorId: newVendor ? newVendor.id : null,
+      vendorId: newVendor.id,
       role: userRole,
     }, { transaction });
 
