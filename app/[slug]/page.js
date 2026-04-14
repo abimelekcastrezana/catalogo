@@ -51,41 +51,38 @@ export default async function VendorPublicPage({ params, searchParams }) {
 
   return (
     <main className="page-shell">
-      <section className="page-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', gap: '1rem', flex: '1', minWidth: 0, alignItems: 'flex-start' }}>
-            {vendor.logoUrl && (
-              <img
-                src={vendor.logoUrl.startsWith('/') ? `/api/uploads${vendor.logoUrl.replace(/^\/uploads\/?/, '/')}` : vendor.logoUrl}
-                alt={`${vendor.name} logo`}
-                style={{ width: '86px', height: '86px', objectFit: 'cover', borderRadius: '18px', boxShadow: '0 18px 40px rgba(15,23,42,0.08)' }}
-              />
-            )}
-            <div style={{ minWidth: 0 }}>
-              <h1 className="page-title" style={{ marginTop: '1rem' }}>{vendor.name}</h1>
-              <p className="page-subtitle">{vendor.slogan || 'Catálogo público del vendedor.'}</p>
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '1rem' }}>
-            <PublicVendorHeaderActions />
-            {vendorContactHref && (
-              <a
-                href={vendorContactHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="primary-button"
-                style={{ alignSelf: 'flex-start', marginTop: '1rem' }}
-              >
-                Contactar tienda
-              </a>
-            )}
-          </div>
+      <section className="page-card" style={{ textAlign: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+          {vendor.logoUrl && (
+            <img
+              src={vendor.logoUrl.startsWith('/') ? `/api/uploads${vendor.logoUrl.replace(/^\/uploads\/?/, '/')}` : vendor.logoUrl}
+              alt={`${vendor.name} logo`}
+              style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '18px', boxShadow: '0 18px 40px rgba(15,23,42,0.08)' }}
+            />
+          )}
+        </div>
+        <h1 className="page-title" style={{ marginTop: '0.75rem', marginBottom: '0.35rem', fontSize: 'clamp(1.5rem, 5vw, 2.2rem)' }}>{vendor.name}</h1>
+        <p className="page-subtitle" style={{ marginBottom: '1rem', fontSize: 'clamp(0.9rem, 3vw, 1rem)' }}>{vendor.slogan || 'Catálogo público del vendedor.'}</p>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          <PublicVendorHeaderActions />
+          {vendorContactHref && (
+            <a
+              href={vendorContactHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="primary-button"
+              style={{ fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', padding: 'clamp(0.6rem, 1vw, 0.85rem) clamp(0.8rem, 2vw, 1.1rem)' }}
+            >
+              Contactar tienda
+            </a>
+          )}
         </div>
 
-        <form method="get" style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '240px', flex: '1' }}>
+        <form method="get" style={{ display: 'grid', gap: '0.75rem', marginBottom: '1rem' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             Categoría
-            <select name="categoryId" defaultValue={categoryId} className="select" style={{ width: '100%' }}>
+            <select name="categoryId" defaultValue={categoryId} className="select">
               <option value="">Todas</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>{category.name}</option>
@@ -95,7 +92,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
           <button type="submit" className="secondary-button">Filtrar</button>
         </form>
 
-        <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', fontSize: 'clamp(0.85rem, 2vw, 0.95rem)' }}>
           <p style={{ margin: 0, color: 'var(--muted)' }}>Página {pageToFetch} de {totalPages} · {totalProducts} producto{totalProducts === 1 ? '' : 's'}</p>
         </div>
       </section>
