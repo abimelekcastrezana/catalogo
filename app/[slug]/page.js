@@ -51,36 +51,58 @@ export default async function VendorPublicPage({ params, searchParams }) {
 
   return (
     <main className="page-shell">
-      <section className="page-card" style={{ textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-          {vendor.logoUrl && (
-            <img
-              src={vendor.logoUrl.startsWith('/') ? `/api/uploads${vendor.logoUrl.replace(/^\/uploads\/?/, '/')}` : vendor.logoUrl}
-              alt={`${vendor.name} logo`}
-              style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '18px', boxShadow: '0 18px 40px rgba(15,23,42,0.08)' }}
-            />
-          )}
-        </div>
-        <h1 className="page-title" style={{ marginTop: '0.75rem', marginBottom: '0.35rem', fontSize: 'clamp(1.5rem, 5vw, 2.2rem)' }}>{vendor.name}</h1>
-        <p className="page-subtitle" style={{ marginBottom: '1rem', fontSize: 'clamp(0.9rem, 3vw, 1rem)' }}>{vendor.slogan || 'Catálogo público del vendedor.'}</p>
+      <section className="page-card">
+        <style>{`
+          @media (max-width: 768px) {
+            .vendor-header { text-align: center; }
+            .vendor-header-content { flex-direction: column; align-items: center; }
+            .vendor-logo { margin-bottom: 1rem; }
+            .vendor-actions { margin-bottom: 1rem; }
+            .vendor-form { display: grid; gap: 0.75rem; }
+          }
+          @media (min-width: 769px) {
+            .vendor-header { text-align: left; }
+            .vendor-header-content { flex-direction: row; align-items: flex-start; }
+            .vendor-logo { margin-right: 1rem; margin-bottom: 0; flex-shrink: 0; }
+            .vendor-actions { margin-left: auto; }
+            .vendor-form { display: flex; align-items: flex-end; gap: 0.75rem; flex-wrap: wrap; }
+          }
+        `}</style>
+        
+        <div className="vendor-header-content" style={{ display: 'flex', gap: '1.5rem' }}>
+          <div className="vendor-logo" style={{ display: 'flex', justifyContent: 'center' }}>
+            {vendor.logoUrl && (
+              <img
+                src={vendor.logoUrl.startsWith('/') ? `/api/uploads${vendor.logoUrl.replace(/^\/uploads\/?/, '/')}` : vendor.logoUrl}
+                alt={`${vendor.name} logo`}
+                style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '18px', boxShadow: '0 18px 40px rgba(15,23,42,0.08)' }}
+              />
+            )}
+          </div>
+          
+          <div className="vendor-header" style={{ flex: 1, minWidth: 0 }}>
+            <h1 className="page-title" style={{ marginTop: 0, marginBottom: '0.35rem' }}>{vendor.name}</h1>
+            <p className="page-subtitle" style={{ marginBottom: '1rem' }}>{vendor.slogan || 'Catálogo público del vendedor.'}</p>
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-          <PublicVendorHeaderActions />
-          {vendorContactHref && (
-            <a
-              href={vendorContactHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="primary-button"
-              style={{ fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', padding: 'clamp(0.6rem, 1vw, 0.85rem) clamp(0.8rem, 2vw, 1.1rem)' }}
-            >
-              Contactar tienda
-            </a>
-          )}
+            <div className="vendor-actions" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+              <PublicVendorHeaderActions />
+              {vendorContactHref && (
+                <a
+                  href={vendorContactHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="primary-button"
+                  style={{ fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', padding: 'clamp(0.6rem, 1vw, 0.85rem) clamp(0.8rem, 2vw, 1.1rem)' }}
+                >
+                  Contactar tienda
+                </a>
+              )}
+            </div>
+          </div>
         </div>
 
-        <form method="get" style={{ display: 'grid', gap: '0.75rem', marginBottom: '1rem' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <form method="get" className="vendor-form" style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '240px', flex: '1' }}>
             Categoría
             <select name="categoryId" defaultValue={categoryId} className="select">
               <option value="">Todas</option>
