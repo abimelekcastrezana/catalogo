@@ -53,7 +53,8 @@
           "formulahendry.code-runner",
           "bierner.markdown-preview-github-styles",
           "mhutchie.git-graph",
-          "ms-azuretools.vscode-containers"
+          "ms-azuretools.vscode-containers",
+          "Anthropic.claude-code"
         ]
     }
   },
@@ -61,8 +62,8 @@
 		// Fix:
 		// If you are using a Mac or Linux OS, uncomment the line below to mount your SSH keys.
 		// This allows you to use your SSH keys inside the container for git operations.
-		"source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached"
-		
+		"source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind,consistency=cached"		
 		// If you are using a Windows OS, uncomment the line below to mount your SSH keys.
 		// This allows you to use your SSH keys inside the container for git operations.
 		// "source=${localEnv:USERPROFILE}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached" 
