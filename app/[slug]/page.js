@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PublicProductCard from '@/app/components/PublicProductCard';
 import PublicVendorHeaderActions from '@/app/components/PublicVendorHeaderActions';
+import VendorPageClient from '@/app/components/VendorPageClient';
 
 export default async function VendorPublicPage({ params, searchParams }) {
   const resolvedParams = await params;
@@ -50,8 +51,9 @@ export default async function VendorPublicPage({ params, searchParams }) {
   const vendorContactHref = vendorPhone ? `https://wa.me/${vendorPhone.replace(/^\+/, '')}?text=${encodeURIComponent(`Hola, estoy interesado en tu tienda ${vendor.name}`)}` : null;
 
   return (
-    <main className="page-shell">
-      <section className="page-card">
+    <VendorPageClient vendorSlug={slug} vendorPhone={vendorPhone} vendorName={vendor.name}>
+      <main className="page-shell">
+        <section className="page-card">
         <style>{`
           @media (max-width: 768px) {
             .vendor-header { text-align: center; }
@@ -125,9 +127,17 @@ export default async function VendorPublicPage({ params, searchParams }) {
             style={{
               display: 'grid',
               gap: '1rem',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))',
+              gridTemplateColumns: 'repeat(2, 1fr)',
             }}
+            className="products-grid"
           >
+            <style>{`
+              @media (min-width: 769px) {
+                .products-grid {
+                  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)) !important;
+                }
+              }
+            `}</style>
             {products.map((product) => (
               <PublicProductCard key={product.id} product={product} />
             ))}
@@ -152,6 +162,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
           )}
         </div>
       )}
-    </main>
+      </main>
+    </VendorPageClient>
   );
 }

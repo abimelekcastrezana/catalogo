@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from 'react';
+import { useCartContext } from '@/app/context/CartContext';
 
 export default function PublicProductCard({ product }) {
+  const { addToCart, isInCart } = useCartContext();
+  const inCart = isInCart(product.id);
   const images = (product.ProductImages || []).slice(0, 2);
   const [current, setCurrent] = useState(0);
   const rawImagePath = images.length ? images[current].path || '' : '';
@@ -101,13 +104,43 @@ export default function PublicProductCard({ product }) {
       <div className="card-body">
         <div style={{ display: 'grid', gap: '0.35rem' }}>
           <h3 style={{ margin: 0, fontSize: '1.05rem', lineHeight: '1.2' }}>{product.name}</h3>
-          <p style={{ margin: 0, color: '#555', minHeight: '2.4rem', overflowWrap: 'anywhere' }}>{product.description || 'Sin descripción'}</p>
-          <div style={{ color: '#555', fontSize: '0.95rem' }}>SKU: {product.sku}</div>
+          <p style={{ margin: 0, color: 'var(--muted)', minHeight: '2.4rem', overflowWrap: 'anywhere', fontSize: '0.9rem' }}>{product.description || 'Sin descripción'}</p>
+          {product.sku && <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>SKU: {product.sku}</div>}
         </div>
 
         <div className="card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ fontSize: '1.15rem', fontWeight: 700 }}>${Number(product.price).toFixed(2)}</div>
         </div>
+
+        <button
+          onClick={() => addToCart(product)}
+          style={{
+            width: '100%',
+            padding: '0.85rem',
+            background: inCart ? '#15803d' : '#25D366',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            fontSize: '0.95rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.opacity = '0.9';
+            e.target.style.transform = 'translateY(-2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.opacity = '1';
+            e.target.style.transform = 'translateY(0)';
+          }}
+        >
+          💬 {inCart ? 'Quitar del carrito' : 'Agregar'}
+        </button>
       </div>
     </article>
   );
