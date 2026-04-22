@@ -102,10 +102,12 @@ export default function PublicProductCard({ product }) {
       </div>
 
       <div className="card-body">
-        <div style={{ display: 'grid', gap: '0.35rem' }}>
+        <div style={{ display: 'grid', gap: '0.35rem', minHeight: '5.2rem' }}>
           <h3 style={{ margin: 0, fontSize: '1.05rem', lineHeight: '1.2' }}>{product.name}</h3>
           <p style={{ margin: 0, color: 'var(--muted)', minHeight: '2.4rem', overflowWrap: 'anywhere', fontSize: '0.9rem' }}>{product.description || 'Sin descripción'}</p>
-          {product.sku && <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>SKU: {product.sku}</div>}
+          <div style={{ color: 'var(--muted)', fontSize: '0.85rem', minHeight: '1.2rem' }}>
+            {product.sku ? `SKU: ${product.sku}` : ''}
+          </div>
         </div>
 
         <div className="card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
