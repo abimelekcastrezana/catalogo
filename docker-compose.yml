@@ -1,5 +1,4 @@
 version: '3.9'
-
 services:
   app:
     build:
@@ -35,7 +34,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
   db:
     image: postgres:16-alpine
     container_name: tiendatap-db
@@ -53,7 +51,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: tiendatap-cloudflared
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /datos/cloudflared:/etc/cloudflared
+    command: tunnel --config /etc/cloudflared/config.yml run
 volumes:
   pgdata:
     driver: local
@@ -61,7 +66,6 @@ volumes:
       type: none
       o: bind
       device: /datos/data/tiendatap-pgdata
-
 networks:
   tiendatap-net:
     driver: bridge
