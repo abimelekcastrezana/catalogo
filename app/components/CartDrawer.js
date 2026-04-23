@@ -6,7 +6,6 @@ import { useState } from 'react';
 export default function CartDrawer() {
   const { cart, showCart, setShowCart, removeFromCart, updateQuantity, clearCart, total, vendorPhone, vendorName } = useCartContext();
   const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
 
   if (!showCart) return null;
 
@@ -24,7 +23,6 @@ export default function CartDrawer() {
       `Hola, me interesa hacer un pedido${customerName ? ` de ${customerName}` : ''}:\n`,
       productsList,
       `\nTotal: $${total.toFixed(2)}`,
-      ...(customerPhone ? [`Mi número: ${customerPhone}`] : []),
     ].join('\n');
 
     const whatsappUrl = `https://wa.me/${vendorPhone.replace(/[^0-9+]/g, '').replace(/^\+/, '')}?text=${encodeURIComponent(message)}`;
@@ -191,31 +189,17 @@ export default function CartDrawer() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gap: '0.75rem' }}>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.9rem' }}>
-                Nombre (opcional)
-                <input
-                  type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Tu nombre"
-                  className="input"
-                  style={{ padding: '0.6rem 0.75rem', fontSize: '0.95rem' }}
-                />
-              </label>
-
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.9rem' }}>
-                Teléfono (opcional)
-                <input
-                  type="tel"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  placeholder="Tu teléfono"
-                  className="input"
-                  style={{ padding: '0.6rem 0.75rem', fontSize: '0.95rem' }}
-                />
-              </label>
-            </div>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.9rem' }}>
+              Nombre (opcional)
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="Tu nombre"
+                className="input"
+                style={{ padding: '0.6rem 0.75rem', fontSize: '0.95rem' }}
+              />
+            </label>
 
             <button
               onClick={handleWhatsApp}
