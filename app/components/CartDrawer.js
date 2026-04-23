@@ -4,7 +4,7 @@ import { useCartContext } from '@/app/context/CartContext';
 import { useState } from 'react';
 
 export default function CartDrawer() {
-  const { cart, showCart, setShowCart, removeFromCart, updateQuantity, clearCart, total, vendorPhone, vendorName } = useCartContext();
+  const { cart, showCart, setShowCart, removeFromCart, updateQuantity, clearCart, total, vendorPhone } = useCartContext();
   const [customerName, setCustomerName] = useState('');
 
   if (!showCart) return null;
@@ -75,7 +75,7 @@ export default function CartDrawer() {
         `}</style>
 
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>🛒 Paga al recibir</h2>
+          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>🛒 Mi carrito</h2>
           <button
             onClick={() => setShowCart(false)}
             style={{
