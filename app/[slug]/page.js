@@ -74,9 +74,16 @@ export default async function VendorPublicPage({ params, searchParams }) {
         `}</style>
         
         <div className="vendor-header-content" style={{ display: 'flex', gap: '1.5rem', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '0', left: '0' }}>
+          <div style={{ position: 'absolute', top: '0', left: '0' }} className="theme-switcher-mobile">
             <PublicVendorHeaderActions />
           </div>
+          <style>{`
+            @media (min-width: 769px) {
+              .theme-switcher-mobile {
+                display: none !important;
+              }
+            }
+          `}</style>
           <div className="vendor-logo" style={{ display: 'flex', justifyContent: 'center' }}>
             {vendor.logoUrl && (
               <img
@@ -91,7 +98,8 @@ export default async function VendorPublicPage({ params, searchParams }) {
             <h1 className="page-title" style={{ marginTop: 0, marginBottom: '0.35rem' }}>{vendor.name}</h1>
             <p className="page-subtitle" style={{ marginBottom: '1rem' }}>{vendor.slogan || 'Catálogo público del vendedor.'}</p>
 
-            <div className="vendor-actions" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            <div className="vendor-actions" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem', alignItems: 'flex-start' }} className="theme-switcher-desktop">
+              <PublicVendorHeaderActions />
               {vendorContactHref && (
                 <a
                   href={vendorContactHref}
@@ -103,6 +111,13 @@ export default async function VendorPublicPage({ params, searchParams }) {
                   Contactar tienda
                 </a>
               )}
+              <style>{`
+                @media (max-width: 768px) {
+                  .theme-switcher-desktop {
+                    display: none !important;
+                  }
+                }
+              `}</style>
             </div>
           </div>
         </div>
