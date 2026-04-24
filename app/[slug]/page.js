@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import PublicProductCard from '@/app/components/PublicProductCard';
 import PublicVendorHeaderActions from '@/app/components/PublicVendorHeaderActions';
 import VendorPageClient from '@/app/components/VendorPageClient';
+import CategorySelect from '@/app/components/CategorySelect';
 
 export default async function VendorPublicPage({ params, searchParams }) {
   const resolvedParams = await params;
@@ -17,7 +18,8 @@ export default async function VendorPublicPage({ params, searchParams }) {
   const vendor = await db.Vendor.findOne({ where: { slug } });
   if (!vendor || !vendor.isActive) return notFound();
 
-  const categories = await db.Category.findAll({ where: { vendorId: vendor.id }, order: [['name', 'ASC']] });
+  const categoryModels = await db.Category.findAll({ where: { vendorId: vendor.id }, order: [['name', 'ASC']] });
+  const categories = categoryModels.map((c) => c.get({ plain: true }));
   const productWhere = { vendorId: vendor.id, isActive: true };
   if (categoryId) {
     productWhere.categoryId = categoryId;
@@ -71,7 +73,10 @@ export default async function VendorPublicPage({ params, searchParams }) {
           }
         `}</style>
         
-        <div className="vendor-header-content" style={{ display: 'flex', gap: '1.5rem' }}>
+        <div className="vendor-header-content" style={{ display: 'flex', gap: '1.5rem', position: 'relative' }}>
+          <div style={{ position: 'absolute', top: '0', left: '0' }}>
+            <PublicVendorHeaderActions />
+          </div>
           <div className="vendor-logo" style={{ display: 'flex', justifyContent: 'center' }}>
             {vendor.logoUrl && (
               <img
@@ -87,7 +92,6 @@ export default async function VendorPublicPage({ params, searchParams }) {
             <p className="page-subtitle" style={{ marginBottom: '1rem' }}>{vendor.slogan || 'Catálogo público del vendedor.'}</p>
 
             <div className="vendor-actions" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-              <PublicVendorHeaderActions />
               {vendorContactHref && (
                 <a
                   href={vendorContactHref}
@@ -103,18 +107,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
           </div>
         </div>
 
-        <form method="get" className="vendor-form" style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '240px', flex: '1' }}>
-            Categoría
-            <select name="categoryId" defaultValue={categoryId} className="select">
-              <option value="">Todas</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>{category.name}</option>
-              ))}
-            </select>
-          </label>
-          <button type="submit" className="secondary-button">Filtrar</button>
-        </form>
+        <CategorySelect categories={categories} currentCategoryId={categoryId} />
 
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', fontSize: 'clamp(0.85rem, 2vw, 0.95rem)' }}>
           <p style={{ margin: 0, color: 'var(--muted)' }}>Página {pageToFetch} de {totalPages} · {totalProducts} producto{totalProducts === 1 ? '' : 's'}</p>
