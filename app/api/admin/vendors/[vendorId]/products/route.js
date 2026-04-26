@@ -25,9 +25,11 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Price must be a positive number' }, { status: 400 });
   }
 
-  const existing = await db.Product.findOne({ where: { vendorId, sku: normalizedSku } });
-  if (existing) {
-    return NextResponse.json({ error: 'SKU already exists for this vendor' }, { status: 409 });
+  if (normalizedSku) {
+    const existing = await db.Product.findOne({ where: { vendorId, sku: normalizedSku } });
+    if (existing) {
+      return NextResponse.json({ error: 'SKU already exists for this vendor' }, { status: 409 });
+    }
   }
 
   try {

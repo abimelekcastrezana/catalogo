@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Op } from 'sequelize';
 import { getUserSession } from '@/lib/auth/getSession';
-import { UniqueConstraintError } from 'sequelize';
 import db from '@/db/index.js';
 import fs from 'fs';
 import path from 'path';
@@ -32,10 +30,16 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ error: 'Product not found' }, { status: 404 });
   }
 
-
+  const normalizedSku = sku ? sku.trim() : null;
+  if (normalizedSku && normalizedSku !== product.sku) {
+    const existingSku = await db.Product.findOne({ where: { vendorId, sku: normalizedSku } });
+    if (existingSku) {
+      return NextResponse.json({ error: 'SKU already exists for this vendor' }, { status: 409 });
+    }
+  }
 
   try {
-    await product.update({ name, sku: sku || null, description, categoryId: categoryId || null, isActive: typeof isActive === 'boolean' ? isActive : product.isActive, price: normalizedPrice });
+    await product.update({ name, sku: normalizedSku, description, categoryId: categoryId || null, isActive: typeof isActive === 'boolean' ? isActive : product.isActive, price: normalizedPrice });
     return NextResponse.json({ product: product.get({ plain: true }) });
   } catch (error) {
     console.error('Admin vendor product update error:', error);
@@ -43,7 +47,7 @@ export async function PUT(request, { params }) {
   }
 }
 
-export async function DELETE(request, { params }) {
+export async function DELETE(_, { params }) {
   const session = await getUserSession();
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
