@@ -32,13 +32,14 @@ export async function PATCH(request, { params }) {
       await db.Category.update({ position: i }, { where: { id: ids[i] } });
     }
 
-    // Invalidar el caché de la página pública del vendedor
     const vendor = await db.Vendor.findByPk(resolvedParams.vendorId);
     if (vendor) {
       revalidatePath(`/${vendor.slug}`);
     }
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    const response = NextResponse.json({ success: true }, { status: 200 });
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    return response;
   } catch (error) {
     console.error('Category reorder error:', error);
     return NextResponse.json({ error: 'Server error reordering categories' }, { status: 500 });

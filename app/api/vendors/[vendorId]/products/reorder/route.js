@@ -38,7 +38,9 @@ export async function PATCH(request, { params }) {
       revalidatePath(`/${vendor.slug}`);
     }
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    const response = NextResponse.json({ success: true }, { status: 200 });
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    return response;
   } catch (error) {
     console.error('Product reorder error:', error);
     return NextResponse.json({ error: 'Server error reordering products' }, { status: 500 });

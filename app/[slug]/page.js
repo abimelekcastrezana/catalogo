@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import db from '@/db/index.js';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -7,6 +8,11 @@ import VendorPageClient from '@/app/components/VendorPageClient';
 import CategorySelect from '@/app/components/CategorySelect';
 
 export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }) {
+  return { title: 'Catálogo' };
+}
 
 export default async function VendorPublicPage({ params, searchParams }) {
   const resolvedParams = await params;
