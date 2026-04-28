@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getUserSession } from '@/lib/auth/getSession';
 import db from '@/db/index.js';
 
@@ -29,6 +30,12 @@ export async function PATCH(request, { params }) {
 
     for (let i = 0; i < ids.length; i++) {
       await db.Category.update({ position: i }, { where: { id: ids[i] } });
+    }
+
+    // Invalidar el caché de la página pública del vendedor
+    const vendor = await db.Vendor.findByPk(resolvedParams.vendorId);
+    if (vendor) {
+      revalidatePath(`/${vendor.slug}`);
     }
 
     return NextResponse.json({ success: true }, { status: 200 });
