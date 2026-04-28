@@ -6,6 +6,8 @@ import PublicVendorHeaderActions from '@/app/components/PublicVendorHeaderAction
 import VendorPageClient from '@/app/components/VendorPageClient';
 import CategorySelect from '@/app/components/CategorySelect';
 
+export const revalidate = 0;
+
 export default async function VendorPublicPage({ params, searchParams }) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
