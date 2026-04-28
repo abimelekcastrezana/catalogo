@@ -4,7 +4,6 @@ import Link from 'next/link';
 import AddProductCard from './AddProductCard';
 import ProductFilter from './ProductFilter';
 import ProductRow from './ProductRow';
-import SortableProductList from '../../components/SortableProductList';
 
 async function getCategories(vendorId) {
   return db.Category.findAll({ where: { vendorId }, order: [['name', 'ASC']] });
@@ -69,20 +68,13 @@ export default async function DashboardProductsPage({ searchParams }) {
         </div>
 
         <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-          <AddProductCard vendorId={session.user.vendorId} categories={categories} />
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <AddProductCard vendorId={session.user.vendorId} categories={categories} />
+            <Link href="/dashboard/products/reorder" className="secondary-button">Reordenar</Link>
+          </div>
           <Link href="/dashboard" className="secondary-button">Volver</Link>
         </div>
       </section>
-
-      {!categoryId && (
-        <section className="page-card">
-          <h2 style={{ marginTop: 0, marginBottom: '1rem' }}>Ordenar productos</h2>
-          <SortableProductList
-            products={products}
-            reorderEndpoint={`/api/vendors/${session.user.vendorId}/products/reorder`}
-          />
-        </section>
-      )}
 
       <section className="page-card">
         <div

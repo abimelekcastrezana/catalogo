@@ -4,7 +4,6 @@ import db from '@/db/index.js';
 import AddProductCard from '@/app/dashboard/products/AddProductCard';
 import ProductRow from '@/app/dashboard/products/ProductRow';
 import BackButton from '@/app/components/BackButton';
-import SortableProductList from '@/app/components/SortableProductList';
 
 export default async function AdminVendorProductsPage({ params, searchParams }) {
   const session = await getUserSession();
@@ -57,18 +56,11 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
       </section>
 
       <section className="page-card">
-        <AddProductCard vendorId={vendorId} categories={categories} apiBase="/api/admin/vendors" />
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <AddProductCard vendorId={vendorId} categories={categories} apiBase="/api/admin/vendors" />
+          <Link href={`/admin/vendors/${vendorId}/products/reorder`} className="secondary-button">Reordenar</Link>
+        </div>
       </section>
-
-      {!categoryId && (
-        <section className="page-card">
-          <h2 style={{ marginTop: 0, marginBottom: '1rem' }}>Ordenar productos</h2>
-          <SortableProductList
-            products={products}
-            reorderEndpoint={`/api/admin/vendors/${vendorId}/products/reorder`}
-          />
-        </section>
-      )}
 
       <section className="page-card">
         <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))' }}>
