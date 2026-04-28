@@ -1,10 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function SortableList({ items, renderItem, onReorder, isLoading = false }) {
   const [localItems, setLocalItems] = useState(items);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setLocalItems(items);
+  }, [items]);
 
   const moveUp = (index) => {
     if (index === 0) return;

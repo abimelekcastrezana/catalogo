@@ -1,12 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function SortableProductsByCategory({ products, categories, reorderEndpoint }) {
   const router = useRouter();
   const [expandedCategories, setExpandedCategories] = useState(new Set());
   const [saving, setSaving] = useState(false);
+  const [groupedProducts, setGroupedProducts] = useState({});
+
+  useEffect(() => {
+    const grouped = {};
+    products.forEach((product) => {
+      const catId = product.categoryId || 'no-category';
+      if (!grouped[catId]) {
+        grouped[catId] = [];
+      }
+      grouped[catId].push(product);
+    });
+    setGroupedProducts(grouped);
+  }, [products]);
 
   const toggleCategory = (categoryId) => {
     const newExpanded = new Set(expandedCategories);
@@ -18,47 +31,42 @@ export default function SortableProductsByCategory({ products, categories, reord
     setExpandedCategories(newExpanded);
   };
 
-  const groupedProducts = {};
-  products.forEach((product) => {
-    const catId = product.categoryId || 'no-category';
-    if (!groupedProducts[catId]) {
-      groupedProducts[catId] = [];
-    }
-    groupedProducts[catId].push(product);
-  });
-
   const moveProductUp = async (categoryId, index) => {
     if (index === 0) return;
     const catKey = categoryId || 'no-category';
-    const items = [...groupedProducts[catKey]];
+    const newGrouped = { ...groupedProducts };
+    const items = [...newGrouped[catKey]];
     [items[index - 1], items[index]] = [items[index], items[index - 1]];
-    groupedProducts[catKey] = items;
-    await saveOrder();
+    newGrouped[catKey] = items;
+    setGroupedProducts(newGrouped);
+    await saveOrder(newGrouped);
   };
 
   const moveProductDown = async (categoryId, index) => {
     const catKey = categoryId || 'no-category';
     if (index === groupedProducts[catKey].length - 1) return;
-    const items = [...groupedProducts[catKey]];
+    const newGrouped = { ...groupedProducts };
+    const items = [...newGrouped[catKey]];
     [items[index], items[index + 1]] = [items[index + 1], items[index]];
-    groupedProducts[catKey] = items;
-    await saveOrder();
+    newGrouped[catKey] = items;
+    setGroupedProducts(newGrouped);
+    await saveOrder(newGrouped);
   };
 
-  const saveOrder = async () => {
+  const saveOrder = async (grouped) => {
     setSaving(true);
     try {
       const allProductIds = [];
 
       // Primero agregar productos sin categoría
-      if (groupedProducts['no-category']) {
-        groupedProducts['no-category'].forEach((product) => {
+      if (grouped['no-category']) {
+        grouped['no-category'].forEach((product) => {
           allProductIds.push(product.id);
         });
       }
 
       // Luego agregar productos de otras categorías en orden de position
-      const sortedCategoryKeys = Object.keys(groupedProducts)
+      const sortedCategoryKeys = Object.keys(grouped)
         .filter((key) => key !== 'no-category')
         .sort((a, b) => {
           const posA = categoryMap[a]?.position ?? 999;
@@ -67,7 +75,7 @@ export default function SortableProductsByCategory({ products, categories, reord
         });
 
       sortedCategoryKeys.forEach((catKey) => {
-        groupedProducts[catKey].forEach((product) => {
+        grouped[catKey].forEach((product) => {
           allProductIds.push(product.id);
         });
       });
