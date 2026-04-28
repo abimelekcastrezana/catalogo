@@ -49,13 +49,28 @@ export default function SortableProductsByCategory({ products, categories, reord
     setSaving(true);
     try {
       const allProductIds = [];
-      Object.keys(groupedProducts)
-        .sort()
-        .forEach((catKey) => {
-          groupedProducts[catKey].forEach((product) => {
-            allProductIds.push(product.id);
-          });
+
+      // Primero agregar productos sin categoría
+      if (groupedProducts['no-category']) {
+        groupedProducts['no-category'].forEach((product) => {
+          allProductIds.push(product.id);
         });
+      }
+
+      // Luego agregar productos de otras categorías en orden de position
+      const sortedCategoryKeys = Object.keys(groupedProducts)
+        .filter((key) => key !== 'no-category')
+        .sort((a, b) => {
+          const posA = categoryMap[a]?.position ?? 999;
+          const posB = categoryMap[b]?.position ?? 999;
+          return posA - posB;
+        });
+
+      sortedCategoryKeys.forEach((catKey) => {
+        groupedProducts[catKey].forEach((product) => {
+          allProductIds.push(product.id);
+        });
+      });
 
       const response = await fetch(reorderEndpoint, {
         method: 'PATCH',
@@ -83,11 +98,19 @@ export default function SortableProductsByCategory({ products, categories, reord
     categoryMap[cat.id] = cat;
   });
 
+  const sortedKeys = Object.keys(groupedProducts).sort((a, b) => {
+    // Sin categoría siempre primero
+    if (a === 'no-category') return -1;
+    if (b === 'no-category') return 1;
+    // Luego por posición de categoría
+    const posA = categoryMap[a]?.position ?? 999;
+    const posB = categoryMap[b]?.position ?? 999;
+    return posA - posB;
+  });
+
   return (
     <div style={{ display: 'grid', gap: '1.5rem' }}>
-      {Object.keys(groupedProducts)
-        .sort()
-        .map((catKey) => {
+      {sortedKeys.map((catKey) => {
           const categoryId = catKey === 'no-category' ? null : catKey;
           const categoryName = catKey === 'no-category' ? 'Sin categoría' : categoryMap[catKey]?.name || catKey;
           const isExpanded = expandedCategories.has(categoryId);
