@@ -33,7 +33,22 @@ export async function POST(request, { params }) {
   }
 
   try {
-    const product = await db.Product.create({ vendorId, categoryId: categoryId || null, name, sku: normalizedSku || null, description, price: normalizedPrice });
+    const maxPositionResult = await db.Product.findOne({
+      where: { vendorId },
+      order: [['position', 'DESC']],
+      attributes: ['position'],
+    });
+    const nextPosition = (maxPositionResult?.position ?? -1) + 1;
+
+    const product = await db.Product.create({
+      vendorId,
+      categoryId: categoryId || null,
+      name,
+      sku: normalizedSku || null,
+      description,
+      price: normalizedPrice,
+      position: nextPosition,
+    });
     return NextResponse.json({ product }, { status: 201 });
   } catch (error) {
     if (error instanceof UniqueConstraintError) {

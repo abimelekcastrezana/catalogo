@@ -42,12 +42,17 @@ export default function AddVendorCategoryForm({ vendorId }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '0.75rem', border: '1px solid #ddd', borderRadius: '12px', padding: '1rem', background: '#fff' }}>
-      <h2 style={{ marginTop: 0 }}>Agregar categoría</h2>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la categoría" required />
-      <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug" required pattern="[A-Za-z0-9-]+" title="Solo letras, números y guiones" />
-      <button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creando...' : 'Crear categoría'}</button>
-      {message && <p>{message}</p>}
+    <form onSubmit={handleSubmit} className="form-card">
+      <div className="form-field">
+        <label>Nombre</label>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la categoría" required />
+      </div>
+      <div className="form-field">
+        <label>Slug</label>
+        <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug" required pattern="[A-Za-z0-9-]+" title="Solo letras, números y guiones" />
+      </div>
+      <button type="submit" className="primary-button" disabled={isSubmitting}>{isSubmitting ? 'Creando...' : 'Crear categoría'}</button>
+      {message && <p className="text-small" style={{ margin: 0 }}>{message}</p>}
     </form>
   );
 }

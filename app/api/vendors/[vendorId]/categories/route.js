@@ -33,7 +33,19 @@ export async function POST(request, { params }) {
   }
 
   try {
-    const category = await db.Category.create({ vendorId: resolvedParams.vendorId, name, slug });
+    const maxPositionResult = await db.Category.findOne({
+      where: { vendorId: resolvedParams.vendorId },
+      order: [['position', 'DESC']],
+      attributes: ['position'],
+    });
+    const nextPosition = (maxPositionResult?.position ?? -1) + 1;
+
+    const category = await db.Category.create({
+      vendorId: resolvedParams.vendorId,
+      name,
+      slug,
+      position: nextPosition,
+    });
     return NextResponse.json({ category }, { status: 201 });
   } catch (error) {
     if (error instanceof UniqueConstraintError) {
