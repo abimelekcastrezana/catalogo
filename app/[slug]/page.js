@@ -18,7 +18,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
   const vendor = await db.Vendor.findOne({ where: { slug } });
   if (!vendor || !vendor.isActive) return notFound();
 
-  const categoryModels = await db.Category.findAll({ where: { vendorId: vendor.id }, order: [['name', 'ASC']] });
+  const categoryModels = await db.Category.findAll({ where: { vendorId: vendor.id }, order: [['position', 'ASC'], ['name', 'ASC']] });
   const categories = categoryModels.map((c) => c.get({ plain: true }));
   const productWhere = { vendorId: vendor.id, isActive: true };
   if (categoryId) {
@@ -36,7 +36,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
       { model: db.ProductImage, order: [['position', 'ASC']] },
       { model: db.Category },
     ],
-    order: [['createdAt', 'DESC']],
+    order: [['position', 'ASC'], ['createdAt', 'DESC']],
     limit: pageSize,
     offset,
   });

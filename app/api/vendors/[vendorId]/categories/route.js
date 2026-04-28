@@ -3,6 +3,15 @@ import { getUserSession } from '@/lib/auth/getSession';
 import { UniqueConstraintError } from 'sequelize';
 import db from '@/db/index.js';
 
+export async function GET(request, { params }) {
+  const resolvedParams = await params;
+  const categories = await db.Category.findAll({
+    where: { vendorId: resolvedParams.vendorId },
+    order: [['position', 'ASC'], ['name', 'ASC']],
+  });
+  return NextResponse.json({ categories }, { status: 200 });
+}
+
 export async function POST(request, { params }) {
   const session = await getUserSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

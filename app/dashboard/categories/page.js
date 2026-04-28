@@ -2,6 +2,7 @@ import { getUserSession } from '../../../lib/auth/getSession';
 import db from '../../../db/index.js';
 import Link from 'next/link';
 import AddCategoryForm from './AddCategoryForm';
+import SortableCategoryList from '../../components/SortableCategoryList';
 
 export default async function DashboardCategoriesPage() {
   const session = await getUserSession();
@@ -14,7 +15,7 @@ export default async function DashboardCategoriesPage() {
     );
   }
 
-  const categories = await db.Category.findAll({ where: { vendorId: session.user.vendorId }, order: [['createdAt', 'DESC']] });
+  const categories = await db.Category.findAll({ where: { vendorId: session.user.vendorId }, order: [['position', 'ASC'], ['name', 'ASC']] });
 
   return (
     <main className="page-shell">
@@ -28,11 +29,11 @@ export default async function DashboardCategoriesPage() {
         </div>
 
         <div style={{ marginTop: '1.5rem' }}>
-          <ul style={{ display: 'grid', gap: '0.75rem', paddingLeft: '1.25rem', margin: 0 }}>
-            {categories.map((c) => (
-              <li key={c.id} style={{ color: 'var(--text)' }}>{c.name} ({c.slug})</li>
-            ))}
-          </ul>
+          <h2 style={{ marginTop: 0, marginBottom: '1rem' }}>Ordenar categorías</h2>
+          <SortableCategoryList
+            categories={categories.map((c) => c.get({ plain: true }))}
+            reorderEndpoint={`/api/vendors/${session.user.vendorId}/categories/reorder`}
+          />
         </div>
       </section>
 

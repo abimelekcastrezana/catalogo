@@ -3,6 +3,7 @@ import { getUserSession } from '@/lib/auth/getSession';
 import db from '@/db/index.js';
 import AddVendorCategoryForm from '../AddVendorCategoryForm';
 import BackButton from '@/app/components/BackButton';
+import SortableCategoryList from '@/app/components/SortableCategoryList';
 
 export default async function AdminVendorCategoriesPage({ params }) {
   const session = await getUserSession();
@@ -28,7 +29,7 @@ export default async function AdminVendorCategoriesPage({ params }) {
     );
   }
 
-  const categories = await db.Category.findAll({ where: { vendorId }, order: [['createdAt', 'DESC']] });
+  const categories = await db.Category.findAll({ where: { vendorId }, order: [['position', 'ASC'], ['name', 'ASC']] });
 
   return (
     <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
@@ -43,20 +44,23 @@ export default async function AdminVendorCategoriesPage({ params }) {
       <div style={{ marginTop: '1.5rem', display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
         <AddVendorCategoryForm vendorId={vendorId} />
         <div style={{ border: '1px solid #ddd', borderRadius: '12px', padding: '0.85rem', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <h2 style={{ marginTop: 0 }}>Categorías existentes</h2>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.75rem' }}>
-            {categories.map((category) => (
-              <li key={category.id} style={{ border: '1px solid #eee', borderRadius: '10px', padding: '0.75rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-                  <div>
-                    <strong>{category.name}</strong>
-                    <div style={{ color: '#555', fontSize: '0.9rem' }}>/{category.slug}</div>
-                  </div>
-                  <Link href={`/admin/categories/${category.id}`} style={{ textDecoration: 'none', color: '#0645ad' }}>Editar</Link>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <h2 style={{ marginTop: 0 }}>Ordenar categorías</h2>
+          <SortableCategoryList
+            categories={categories.map((c) => c.get({ plain: true }))}
+            reorderEndpoint={`/api/admin/vendors/${vendorId}/categories/reorder`}
+          />
+          <div style={{ marginTop: '1.5rem' }}>
+            <h3 style={{ marginTop: 0 }}>Editar categoría</h3>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.75rem' }}>
+              {categories.map((category) => (
+                <li key={category.id}>
+                  <Link href={`/admin/categories/${category.id}`} style={{ textDecoration: 'none', color: '#0645ad' }}>
+                    {category.name} ({category.slug})
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </main>

@@ -4,6 +4,7 @@ import db from '@/db/index.js';
 import AddProductCard from '@/app/dashboard/products/AddProductCard';
 import ProductRow from '@/app/dashboard/products/ProductRow';
 import BackButton from '@/app/components/BackButton';
+import SortableProductList from '@/app/components/SortableProductList';
 
 export default async function AdminVendorProductsPage({ params, searchParams }) {
   const session = await getUserSession();
@@ -38,9 +39,9 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
     productWhere.categoryId = categoryId;
   }
 
-  const categoryModels = await db.Category.findAll({ where: categoryWhere, order: [['name', 'ASC']] });
+  const categoryModels = await db.Category.findAll({ where: categoryWhere, order: [['position', 'ASC'], ['name', 'ASC']] });
   const categories = categoryModels.map((category) => category.get({ plain: true }));
-  const productModels = await db.Product.findAll({ where: productWhere, include: [{ model: db.ProductImage, order: [['position', 'ASC']] }, { model: db.Category }], order: [['createdAt', 'DESC']] });
+  const productModels = await db.Product.findAll({ where: productWhere, include: [{ model: db.ProductImage, order: [['position', 'ASC']] }, { model: db.Category }], order: [['position', 'ASC'], ['createdAt', 'DESC']] });
   const products = productModels.map((p) => p.get({ plain: true }));
 
   return (
@@ -58,6 +59,16 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
       <section className="page-card">
         <AddProductCard vendorId={vendorId} categories={categories} apiBase="/api/admin/vendors" />
       </section>
+
+      {!categoryId && (
+        <section className="page-card">
+          <h2 style={{ marginTop: 0, marginBottom: '1rem' }}>Ordenar productos</h2>
+          <SortableProductList
+            products={products}
+            reorderEndpoint={`/api/admin/vendors/${vendorId}/products/reorder`}
+          />
+        </section>
+      )}
 
       <section className="page-card">
         <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))' }}>
