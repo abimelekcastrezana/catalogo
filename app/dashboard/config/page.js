@@ -1,7 +1,6 @@
 import { getUserSession } from '../../../lib/auth/getSession';
 import db from '../../../db/index.js';
 import ConfigForm from './ConfigForm';
-import LogoUploadForm from './LogoUploadForm';
 import Link from 'next/link';
 
 export default async function DashboardConfigPage() {
@@ -48,10 +47,6 @@ export default async function DashboardConfigPage() {
 
       <section className="page-card">
         <ConfigForm vendor={vendor} />
-      </section>
-
-      <section className="page-card">
-        <LogoUploadForm vendor={vendor} />
       </section>
     </main>
   );
