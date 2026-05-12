@@ -1,4 +1,4 @@
-import { headers } from 'next/headers';
+import { unstable_noStore } from 'next/cache';
 import db from '@/db/index.js';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -15,6 +15,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function VendorPublicPage({ params, searchParams }) {
+  unstable_noStore();
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
   const { slug } = resolvedParams;
@@ -106,7 +107,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
             <h1 className="page-title" style={{ marginTop: 0, marginBottom: '0.35rem' }}>{vendor.name}</h1>
             <p className="page-subtitle" style={{ marginBottom: '1rem' }}>{vendor.slogan || 'Catálogo público del vendedor.'}</p>
 
-            <div className="vendor-actions" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem', alignItems: 'flex-start' }} className="theme-switcher-desktop">
+            <div className="vendor-actions theme-switcher-desktop" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem', alignItems: 'flex-start' }}>
               <PublicVendorHeaderActions />
               {vendorContactHref && (
                 <a
