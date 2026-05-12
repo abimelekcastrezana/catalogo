@@ -32,10 +32,10 @@ export async function PATCH(request, { params }) {
       await db.Product.update({ position: i }, { where: { id: ids[i] } });
     }
 
-    // Invalidar el caché de la página pública del vendedor
     const vendor = await db.Vendor.findByPk(resolvedParams.vendorId);
     if (vendor) {
       revalidatePath(`/${vendor.slug}`);
+      revalidatePath('/');
     }
 
     const response = NextResponse.json({ success: true }, { status: 200 });

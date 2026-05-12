@@ -35,6 +35,7 @@ export async function PATCH(request, { params }) {
     const vendor = await db.Vendor.findByPk(resolvedParams.vendorId);
     if (vendor) {
       revalidatePath(`/${vendor.slug}`);
+      revalidatePath('/');
     }
 
     const response = NextResponse.json({ success: true }, { status: 200 });
