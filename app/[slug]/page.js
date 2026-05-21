@@ -14,7 +14,37 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const vendor = await db.Vendor.findOne({ where: { slug } });
-  return { title: vendor ? `${vendor.name} — TiendaTap` : 'Catálogo' };
+  if (!vendor) return { title: 'Catálogo' };
+
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://tiendatap.com';
+  const rawLogo = vendor.logoUrl;
+  const absoluteLogo = rawLogo
+    ? rawLogo.startsWith('http')
+      ? rawLogo
+      : `${baseUrl}/api/uploads${rawLogo.replace(/^\/uploads\/?/, '/')}`
+    : `${baseUrl}/tiendatap_logo.jpg`;
+
+  const description = vendor.slogan || `Catálogo digital de ${vendor.name}`;
+  const title = `${vendor.name} — TiendaTap`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/${slug}`,
+      siteName: 'TiendaTap',
+      images: [{ url: absoluteLogo, width: 400, height: 400, alt: vendor.name }],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+      images: [absoluteLogo],
+    },
+  };
 }
 
 const PAGE_SIZE = 12;
