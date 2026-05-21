@@ -1,231 +1,171 @@
 "use client";
 
 import { useState } from "react";
+import { Badge } from "@/app/components/ui/badge";
+import { Button } from "@/app/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/app/components/ui/sheet";
+import { Card, CardContent, CardFooter } from "@/app/components/ui/card";
 
-export default function ProductRow({ product, vendorId, categories, apiBase = '/api/vendors' }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel }) {
   const [name, setName] = useState(product.name);
-  const [sku, setSku] = useState(product.sku);
-  const [description, setDescription] = useState(product.description || "");
-  const [catId, setCatId] = useState(product.categoryId || "");
-  const [price, setPrice] = useState(product.price || "");
-  const [message, setMessage] = useState("");
+  const [sku, setSku] = useState(product.sku || '');
+  const [description, setDescription] = useState(product.description || '');
+  const [catId, setCatId] = useState(product.categoryId || '');
+  const [price, setPrice] = useState(product.price || '');
   const [imageFiles, setImageFiles] = useState([null, null]);
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const updateProduct = async () => {
+  const handleSave = async () => {
+    setSubmitting(true);
     const res = await fetch(`${apiBase}/${vendorId}/products/${product.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, sku, description, categoryId: catId || null, isActive: product.isActive, price }),
     });
     let data = {};
-    const text = await res.text();
-    try {
-      data = text ? JSON.parse(text) : {};
-    } catch (error) {
-      data = { error: text || 'Error actualizando producto' };
-    }
-    if (!res.ok) {
-      setMessage(data.error || 'Error actualizando producto');
-      return;
-    }
+    try { data = JSON.parse(await res.text()); } catch {}
+    if (!res.ok) { setMessage(data.error || 'Error actualizando'); setSubmitting(false); return; }
 
-    const uploadPromises = imageFiles
-      .map((file, index) => ({ file, position: index + 1 }))
-      .filter(({ file }) => file)
-      .slice(0, 2)
-      .map(async ({ file, position }) => {
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('replacePosition', String(position));
-        const uploadRes = await fetch(`/api/products/${product.id}/images`, {
-          method: 'POST',
-          body: formData,
-        });
-        const text = await uploadRes.text();
-        try {
-          return text ? JSON.parse(text) : {};
-        } catch (err) {
-          return { error: text || 'Upload response not valid JSON' };
-        }
-      });
+    await Promise.all(
+      imageFiles.map((file, i) => ({ file, position: i + 1 }))
+        .filter(({ file }) => file)
+        .map(async ({ file, position }) => {
+          const fd = new FormData();
+          fd.append('image', file);
+          fd.append('replacePosition', String(position));
+          return fetch(`/api/products/${product.id}/images`, { method: 'POST', body: fd });
+        })
+    );
 
-    const uploadResults = await Promise.all(uploadPromises);
-    const uploadError = uploadResults.find((result) => result?.error);
-    if (uploadError) {
-      setMessage(uploadError.error || 'Producto actualizado, pero la imagen no se pudo subir');
-      return;
-    }
-
-    setMessage('Producto actualizado y imagen(es) subidas.');
-    setIsEditing(false);
-    window.location.reload();
+    setSubmitting(false);
+    onSuccess();
   };
 
+  return (
+    <div className="grid gap-4">
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Nombre</label>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
+      </div>
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Precio</label>
+        <input className="input" value={price} onChange={(e) => setPrice(e.target.value)} type="number" step="0.01" min="0" />
+      </div>
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Descripción</label>
+        <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
+      </div>
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Categoría</label>
+        <select className="select" value={catId} onChange={(e) => setCatId(e.target.value)}>
+          <option value="">Sin categoría</option>
+          {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-1.5">
+          <label className="text-xs font-medium text-[var(--muted)]">Reemplazar imagen 1</label>
+          <input className="input text-xs" type="file" accept="image/*" onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])} />
+        </div>
+        <div className="grid gap-1.5">
+          <label className="text-xs font-medium text-[var(--muted)]">Reemplazar imagen 2</label>
+          <input className="input text-xs" type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
+        </div>
+      </div>
+      {message && <p className="text-sm text-red-500">{message}</p>}
+      <div className="flex gap-2 pt-2">
+        <Button onClick={handleSave} disabled={submitting} className="flex-1">
+          {submitting ? 'Guardando...' : 'Guardar cambios'}
+        </Button>
+        <Button variant="outline" onClick={onCancel}>Cancelar</Button>
+      </div>
+    </div>
+  );
+}
+
+export default function ProductRow({ product, vendorId, categories, apiBase = '/api/vendors' }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [editOpen, setEditOpen] = useState(false);
+  const [message, setMessage] = useState('');
+
   const deleteProduct = async () => {
-    if (!confirm("¿Eliminar producto?")) return;
-    const res = await fetch(`${apiBase}/${vendorId}/products/${product.id}`, { method: "DELETE" });
-    if (!res.ok) {
-      setMessage((await res.json()).error || "Error al eliminar");
-      return;
-    }
-    setMessage("Producto eliminado");
+    if (!confirm('¿Eliminar producto?')) return;
+    const res = await fetch(`${apiBase}/${vendorId}/products/${product.id}`, { method: 'DELETE' });
+    if (!res.ok) { setMessage((await res.json()).error || 'Error al eliminar'); return; }
     window.location.reload();
   };
 
   const imageUrls = (product.ProductImages || [])
     .sort((a, b) => (a.position || 0) - (b.position || 0))
     .slice(0, 2)
-    .map((img) => {
-      const pathWithoutPrefix = img.path?.replace(/^\/uploads/, '') || '';
-      return `/api/uploads${pathWithoutPrefix}`;
-    });
+    .map((img) => `/api/uploads${(img.path || '').replace(/^\/uploads/, '')}`);
 
-  const handlePrevImage = () => setCurrentImageIndex((currentImageIndex - 1 + imageUrls.length) % imageUrls.length);
-  const handleNextImage = () => setCurrentImageIndex((currentImageIndex + 1) % imageUrls.length);
+  const categoryName = categories.find((c) => c.id === product.categoryId)?.name;
 
   return (
-    <article className="card">
-      <div className="card-hero">
-        {imageUrls.length ? (
-          <img
-            src={imageUrls[currentImageIndex]}
-            alt={product.name}
+    <>
+      <Card className="overflow-hidden border-[var(--border)] bg-[var(--card)] shadow-card flex flex-col">
+        {/* Image */}
+        <div className="relative w-full h-48 bg-[var(--surface-strong)] flex items-center justify-center overflow-hidden">
+          {imageUrls.length ? (
+            <img src={imageUrls[currentImageIndex]} alt={product.name} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-[var(--muted)] text-sm">Sin imagen</span>
+          )}
+          <Badge variant="secondary" className="absolute top-3 left-3 bg-white/90 text-[var(--muted)] text-xs shadow-sm">
+            {categoryName || 'Sin categoría'}
+          </Badge>
+          {imageUrls.length > 1 && (
+            <>
+              <button type="button" onClick={() => setCurrentImageIndex((currentImageIndex - 1 + imageUrls.length) % imageUrls.length)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full border border-white/80 bg-black/60 text-white flex items-center justify-center z-10">‹</button>
+              <button type="button" onClick={() => setCurrentImageIndex((currentImageIndex + 1) % imageUrls.length)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full border border-white/80 bg-black/60 text-white flex items-center justify-center z-10">›</button>
+            </>
+          )}
+        </div>
+
+        {/* Info */}
+        <CardContent className="p-4 flex-1 space-y-1">
+          <h3 className="font-semibold text-base leading-tight text-[var(--text)]">{product.name}</h3>
+          <p className="text-[var(--muted)] text-sm line-clamp-2">{product.description || 'Sin descripción'}</p>
+          <p className="font-bold text-lg text-[var(--text)] pt-1">${Number(product.price).toFixed(2)}</p>
+        </CardContent>
+
+        {/* Actions */}
+        <CardFooter className="p-4 pt-0 flex gap-2">
+          <Button variant="outline" size="sm" className="flex-1" onClick={() => setEditOpen(true)}>
+            Editar
+          </Button>
+          <Button
+            size="sm"
+            className="bg-[var(--danger)] hover:opacity-90 text-white border-none flex-1"
+            onClick={deleteProduct}
+          >
+            Eliminar
+          </Button>
+        </CardFooter>
+
+        {message && <p className="text-sm text-red-500 px-4 pb-3">{message}</p>}
+      </Card>
+
+      {/* Sheet de edición */}
+      <Sheet open={editOpen} onOpenChange={setEditOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-[520px] overflow-y-auto bg-[var(--bg)] text-[var(--text)]">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="text-xl text-[var(--text)]">Editar: {product.name}</SheetTitle>
+          </SheetHeader>
+          <EditForm
+            product={product}
+            vendorId={vendorId}
+            categories={categories}
+            apiBase={apiBase}
+            onSuccess={() => { setEditOpen(false); window.location.reload(); }}
+            onCancel={() => setEditOpen(false)}
           />
-        ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
-            Sin imagen
-          </div>
-        )}
-        <div style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'rgba(255,255,255,0.92)', padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.78rem', color: 'var(--muted)', boxShadow: '0 8px 24px rgba(15,23,42,0.08)' }}>
-          {categories.find((cat) => cat.id === product.categoryId)?.name ? `Categoría: ${categories.find((cat) => cat.id === product.categoryId).name}` : 'Sin categoría'}
-        </div>
-
-        {imageUrls.length > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={handlePrevImage}
-              style={{
-                position: 'absolute',
-                left: '0.75rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '36px',
-                height: '36px',
-                borderRadius: '999px',
-                border: '1px solid rgba(255,255,255,0.85)',
-                background: 'rgba(15,23,42,0.6)',
-                color: '#fff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 2,
-                boxShadow: '0 10px 24px rgba(15,23,42,0.18)',
-              }}
-              aria-label="Imagen anterior"
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              onClick={handleNextImage}
-              style={{
-                position: 'absolute',
-                right: '0.75rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '36px',
-                height: '36px',
-                borderRadius: '999px',
-                border: '1px solid rgba(255,255,255,0.85)',
-                background: 'rgba(15,23,42,0.6)',
-                color: '#fff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 2,
-                boxShadow: '0 10px 24px rgba(15,23,42,0.18)',
-              }}
-              aria-label="Siguiente imagen"
-            >
-              ›
-            </button>
-            <div style={{ position: 'absolute', bottom: '0.75rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.45rem', padding: '0 0.5rem' }}>
-              {imageUrls.map((_, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => setCurrentImageIndex(index)}
-                  style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    border: '1px solid rgba(255,255,255,0.9)',
-                    background: currentImageIndex === index ? '#fff' : 'rgba(255,255,255,0.7)',
-                    cursor: 'pointer',
-                  }}
-                  aria-label={`Imagen ${index + 1}`}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="card-body">
-        {isEditing ? (
-          <div style={{ display: 'grid', gap: '0.75rem' }}>
-            <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
-            <input className="input" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU (opcional)" />
-            <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
-            <select className="select" value={catId} onChange={(e) => setCatId(e.target.value)}>
-              <option value="">Sin categoría</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-            <input className="input" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Precio" type="number" step="0.01" min="0" />
-            <div style={{ display: 'grid', gap: '0.5rem' }}>
-              <label className="form-field">
-                <span>Reemplazar imagen 1</span>
-                <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])} />
-              </label>
-              <label className="form-field">
-                <span>Reemplazar imagen 2</span>
-                <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
-              </label>
-            </div>
-            <div className="form-actions" style={{ justifyContent: 'flex-start', flexWrap: 'wrap' }}>
-              <button type="button" onClick={updateProduct} className="primary-button">Guardar</button>
-              <button type="button" onClick={() => setIsEditing(false)} className="secondary-button">Cancelar</button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div style={{ display: 'grid', gap: '0.35rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.05rem', lineHeight: '1.2' }}>{product.name}</h3>
-              <p style={{ margin: 0, color: 'var(--muted)', minHeight: '2.4rem' }}>{product.description || 'Sin descripción'}</p>
-              <div style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>SKU: {product.sku}</div>
-            </div>
-            <div className="card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ fontSize: '1.15rem', fontWeight: 700 }}>${Number(product.price).toFixed(2)}</div>
-            </div>
-          </>
-        )}
-      </div>
-
-      {!isEditing && (
-        <div style={{ padding: '0 1.1rem 1.2rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button type="button" onClick={() => setIsEditing(true)} className="secondary-button">Editar</button>
-          <button type="button" onClick={deleteProduct} className="secondary-button" style={{ background: 'var(--danger)', color: '#fff', borderColor: 'transparent' }}>Eliminar</button>
-        </div>
-      )}
-
-      {message && <p style={{ color: '#d00', padding: '0 1.1rem 1.2rem' }}>{message}</p>}
-    </article>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

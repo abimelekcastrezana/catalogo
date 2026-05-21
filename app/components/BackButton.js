@@ -1,35 +1,22 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { Button } from '@/app/components/ui/button';
 
-export default function BackButton() {
+export default function BackButton({ fallback = '/admin' }) {
   const router = useRouter();
 
   const handleBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) {
       router.back();
     } else {
-      router.push('/admin');
+      router.push(fallback);
     }
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleBack}
-      style={{
-        padding: '0.65rem 1rem',
-        border: '1px solid #ccc',
-        borderRadius: '8px',
-        background: '#fff',
-        color: '#000',
-        cursor: 'pointer',
-        alignSelf: 'flex-start',
-        display: 'inline-flex',
-        alignItems: 'center',
-      }}
-    >
+    <Button type="button" variant="outline" onClick={handleBack}>
       Volver
-    </button>
+    </Button>
   );
 }

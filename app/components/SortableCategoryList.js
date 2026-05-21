@@ -7,24 +7,17 @@ export default function SortableCategoryList({ categories, reorderEndpoint }) {
   const router = useRouter();
 
   const handleReorder = async (ids) => {
-    try {
-      const response = await fetch(reorderEndpoint, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        alert(`Error al reordenar: ${error.error}`);
-        return;
-      }
-
-      router.refresh();
-    } catch (error) {
-      console.error('Reorder error:', error);
-      alert('Error al reordenar categorías');
+    const res = await fetch(reorderEndpoint, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      alert(`Error al reordenar: ${err.error}`);
+      return;
     }
+    router.refresh();
   };
 
   return (
@@ -32,8 +25,8 @@ export default function SortableCategoryList({ categories, reorderEndpoint }) {
       items={categories}
       renderItem={(category) => (
         <div>
-          <strong>{category.name}</strong>
-          <div style={{ color: '#555', fontSize: '0.9rem' }}>/{category.slug}</div>
+          <p className="font-semibold text-sm text-[var(--text)] m-0">{category.name}</p>
+          <p className="text-xs text-[var(--muted)] m-0">/{category.slug}</p>
         </div>
       )}
       onReorder={handleReorder}

@@ -9,35 +9,34 @@ export default function ProductFilter({ categories }) {
   const currentCategory = searchParams.get('categoryId') || '';
   const [categoryId, setCategoryId] = useState(currentCategory);
 
-  useEffect(() => {
-    setCategoryId(currentCategory);
-  }, [currentCategory]);
+  useEffect(() => { setCategoryId(currentCategory); }, [currentCategory]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const params = new URLSearchParams(window.location.search);
-    if (categoryId) {
-      params.set('categoryId', categoryId);
-    } else {
-      params.delete('categoryId');
-    }
+    if (categoryId) { params.set('categoryId', categoryId); } else { params.delete('categoryId'); }
     params.delete('page');
     const queryString = params.toString();
     router.push(`/dashboard/products${queryString ? `?${queryString}` : ''}`);
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-      <label style={{ display: 'grid', gap: '0.35rem' }}>
-        <span>Filtrar por categoría</span>
-        <select name="categoryId" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="select" style={{ minWidth: '200px' }}>
+    <form onSubmit={handleSubmit} className="flex items-end gap-2 flex-wrap">
+      <div className="grid gap-1">
+        <span className="text-xs font-medium text-[var(--muted)]">Categoría</span>
+        <select
+          name="categoryId"
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
+          className="select text-sm py-2 min-w-[160px]"
+        >
           <option value="">Todas</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>{category.name}</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
           ))}
         </select>
-      </label>
-      <button type="submit" className="secondary-button">Filtrar</button>
+      </div>
+      <button type="submit" className="secondary-button text-sm py-2 px-4">Filtrar</button>
     </form>
   );
 }

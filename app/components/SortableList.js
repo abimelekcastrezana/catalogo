@@ -2,90 +2,49 @@
 
 import { useState, useEffect } from 'react';
 
-export default function SortableList({ items, renderItem, onReorder, isLoading = false }) {
+export default function SortableList({ items, renderItem, onReorder }) {
   const [localItems, setLocalItems] = useState(items);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    setLocalItems(items);
-  }, [items]);
+  useEffect(() => { setLocalItems(items); }, [items]);
 
-  const moveUp = (index) => {
-    if (index === 0) return;
+  const swap = (index, direction) => {
+    const next = index + direction;
+    if (next < 0 || next >= localItems.length) return;
     const newItems = [...localItems];
-    [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
-    setLocalItems(newItems);
-    saveOrder(newItems);
-  };
-
-  const moveDown = (index) => {
-    if (index === localItems.length - 1) return;
-    const newItems = [...localItems];
-    [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
+    [newItems[index], newItems[next]] = [newItems[next], newItems[index]];
     setLocalItems(newItems);
     saveOrder(newItems);
   };
 
   const saveOrder = async (items) => {
     setSaving(true);
-    try {
-      const ids = items.map(item => item.id);
-      await onReorder(ids);
-    } finally {
-      setSaving(false);
-    }
+    try { await onReorder(items.map((i) => i.id)); }
+    finally { setSaving(false); }
   };
 
   return (
-    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.75rem' }}>
+    <ul className="list-none p-0 m-0 grid gap-2">
       {localItems.map((item, index) => (
         <li
           key={item.id}
-          style={{
-            border: '1px solid #eee',
-            borderRadius: '10px',
-            padding: '0.75rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: '1rem',
-            opacity: saving ? 0.6 : 1,
-            transition: 'opacity 0.2s',
-          }}
+          className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] transition-opacity ${saving ? 'opacity-50' : 'opacity-100'}`}
         >
-          <div style={{ flex: 1 }}>
-            {renderItem(item)}
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+          <div className="flex-1 min-w-0">{renderItem(item)}</div>
+          <div className="flex gap-1 flex-shrink-0">
             <button
-              onClick={() => moveUp(index)}
+              onClick={() => swap(index, -1)}
               disabled={index === 0 || saving}
-              style={{
-                padding: '0.4rem 0.6rem',
-                fontSize: '0.9rem',
-                border: '1px solid #ddd',
-                borderRadius: '6px',
-                cursor: index === 0 || saving ? 'not-allowed' : 'pointer',
-                opacity: index === 0 ? 0.4 : 1,
-                backgroundColor: '#fff',
-              }}
-              title="Mover hacia arriba"
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-[var(--accent-soft)] transition-colors"
+              title="Mover arriba"
             >
               ↑
             </button>
             <button
-              onClick={() => moveDown(index)}
+              onClick={() => swap(index, 1)}
               disabled={index === localItems.length - 1 || saving}
-              style={{
-                padding: '0.4rem 0.6rem',
-                fontSize: '0.9rem',
-                border: '1px solid #ddd',
-                borderRadius: '6px',
-                cursor: index === localItems.length - 1 || saving ? 'not-allowed' : 'pointer',
-                opacity: index === localItems.length - 1 ? 0.4 : 1,
-                backgroundColor: '#fff',
-              }}
-              title="Mover hacia abajo"
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-[var(--accent-soft)] transition-colors"
+              title="Mover abajo"
             >
               ↓
             </button>

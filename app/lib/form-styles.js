@@ -1,0 +1,10 @@
+export const field = 'grid gap-1.5';
+export const label = 'text-sm font-medium text-[var(--text)]';
+export const input = 'input';
+export const select = 'select';
+export const hint = 'text-xs text-[var(--muted)]';
+export const divider = 'border-t border-[var(--border)] my-2';
+export const sectionTitle = 'text-sm font-semibold text-[var(--text)]';
+export const msgOk = 'text-sm text-green-600 dark:text-green-400';
+export const msgErr = 'text-sm text-red-500';
+export const msg = (text) => (text?.includes('Error') || text?.includes('error') || text?.includes('inválido') ? msgErr : msgOk);

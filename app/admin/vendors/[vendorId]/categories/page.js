@@ -4,15 +4,19 @@ import db from '@/db/index.js';
 import AddVendorCategoryForm from '../AddVendorCategoryForm';
 import BackButton from '@/app/components/BackButton';
 import SortableCategoryList from '@/app/components/SortableCategoryList';
+import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 
 export default async function AdminVendorCategoriesPage({ params }) {
   const session = await getUserSession();
   if (!session || session.user.role !== 'admin') {
     return (
-      <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-        <h1>No autorizado</h1>
-        <p>Necesitas iniciar sesión como admin.</p>
-        <Link href="/login">Ir a login</Link>
+      <main className="page-shell">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
+          <CardContent className="pt-6 text-center space-y-3">
+            <p className="text-[var(--text)]">Necesitas iniciar sesión como admin.</p>
+            <Link href="/login" className="primary-button">Ir a login</Link>
+          </CardContent>
+        </Card>
       </main>
     );
   }
@@ -22,46 +26,75 @@ export default async function AdminVendorCategoriesPage({ params }) {
   const vendor = await db.Vendor.findByPk(vendorId);
   if (!vendor) {
     return (
-      <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-        <h1>Tienda no encontrada</h1>
-        <Link href="/admin">Volver al admin</Link>
+      <main className="page-shell">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
+          <CardContent className="pt-6 text-center">
+            <p className="text-[var(--text)]">Tienda no encontrada.</p>
+          </CardContent>
+        </Card>
       </main>
     );
   }
 
-  const categories = await db.Category.findAll({ where: { vendorId }, order: [['position', 'ASC'], ['name', 'ASC']] });
+  const categories = await db.Category.findAll({
+    where: { vendorId },
+    order: [['position', 'ASC'], ['name', 'ASC']],
+  });
 
   return (
-    <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1>Categorías de {vendor.name}</h1>
-          <p style={{ margin: '0.25rem 0 0' }}>Edita las categorías del vendedor desde aquí.</p>
-        </div>
-        <BackButton />
-      </div>
-
-      <div style={{ marginTop: '1.5rem', display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
-        <AddVendorCategoryForm vendorId={vendorId} />
-        <div style={{ border: '1px solid #ddd', borderRadius: '12px', padding: '0.85rem', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <h2 style={{ marginTop: 0 }}>Ordenar categorías</h2>
-          <SortableCategoryList
-            categories={categories.map((c) => c.get({ plain: true }))}
-            reorderEndpoint={`/api/admin/vendors/${vendorId}/categories/reorder`}
-          />
-          <div style={{ marginTop: '1.5rem' }}>
-            <h3 style={{ marginTop: 0 }}>Editar categoría</h3>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.75rem' }}>
-              {categories.map((category) => (
-                <li key={category.id}>
-                  <Link href={`/admin/categories/${category.id}`} style={{ textDecoration: 'none', color: '#0645ad' }}>
-                    {category.name} ({category.slug})
-                  </Link>
-                </li>
-              ))}
-            </ul>
+    <main className="page-shell">
+      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <CardHeader>
+          <div className="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <CardTitle className="page-title">Categorías de {vendor.name}</CardTitle>
+              <p className="text-sm text-[var(--muted)] mt-1">Administra y reordena las categorías de esta tienda.</p>
+            </div>
+            <BackButton fallback="/admin" />
           </div>
-        </div>
+        </CardHeader>
+      </Card>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {/* Crear categoría */}
+        <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+          <CardHeader>
+            <CardTitle className="text-lg">Agregar categoría</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AddVendorCategoryForm vendorId={vendorId} />
+          </CardContent>
+        </Card>
+
+        {/* Ordenar y editar */}
+        <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+          <CardHeader>
+            <CardTitle className="text-lg">Ordenar categorías</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <SortableCategoryList
+              categories={categories.map((c) => c.get({ plain: true }))}
+              reorderEndpoint={`/api/admin/vendors/${vendorId}/categories/reorder`}
+            />
+            {categories.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-[var(--text)] mb-2">Editar categoría</p>
+                <ul className="space-y-1">
+                  {categories.map((category) => (
+                    <li key={category.id}>
+                      <Link
+                        href={`/admin/categories/${category.id}`}
+                        className="text-sm text-[var(--accent)] hover:underline"
+                      >
+                        {category.name} <span className="text-[var(--muted)]">({category.slug})</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </main>
   );

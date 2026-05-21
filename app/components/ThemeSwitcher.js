@@ -1,53 +1,30 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-const THEME_KEY = "catalog-theme";
-
 export default function ThemeSwitcher() {
-  const [theme, setTheme] = useState("light");
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    const current = document.documentElement.dataset.theme || "light";
-    setTheme(current);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
-  function toggle() {
-    const next = theme === "light" ? "dark" : "light";
-    setTheme(next);
-    document.documentElement.dataset.theme = next;
-    localStorage.setItem(THEME_KEY, next);
+  if (!mounted) {
+    return (
+      <div className="w-11 h-11 rounded-full border border-[var(--border)] bg-[var(--surface-strong)]" />
+    );
   }
+
+  const isDark = resolvedTheme === "dark";
 
   return (
     <button
       type="button"
-      onClick={toggle}
-      style={{
-        width: '44px',
-        height: '44px',
-        borderRadius: '50%',
-        border: '2px solid var(--border)',
-        background: 'var(--bg)',
-        color: 'var(--fg)',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '1.5rem',
-        transition: 'all 0.2s',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'scale(1.1)';
-        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'scale(1)';
-        e.currentTarget.style.boxShadow = 'none';
-      }}
-      title={theme === "light" ? "Modo oscuro" : "Modo claro"}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      className="w-11 h-11 rounded-full border-2 border-[var(--border)] bg-[var(--bg)] flex items-center justify-center text-2xl transition-transform hover:scale-110 hover:shadow-md"
+      title={isDark ? "Modo claro" : "Modo oscuro"}
     >
-      {theme === "light" ? "🌙" : "☀️"}
+      {isDark ? "☀️" : "🌙"}
     </button>
   );
 }

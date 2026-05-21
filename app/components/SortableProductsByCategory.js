@@ -9,46 +9,33 @@ export default function SortableProductsByCategory({ products, categories, reord
   const [saving, setSaving] = useState(false);
   const [groupedProducts, setGroupedProducts] = useState({});
 
+  const categoryMap = {};
+  categories.forEach((cat) => { categoryMap[cat.id] = cat; });
+
   useEffect(() => {
     const grouped = {};
     products.forEach((product) => {
       const catId = product.categoryId || 'no-category';
-      if (!grouped[catId]) {
-        grouped[catId] = [];
-      }
+      if (!grouped[catId]) grouped[catId] = [];
       grouped[catId].push(product);
     });
     setGroupedProducts(grouped);
   }, [products]);
 
-  const toggleCategory = (categoryId) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
-    }
-    setExpandedCategories(newExpanded);
+  const toggleCategory = (catId) => {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev);
+      next.has(catId) ? next.delete(catId) : next.add(catId);
+      return next;
+    });
   };
 
-  const moveProductUp = async (categoryId, index) => {
-    if (index === 0) return;
-    const catKey = categoryId || 'no-category';
-    const newGrouped = { ...groupedProducts };
-    const items = [...newGrouped[catKey]];
-    [items[index - 1], items[index]] = [items[index], items[index - 1]];
-    newGrouped[catKey] = items;
-    setGroupedProducts(newGrouped);
-    await saveOrder(newGrouped);
-  };
-
-  const moveProductDown = async (categoryId, index) => {
-    const catKey = categoryId || 'no-category';
-    if (index === groupedProducts[catKey].length - 1) return;
-    const newGrouped = { ...groupedProducts };
-    const items = [...newGrouped[catKey]];
-    [items[index], items[index + 1]] = [items[index + 1], items[index]];
-    newGrouped[catKey] = items;
+  const swap = async (catKey, index, direction) => {
+    const next = index + direction;
+    const items = [...groupedProducts[catKey]];
+    if (next < 0 || next >= items.length) return;
+    [items[index], items[next]] = [items[next], items[index]];
+    const newGrouped = { ...groupedProducts, [catKey]: items };
     setGroupedProducts(newGrouped);
     await saveOrder(newGrouped);
   };
@@ -56,173 +43,89 @@ export default function SortableProductsByCategory({ products, categories, reord
   const saveOrder = async (grouped) => {
     setSaving(true);
     try {
-      const allProductIds = [];
-
-      // Primero agregar productos sin categoría
-      if (grouped['no-category']) {
-        grouped['no-category'].forEach((product) => {
-          allProductIds.push(product.id);
-        });
-      }
-
-      // Luego agregar productos de otras categorías en orden de position
-      const sortedCategoryKeys = Object.keys(grouped)
-        .filter((key) => key !== 'no-category')
-        .sort((a, b) => {
-          const posA = categoryMap[a]?.position ?? 999;
-          const posB = categoryMap[b]?.position ?? 999;
-          return posA - posB;
-        });
-
-      sortedCategoryKeys.forEach((catKey) => {
-        grouped[catKey].forEach((product) => {
-          allProductIds.push(product.id);
-        });
+      const sortedKeys = Object.keys(grouped).sort((a, b) => {
+        if (a === 'no-category') return -1;
+        if (b === 'no-category') return 1;
+        return (categoryMap[a]?.position ?? 999) - (categoryMap[b]?.position ?? 999);
       });
-
-      const response = await fetch(reorderEndpoint, {
+      const allIds = sortedKeys.flatMap((key) => grouped[key].map((p) => p.id));
+      const res = await fetch(reorderEndpoint, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: allProductIds }),
+        body: JSON.stringify({ ids: allIds }),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        alert(`Error al reordenar: ${error.error}`);
-        return;
-      }
-
+      if (!res.ok) { alert('Error al reordenar'); return; }
       router.refresh();
-    } catch (error) {
-      console.error('Reorder error:', error);
-      alert('Error al reordenar productos');
-    } finally {
-      setSaving(false);
-    }
+    } catch { alert('Error al reordenar productos'); }
+    finally { setSaving(false); }
   };
 
-  const categoryMap = {};
-  categories.forEach((cat) => {
-    categoryMap[cat.id] = cat;
-  });
-
   const sortedKeys = Object.keys(groupedProducts).sort((a, b) => {
-    // Sin categoría siempre primero
     if (a === 'no-category') return -1;
     if (b === 'no-category') return 1;
-    // Luego por posición de categoría
-    const posA = categoryMap[a]?.position ?? 999;
-    const posB = categoryMap[b]?.position ?? 999;
-    return posA - posB;
+    return (categoryMap[a]?.position ?? 999) - (categoryMap[b]?.position ?? 999);
   });
 
+  if (sortedKeys.length === 0) {
+    return <p className="text-sm text-[var(--muted)] text-center py-6">No hay productos para reordenar.</p>;
+  }
+
   return (
-    <div style={{ display: 'grid', gap: '1.5rem' }}>
+    <div className="grid gap-3">
+      {saving && (
+        <p className="text-xs text-[var(--muted)] text-center animate-pulse">Guardando orden...</p>
+      )}
       {sortedKeys.map((catKey) => {
-          const categoryId = catKey === 'no-category' ? null : catKey;
-          const categoryName = catKey === 'no-category' ? 'Sin categoría' : categoryMap[catKey]?.name || catKey;
-          const isExpanded = expandedCategories.has(categoryId);
-          const productsInCat = groupedProducts[catKey];
+        const catId = catKey === 'no-category' ? null : catKey;
+        const catName = catKey === 'no-category' ? 'Sin categoría' : (categoryMap[catKey]?.name || catKey);
+        const isExpanded = expandedCategories.has(catId);
+        const items = groupedProducts[catKey];
 
-          return (
-            <div
-              key={catKey}
-              style={{
-                border: '1px solid #ddd',
-                borderRadius: '12px',
-                padding: '1rem',
-                backgroundColor: '#fafafa',
-              }}
+        return (
+          <div key={catKey} className="rounded-2xl border border-[var(--border)] overflow-hidden">
+            {/* Header de categoría */}
+            <button
+              onClick={() => toggleCategory(catId)}
+              className="w-full flex items-center justify-between px-5 py-4 bg-[var(--surface-strong)] hover:bg-[var(--accent-soft)] transition-colors text-left"
             >
-              <button
-                onClick={() => toggleCategory(categoryId)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  background: '#fff',
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  transition: 'all 0.2s',
-                }}
-              >
-                <span>{categoryName}</span>
-                <span style={{ fontSize: '0.9rem', color: '#666' }}>
-                  {isExpanded ? '▼' : '▶'} {productsInCat.length} producto{productsInCat.length !== 1 ? 's' : ''}
-                </span>
-              </button>
+              <span className="font-semibold text-sm text-[var(--text)]">{catName}</span>
+              <span className="text-xs text-[var(--muted)] flex items-center gap-2">
+                {items.length} producto{items.length !== 1 ? 's' : ''}
+                <span className="text-base">{isExpanded ? '▼' : '▶'}</span>
+              </span>
+            </button>
 
-              {isExpanded && (
-                <div style={{ marginTop: '1rem', display: 'grid', gap: '0.75rem' }}>
-                  {productsInCat.map((product, index) => (
-                    <div
-                      key={product.id}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '0.75rem',
-                        backgroundColor: '#fff',
-                        borderRadius: '8px',
-                        border: '1px solid #eee',
-                        gap: '1rem',
-                        opacity: saving ? 0.6 : 1,
-                        transition: 'opacity 0.2s',
-                      }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{product.name}</div>
-                        <div style={{ color: '#666', fontSize: '0.85rem' }}>
-                          ${parseFloat(product.price).toFixed(2)}
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
-                        <button
-                          onClick={() => moveProductUp(categoryId, index)}
-                          disabled={index === 0 || saving}
-                          style={{
-                            padding: '0.4rem 0.6rem',
-                            fontSize: '0.9rem',
-                            border: '1px solid #ddd',
-                            borderRadius: '6px',
-                            cursor: index === 0 || saving ? 'not-allowed' : 'pointer',
-                            opacity: index === 0 ? 0.4 : 1,
-                            backgroundColor: '#fff',
-                          }}
-                          title="Mover hacia arriba"
-                        >
-                          ↑
-                        </button>
-                        <button
-                          onClick={() => moveProductDown(categoryId, index)}
-                          disabled={index === productsInCat.length - 1 || saving}
-                          style={{
-                            padding: '0.4rem 0.6rem',
-                            fontSize: '0.9rem',
-                            border: '1px solid #ddd',
-                            borderRadius: '6px',
-                            cursor:
-                              index === productsInCat.length - 1 || saving ? 'not-allowed' : 'pointer',
-                            opacity: index === productsInCat.length - 1 ? 0.4 : 1,
-                            backgroundColor: '#fff',
-                          }}
-                          title="Mover hacia abajo"
-                        >
-                          ↓
-                        </button>
-                      </div>
+            {/* Productos */}
+            {isExpanded && (
+              <ul className="list-none m-0 p-3 grid gap-2 bg-[var(--surface)]">
+                {items.map((product, index) => (
+                  <li
+                    key={product.id}
+                    className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] transition-opacity ${saving ? 'opacity-50' : ''}`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-[var(--text)] truncate m-0">{product.name}</p>
+                      <p className="text-xs text-[var(--muted)] m-0">${parseFloat(product.price).toFixed(2)}</p>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                    <div className="flex gap-1 flex-shrink-0">
+                      <button
+                        onClick={() => swap(catKey, index, -1)}
+                        disabled={index === 0 || saving}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-[var(--accent-soft)] transition-colors"
+                      >↑</button>
+                      <button
+                        onClick={() => swap(catKey, index, 1)}
+                        disabled={index === items.length - 1 || saving}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-[var(--accent-soft)] transition-colors"
+                      >↓</button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -2,14 +2,20 @@ import { getUserSession } from '@/lib/auth/getSession';
 import db from '@/db/index.js';
 import Link from 'next/link';
 import SortableProductsByCategory from '@/app/components/SortableProductsByCategory';
+import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
+import { Button } from '@/app/components/ui/button';
 
 export default async function DashboardProductsReorderPage() {
   const session = await getUserSession();
   if (!session) {
     return (
-      <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-        <h1>No autorizado</h1>
-        <Link href="/login">Iniciar sesión</Link>
+      <main className="page-shell">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
+          <CardContent className="pt-6 text-center space-y-3">
+            <p className="text-[var(--text)]">Sesión requerida.</p>
+            <Link href="/login"><Button>Iniciar sesión</Button></Link>
+          </CardContent>
+        </Card>
       </main>
     );
   }
@@ -30,23 +36,29 @@ export default async function DashboardProductsReorderPage() {
 
   return (
     <main className="page-shell">
-      <section className="page-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 className="page-title">Reordenar Productos</h1>
-            <p className="page-subtitle">Organiza tus productos por categoría de forma intuitiva.</p>
+      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <CardHeader>
+          <div className="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <CardTitle className="page-title">Reordenar productos</CardTitle>
+              <p className="page-subtitle">Arrastra para organizar el orden de tus productos por categoría.</p>
+            </div>
+            <Link href="/dashboard/products">
+              <Button variant="outline">← Volver</Button>
+            </Link>
           </div>
-          <Link href="/dashboard/products" className="secondary-button">Volver</Link>
-        </div>
-      </section>
+        </CardHeader>
+      </Card>
 
-      <section className="page-card">
-        <SortableProductsByCategory
-          products={productsPlain}
-          categories={categoriesPlain}
-          reorderEndpoint={`/api/vendors/${session.user.vendorId}/products/reorder`}
-        />
-      </section>
+      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <CardContent className="pt-6">
+          <SortableProductsByCategory
+            products={productsPlain}
+            categories={categoriesPlain}
+            reorderEndpoint={`/api/vendors/${session.user.vendorId}/products/reorder`}
+          />
+        </CardContent>
+      </Card>
     </main>
   );
 }

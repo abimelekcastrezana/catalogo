@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import * as F from '@/app/lib/form-styles';
 
 export default function EditCategoryForm({ category, vendors }) {
   const router = useRouter();
@@ -15,45 +16,38 @@ export default function EditCategoryForm({ category, vendors }) {
     event.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
-
-    const response = await fetch(`/api/admin/categories/${category.id}`, {
+    const res = await fetch(`/api/admin/categories/${category.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ vendorId, name, slug }),
     });
-
-    const data = await response.json();
-    if (!response.ok) {
-      setMessage(data.error || 'Error actualizando categoría');
-      setIsSubmitting(false);
-      return;
-    }
-
+    const data = await res.json();
+    if (!res.ok) { setMessage(data.error || 'Error actualizando categoría'); setIsSubmitting(false); return; }
     setMessage('Categoría actualizada correctamente');
     setIsSubmitting(false);
     router.refresh();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form-card" style={{ maxWidth: '520px' }}>
-      <div className="form-field">
-        <label>Vendedor</label>
-        <select className="select" value={vendorId} onChange={(e) => setVendorId(e.target.value)} required>
-          {vendors.map((vendor) => (
-            <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
-          ))}
+    <form onSubmit={handleSubmit} className="grid gap-4 max-w-lg">
+      <div className={F.field}>
+        <label className={F.label}>Vendedor</label>
+        <select className={F.select} value={vendorId} onChange={(e) => setVendorId(e.target.value)} required>
+          {vendors.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
         </select>
       </div>
-      <div className="form-field">
-        <label>Nombre</label>
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la categoría" required />
+      <div className={F.field}>
+        <label className={F.label}>Nombre</label>
+        <input className={F.input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la categoría" required />
       </div>
-      <div className="form-field">
-        <label>Slug</label>
-        <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug de categoría" required />
+      <div className={F.field}>
+        <label className={F.label}>Slug</label>
+        <input className={F.input} value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="slug-categoria" required />
       </div>
-      <button type="submit" className="primary-button" disabled={isSubmitting}>{isSubmitting ? 'Guardando...' : 'Guardar categoría'}</button>
-      {message && <p className="text-small" style={{ margin: 0 }}>{message}</p>}
+      <button type="submit" className="primary-button" disabled={isSubmitting}>
+        {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
+      </button>
+      {message && <p className={F.msg(message)}>{message}</p>}
     </form>
   );
 }

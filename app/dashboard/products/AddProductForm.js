@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function AddProductForm({ vendorId, categories, apiBase = '/api/vendors' }) {
+export default function AddProductForm({ vendorId, categories, apiBase = '/api/vendors', onSuccess }) {
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
@@ -64,7 +64,6 @@ const res = await fetch(`${apiBase}/${vendorId}/products`, {
 
       await Promise.all(uploadPromises);
 
-      setMessage('Producto creado catoke y archivos subidos (si se adjuntaron).');
       setName('');
       setSku('');
       setPrice('');
@@ -72,6 +71,7 @@ const res = await fetch(`${apiBase}/${vendorId}/products`, {
       setCategoryId('');
       setImageFiles([null, null]);
       setIsSubmitting(false);
+      if (onSuccess) { onSuccess(); } else { setMessage('Producto creado.'); }
     } catch (err) {
       setMessage(err.message || 'Error creando producto');
       setIsSubmitting(false);
@@ -79,25 +79,21 @@ const res = await fetch(`${apiBase}/${vendorId}/products`, {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form-card" style={{ maxWidth: '520px' }}>
-      <div className="form-field">
-        <label>Nombre</label>
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" required />
+    <form onSubmit={handleSubmit} className="grid gap-4 max-w-lg">
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Nombre</label>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre del producto" required />
       </div>
-      <div className="form-field">
-        <label>SKU</label>
-        <input className="input" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="SKU (opcional)" />
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Precio</label>
+        <input className="input" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" type="number" step="0.01" min="0" required />
       </div>
-      <div className="form-field">
-        <label>Precio</label>
-        <input className="input" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Precio" type="number" step="0.01" min="0" required />
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Descripción</label>
+        <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción del producto" />
       </div>
-      <div className="form-field">
-        <label>Descripción</label>
-        <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
-      </div>
-      <div className="form-field">
-        <label>Categoría</label>
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Categoría</label>
         <select className="select" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
           <option value="">Sin categoría</option>
           {categories?.map((cat) => (
@@ -105,18 +101,22 @@ const res = await fetch(`${apiBase}/${vendorId}/products`, {
           ))}
         </select>
       </div>
-      <div className="form-field">
-        <label>Imagen 1</label>
-        <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])} />
-      </div>
-      <div className="form-field">
-        <label>Imagen 2</label>
-        <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--text)]">Imagen 1</label>
+          <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])} />
+        </div>
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--text)]">Imagen 2</label>
+          <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
+        </div>
       </div>
       <button type="submit" className="primary-button" disabled={isSubmitting}>
         {isSubmitting ? 'Creando...' : 'Crear producto'}
       </button>
-      {message && <p className="text-small" style={{ margin: 0 }}>{message}</p>}
+      {message && (
+        <p className={`text-sm ${message.includes('Error') ? 'text-red-500' : 'text-[var(--muted)]'}`}>{message}</p>
+      )}
     </form>
   );
 }

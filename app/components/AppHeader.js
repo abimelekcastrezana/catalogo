@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import ThemeSwitcher from './ThemeSwitcher';
 import SignOutButton from './SignOutButton';
+import { Button } from '@/app/components/ui/button';
 
 export default function AppHeader({ whatsappPhone }) {
   const pathname = usePathname();
@@ -17,85 +18,89 @@ export default function AppHeader({ whatsappPhone }) {
   const isHome = pathname === '/';
   const showBrand = !isAuthenticated || isHome;
 
-  if (isVendorPublic) {
-    return null;
-  }
+  if (isVendorPublic) return null;
 
   return (
-    <header className="app-header">
+    <header className="flex justify-between items-center gap-4 px-6 pt-5 max-w-[1200px] mx-auto">
       {showBrand ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img
             src="/tiendatap_logo.jpg"
             alt="TiendaTap logo"
-            style={{ width: '48px', height: '48px', borderRadius: '12px', objectFit: 'cover' }}
+            className="w-12 h-12 rounded-xl object-cover"
           />
-          <div>
-            <h1 style={{ margin: 0, fontSize: '1.4rem' }}>TiendaTap</h1>
-          </div>
-        </div>
+          <h1 className="m-0 text-xl font-semibold">TiendaTap</h1>
+        </Link>
       ) : (
-        <div style={{ minHeight: '2.25rem' }} />
+        <div className="h-9" />
       )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <div className="desktop-actions">
-          <ThemeSwitcher />
-          {isAuthenticated && <SignOutButton />}
-          {isHome && whatsappPhone && (
-            <a
-              href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="primary-button"
-            >
-              WhatsApp
-            </a>
-          )}
-          {!isAuthenticated && (
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <Link href="/login" className="secondary-button">Iniciar sesión</Link>
-              <Link href="/register" className="secondary-button">Registrarse</Link>
-            </div>
-          )}
-        </div>
 
-        <div className="mobile-actions" style={{ position: 'relative' }}>
-          <button
-            type="button"
-            className="mobile-action-toggle"
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-label="Abrir menú móvil"
+      {/* Desktop */}
+      <div className="hidden md:flex items-center gap-3 flex-wrap">
+        <ThemeSwitcher />
+        {isAuthenticated && <SignOutButton />}
+        {isHome && whatsappPhone && (
+          <a
+            href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="primary-button"
           >
-            ☰
-          </button>
-          {menuOpen && (
-            <div className="mobile-action-menu" style={{ position: 'absolute', right: 0, top: 'calc(100% + 0.5rem)', zIndex: 50 }}>
-              <ThemeSwitcher />
-              {isHome && whatsappPhone && (
-                <a
-                  href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="primary-button"
-                  style={{ width: '100%' }}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  WhatsApp
-                </a>
-              )}
-              {isAuthenticated ? (
-                <button className="secondary-button" style={{ width: '100%' }} onClick={() => { setMenuOpen(false); signOut({ callbackUrl: '/' }); }}>
-                  Cerrar sesión
-                </button>
-              ) : (
-                <>
-                  <Link href="/login" className="secondary-button" style={{ width: '100%' }} onClick={() => setMenuOpen(false)}>Iniciar sesión</Link>
-                  <Link href="/register" className="secondary-button" style={{ width: '100%' }} onClick={() => setMenuOpen(false)}>Registrarse</Link>
-                </>
-              )}
-            </div>
-          )}
-        </div>
+            ¡Quiero mi tienda!
+          </a>
+        )}
+        {!isAuthenticated && (
+          <div className="flex gap-2 flex-wrap items-center">
+            <Link href="/login"><Button variant="outline">Iniciar sesión</Button></Link>
+            <Link href="/register"><Button variant="outline">Registrarse</Button></Link>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile */}
+      <div className="flex md:hidden items-center relative">
+        <button
+          type="button"
+          className="w-11 h-11 rounded-full border border-[var(--border)] bg-[var(--surface-strong)] flex items-center justify-center text-xl"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Abrir menú móvil"
+        >
+          ☰
+        </button>
+        {menuOpen && (
+          <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-[180px] p-3 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-xl grid gap-3">
+            <ThemeSwitcher />
+            {isHome && whatsappPhone && (
+              <a
+                href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="primary-button w-full"
+                onClick={() => setMenuOpen(false)}
+              >
+                ¡Quiero mi tienda!
+              </a>
+            )}
+            {isAuthenticated ? (
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() => { setMenuOpen(false); signOut({ callbackUrl: '/' }); }}
+              >
+                Cerrar sesión
+              </Button>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">Iniciar sesión</Button>
+                </Link>
+                <Link href="/register" onClick={() => setMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">Registrarse</Button>
+                </Link>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

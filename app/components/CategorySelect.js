@@ -2,13 +2,13 @@
 
 export default function CategorySelect({ categories, currentCategoryId }) {
   return (
-    <form method="get" style={{ marginBottom: '1rem' }}>
-      <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '240px', flex: '1' }}>
-        Categoría
+    <form method="get" className="mb-4">
+      <label className="flex flex-col gap-1 min-w-[240px] flex-1">
+        <span className="text-sm font-medium text-[var(--muted)]">Categoría</span>
         <select
           name="categoryId"
           defaultValue={currentCategoryId}
-          className="select"
+          className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] text-[var(--text)] appearance-none"
           onChange={(e) => e.currentTarget.form?.submit()}
         >
           <option value="">Todas</option>
