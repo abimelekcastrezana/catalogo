@@ -4,15 +4,20 @@ import db from '@/db/index.js';
 import AddProductCard from '@/app/dashboard/products/AddProductCard';
 import ProductRow from '@/app/dashboard/products/ProductRow';
 import BackButton from '@/app/components/BackButton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
+import { Button } from '@/app/components/ui/button';
 
 export default async function AdminVendorProductsPage({ params, searchParams }) {
   const session = await getUserSession();
   if (!session || session.user.role !== 'admin') {
     return (
-      <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-        <h1>No autorizado</h1>
-        <p>Necesitas iniciar sesión como admin.</p>
-        <Link href="/login">Ir a login</Link>
+      <main className="page-shell">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
+          <CardContent className="pt-6 text-center space-y-3">
+            <p className="text-[var(--text)]">Necesitas iniciar sesión como admin.</p>
+            <Link href="/login"><Button>Ir a login</Button></Link>
+          </CardContent>
+        </Card>
       </main>
     );
   }
@@ -25,50 +30,78 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
   const vendor = await db.Vendor.findByPk(vendorId);
   if (!vendor) {
     return (
-      <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-        <h1>Tienda no encontrada</h1>
-        <Link href="/admin">Volver al admin</Link>
+      <main className="page-shell">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
+          <CardContent className="pt-6 text-center">
+            <p className="text-[var(--text)]">Tienda no encontrada.</p>
+          </CardContent>
+        </Card>
       </main>
     );
   }
 
-  const categoryWhere = { vendorId };
-  const productWhere = { vendorId };
-  if (categoryId) {
-    productWhere.categoryId = categoryId;
-  }
+  const categoryModels = await db.Category.findAll({
+    where: { vendorId },
+    order: [['position', 'ASC'], ['name', 'ASC']],
+  });
+  const categories = categoryModels.map((c) => c.get({ plain: true }));
 
-  const categoryModels = await db.Category.findAll({ where: categoryWhere, order: [['position', 'ASC'], ['name', 'ASC']] });
-  const categories = categoryModels.map((category) => category.get({ plain: true }));
-  const productModels = await db.Product.findAll({ where: productWhere, include: [{ model: db.ProductImage, order: [['position', 'ASC']] }, { model: db.Category }], order: [['position', 'ASC'], ['createdAt', 'DESC']] });
+  const productWhere = { vendorId };
+  if (categoryId) productWhere.categoryId = categoryId;
+
+  const productModels = await db.Product.findAll({
+    where: productWhere,
+    include: [
+      { model: db.ProductImage, order: [['position', 'ASC']] },
+      { model: db.Category },
+    ],
+    order: [['position', 'ASC'], ['createdAt', 'DESC']],
+  });
   const products = productModels.map((p) => p.get({ plain: true }));
 
   return (
     <main className="page-shell">
-      <section className="page-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 className="page-title">Productos de {vendor.name}</h1>
-            <p className="page-subtitle">Edita productos directamente como admin.</p>
+      {/* Header */}
+      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <CardHeader>
+          <div className="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <CardTitle className="page-title">Productos de {vendor.name}</CardTitle>
+              <p className="text-sm text-[var(--muted)] mt-1">
+                {products.length} producto{products.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+            <BackButton fallback="/admin" />
           </div>
-          <BackButton />
-        </div>
-      </section>
+          <div className="flex gap-2 flex-wrap pt-2">
+            <AddProductCard vendorId={vendorId} categories={categories} apiBase="/api/admin/vendors" />
+            <Link href={`/admin/vendors/${vendorId}/products/reorder`}>
+              <Button variant="outline" size="sm">Reordenar</Button>
+            </Link>
+          </div>
+        </CardHeader>
+      </Card>
 
-      <section className="page-card">
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <AddProductCard vendorId={vendorId} categories={categories} apiBase="/api/admin/vendors" />
-          <Link href={`/admin/vendors/${vendorId}/products/reorder`} className="secondary-button">Reordenar</Link>
-        </div>
-      </section>
-
-      <section className="page-card">
-        <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))' }}>
-          {products.map((product) => (
-            <ProductRow key={product.id} product={product} vendorId={vendorId} categories={categories} apiBase="/api/admin/vendors" />
-          ))}
-        </div>
-      </section>
+      {/* Grid de productos */}
+      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <CardContent className="pt-6">
+          {products.length === 0 ? (
+            <p className="text-center text-[var(--muted)] py-8">No hay productos en esta tienda.</p>
+          ) : (
+            <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(min(220px,100%),1fr))]">
+              {products.map((product) => (
+                <ProductRow
+                  key={product.id}
+                  product={product}
+                  vendorId={vendorId}
+                  categories={categories}
+                  apiBase="/api/admin/vendors"
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </main>
   );
 }

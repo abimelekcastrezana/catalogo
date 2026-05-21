@@ -12,19 +12,33 @@
     "migrations:delete": "npx sequelize-cli db:migrate:undo:all --config db/config.js"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
+    "autoprefixer": "^10.5.0",
     "bcrypt": "^6.0.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "dotenv": "^17.3.1",
+    "lucide-react": "^1.16.0",
     "next": "16.1.6",
     "next-auth": "^4.24.13",
+    "next-themes": "^0.4.6",
     "pg": "^8.20.0",
     "pg-hstore": "^2.3.4",
+    "postcss": "^8.5.15",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sequelize": "^6.37.8",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^3.4.19"
   },
   "devDependencies": {
     "eslint": "^9.0.0",
-    "eslint-config-next": "16.1.6"
+    "eslint-config-next": "16.1.6",
+    "shadcn": "^4.7.0"
   }
 }

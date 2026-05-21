@@ -1,187 +1,159 @@
-import { unstable_noStore, revalidateTag } from 'next/cache';
+import { unstable_noStore } from 'next/cache';
 import db from '@/db/index.js';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PublicProductCard from '@/app/components/PublicProductCard';
-import PublicVendorHeaderActions from '@/app/components/PublicVendorHeaderActions';
 import VendorPageClient from '@/app/components/VendorPageClient';
 import CategorySelect from '@/app/components/CategorySelect';
+import ThemeSwitcher from '@/app/components/ThemeSwitcher';
+import { Button } from '@/app/components/ui/button';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }) {
-  return { title: 'Catálogo' };
+  const { slug } = await params;
+  const vendor = await db.Vendor.findOne({ where: { slug } });
+  return { title: vendor ? `${vendor.name} — TiendaTap` : 'Catálogo' };
 }
+
+const PAGE_SIZE = 12;
 
 export default async function VendorPublicPage({ params, searchParams }) {
   unstable_noStore();
-  const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
-  const { slug } = resolvedParams;
-  const categoryId = resolvedSearchParams?.categoryId || '';
-  const rawPage = parseInt(resolvedSearchParams?.page ?? '1', 10);
+  const { slug } = await params;
+  const resolved = await searchParams;
+  const categoryId = resolved?.categoryId || '';
+  const rawPage = parseInt(resolved?.page ?? '1', 10);
   const currentPage = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
-  const pageSize = 10;
 
   const vendor = await db.Vendor.findOne({ where: { slug } });
   if (!vendor || !vendor.isActive) return notFound();
 
-  const categoryModels = await db.Category.findAll({
-    where: { vendorId: vendor.id },
-    order: [['position', 'ASC'], ['name', 'ASC']]
-  });
-  const categories = categoryModels.map((c) => c.get({ plain: true }));
-  const productWhere = { vendorId: vendor.id, isActive: true };
-  if (categoryId) {
-    productWhere.categoryId = categoryId;
-  }
+  const [categoryModels, totalProducts] = await Promise.all([
+    db.Category.findAll({
+      where: { vendorId: vendor.id },
+      order: [['position', 'ASC'], ['name', 'ASC']],
+    }),
+    db.Product.count({
+      where: { vendorId: vendor.id, isActive: true, ...(categoryId ? { categoryId } : {}) },
+    }),
+  ]);
 
-  const totalProducts = await db.Product.count({ where: productWhere });
-  const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
-  const pageToFetch = currentPage > totalPages ? totalPages : currentPage;
-  const offset = (pageToFetch - 1) * pageSize;
+  const categories = categoryModels.map((c) => c.get({ plain: true }));
+  const totalPages = Math.max(1, Math.ceil(totalProducts / PAGE_SIZE));
+  const pageToFetch = Math.min(currentPage, totalPages);
+  const offset = (pageToFetch - 1) * PAGE_SIZE;
 
   const productModels = await db.Product.findAll({
-    where: productWhere,
+    where: { vendorId: vendor.id, isActive: true, ...(categoryId ? { categoryId } : {}) },
     include: [
       { model: db.ProductImage, order: [['position', 'ASC']] },
       { model: db.Category },
     ],
     order: [['position', 'ASC'], ['createdAt', 'DESC']],
-    limit: pageSize,
+    limit: PAGE_SIZE,
     offset,
   });
 
   const products = productModels.map((p) => p.get({ plain: true }));
-  const buildPageHref = (targetPage) => {
-    const params = new URLSearchParams();
-    if (categoryId) params.set('categoryId', categoryId);
-    if (targetPage > 1) params.set('page', targetPage.toString());
-    return `/${slug}${params.toString() ? `?${params.toString()}` : ''}`;
-  };
+  const vendorPhone = vendor.whatsappPhone?.replace(/[^0-9+]/g, '') || '';
+  const logoUrl = vendor.logoUrl
+    ? vendor.logoUrl.startsWith('/') ? `/api/uploads${vendor.logoUrl.replace(/^\/uploads\/?/, '/')}` : vendor.logoUrl
+    : null;
 
-  const vendorPhone = vendor.whatsappPhone ? vendor.whatsappPhone.replace(/[^0-9+]/g, '') : '';
-  const vendorContactHref = vendorPhone ? `https://wa.me/${vendorPhone.replace(/^\+/, '')}?text=${encodeURIComponent(`Hola, estoy interesado en tu tienda ${vendor.name}`)}` : null;
+  const buildPageHref = (page) => {
+    const p = new URLSearchParams();
+    if (categoryId) p.set('categoryId', categoryId);
+    if (page > 1) p.set('page', String(page));
+    return `/${slug}${p.toString() ? `?${p}` : ''}`;
+  };
 
   return (
     <VendorPageClient vendorSlug={slug} vendorPhone={vendorPhone} vendorName={vendor.name}>
-      <main className="page-shell">
-        <section className="page-card">
-        <style>{`
-          @media (max-width: 768px) {
-            .vendor-header { text-align: center; }
-            .vendor-header-content { flex-direction: column; align-items: center; }
-            .vendor-logo { margin-bottom: 1rem; }
-            .vendor-actions { margin-bottom: 1rem; }
-            .vendor-form { display: grid; gap: 0.75rem; }
-          }
-          @media (min-width: 769px) {
-            .vendor-header { text-align: left; }
-            .vendor-header-content { flex-direction: row; align-items: flex-start; }
-            .vendor-logo { margin-right: 1rem; margin-bottom: 0; flex-shrink: 0; }
-            .vendor-actions { margin-left: auto; }
-            .vendor-form { display: flex; align-items: flex-end; gap: 0.75rem; flex-wrap: wrap; }
-          }
-        `}</style>
-        
-        <div className="vendor-header-content" style={{ display: 'flex', gap: '1.5rem', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '0', left: '0' }} className="theme-switcher-mobile">
-            <PublicVendorHeaderActions />
+      <main className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* Hero del vendor */}
+        <section className="relative">
+          {/* ThemeSwitcher — fixed para no afectar el centrado en absoluto */}
+          <div className="fixed top-4 right-4 z-40">
+            <ThemeSwitcher />
           </div>
-          <style>{`
-            @media (min-width: 769px) {
-              .theme-switcher-mobile {
-                display: none !important;
-              }
-            }
-          `}</style>
-          <div className="vendor-logo" style={{ display: 'flex', justifyContent: 'center' }}>
-            {vendor.logoUrl && (
+
+          {/* Contenido perfectamente centrado en mobile, fila en desktop */}
+          <div className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left gap-4">
+            {logoUrl && (
               <img
-                src={vendor.logoUrl.startsWith('/') ? `/api/uploads${vendor.logoUrl.replace(/^\/uploads\/?/, '/')}` : vendor.logoUrl}
-                alt={`${vendor.name} logo`}
-                style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '18px', boxShadow: '0 18px 40px rgba(15,23,42,0.08)' }}
+                src={logoUrl}
+                alt={vendor.name}
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover shadow-card flex-shrink-0"
               />
             )}
-          </div>
-          
-          <div className="vendor-header" style={{ flex: 1, minWidth: 0 }}>
-            <h1 className="page-title" style={{ marginTop: 0, marginBottom: '0.35rem' }}>{vendor.name}</h1>
-            <p className="page-subtitle" style={{ marginBottom: '1rem' }}>{vendor.slogan || 'Catálogo público del vendedor.'}</p>
-
-            <div className="vendor-actions theme-switcher-desktop" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem', alignItems: 'flex-start' }}>
-              <PublicVendorHeaderActions />
-              {vendorContactHref && (
-                <a
-                  href={vendorContactHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="primary-button"
-                  style={{ fontSize: 'clamp(0.85rem, 2vw, 0.95rem)', padding: 'clamp(0.6rem, 1vw, 0.85rem) clamp(0.8rem, 2vw, 1.1rem)' }}
-                >
-                  Contactar tienda
-                </a>
+            <div className="space-y-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text)] leading-tight">{vendor.name}</h1>
+              {vendor.slogan && (
+                <p className="text-[var(--muted)] text-sm">{vendor.slogan}</p>
               )}
-              <style>{`
-                @media (max-width: 768px) {
-                  .theme-switcher-desktop {
-                    display: none !important;
-                  }
-                }
-              `}</style>
+              {(vendor.state || vendor.city) && (
+                <p className="text-xs text-[var(--muted)]">
+                  📍 {vendor.city ? `${vendor.city}, ` : ''}{vendor.state}
+                </p>
+              )}
+              {vendorPhone && (
+                <div className="pt-1">
+                  <a
+                    href={`https://wa.me/${vendorPhone.replace(/^\+/, '')}?text=${encodeURIComponent(`Hola, estoy interesado en tu tienda ${vendor.name}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button size="sm">Contactar</Button>
+                  </a>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        </section>
 
-        <CategorySelect categories={categories} currentCategoryId={categoryId} />
+        {/* Filtros */}
+        <section className="flex flex-col sm:flex-row items-start sm:items-end gap-3 flex-wrap">
+          <CategorySelect categories={categories} currentCategoryId={categoryId} />
+          <p className="text-sm text-[var(--muted)] pb-1">
+            {totalProducts} producto{totalProducts !== 1 ? 's' : ''}
+            {categoryId ? ' en esta categoría' : ''}
+          </p>
+        </section>
 
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', fontSize: 'clamp(0.85rem, 2vw, 0.95rem)' }}>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>Página {pageToFetch} de {totalPages} · {totalProducts} producto{totalProducts === 1 ? '' : 's'}</p>
-        </div>
-      </section>
-
-      <section>
-        {products.length ? (
-          <div
-            style={{
-              display: 'grid',
-              gap: '1rem',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-            }}
-            className="products-grid"
-          >
-            <style>{`
-              @media (min-width: 769px) {
-                .products-grid {
-                  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)) !important;
-                }
-              }
-            `}</style>
+        {/* Grid de productos */}
+        {products.length > 0 ? (
+          <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {products.map((product) => (
               <PublicProductCard key={product.id} product={product} />
             ))}
-          </div>
+          </section>
         ) : (
-          <p>No hay productos activos para esta tienda.</p>
+          <section className="text-center py-16 text-[var(--muted)]">
+            <p className="text-4xl mb-3">📦</p>
+            <p>No hay productos en esta categoría.</p>
+          </section>
         )}
-      </section>
 
-      {totalPages > 1 && (
-        <div className="pagination-row" style={{ marginTop: '1rem' }}>
-          {pageToFetch > 1 && (
-            <Link href={buildPageHref(pageToFetch - 1)} className="secondary-button" style={{ padding: '0.5rem 0.85rem' }}>
-              Anterior
-            </Link>
-          )}
-          <span>Página {pageToFetch} de {totalPages}</span>
-          {pageToFetch < totalPages && (
-            <Link href={buildPageHref(pageToFetch + 1)} className="secondary-button" style={{ padding: '0.5rem 0.85rem' }}>
-              Siguiente
-            </Link>
-          )}
-        </div>
-      )}
+        {/* Paginación */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            {pageToFetch > 1 && (
+              <Link href={buildPageHref(pageToFetch - 1)}>
+                <Button variant="outline" size="sm">← Anterior</Button>
+              </Link>
+            )}
+            <span className="text-sm text-[var(--muted)]">
+              Página {pageToFetch} de {totalPages}
+            </span>
+            {pageToFetch < totalPages && (
+              <Link href={buildPageHref(pageToFetch + 1)}>
+                <Button variant="outline" size="sm">Siguiente →</Button>
+              </Link>
+            )}
+          </div>
+        )}
       </main>
     </VendorPageClient>
   );

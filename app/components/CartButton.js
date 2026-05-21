@@ -3,64 +3,22 @@
 import { useCartContext } from '@/app/context/CartContext';
 
 export default function CartButton() {
-  const { itemCount, showCart, setShowCart, isLoaded } = useCartContext();
+  const { itemCount, setShowCart, isLoaded } = useCartContext();
 
   if (!isLoaded) return null;
 
   return (
     <button
       onClick={() => setShowCart(true)}
-      style={{
-        position: 'fixed',
-        bottom: '2rem',
-        right: '2rem',
-        width: '60px',
-        height: '60px',
-        borderRadius: '50%',
-        background: '#25D366',
-        color: 'white',
-        border: 'none',
-        fontSize: '1.5rem',
-        cursor: 'pointer',
-        boxShadow: '0 4px 12px rgba(37, 211, 102, 0.4)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 100,
-        transition: 'all 0.2s ease',
-      }}
-      onMouseEnter={(e) => {
-        e.target.style.transform = 'scale(1.1)';
-        e.target.style.boxShadow = '0 6px 16px rgba(37, 211, 102, 0.5)';
-      }}
-      onMouseLeave={(e) => {
-        e.target.style.transform = 'scale(1)';
-        e.target.style.boxShadow = '0 4px 12px rgba(37, 211, 102, 0.4)';
-      }}
-      title={itemCount > 0 ? `${itemCount} producto${itemCount !== 1 ? 's' : ''} en el carrito` : 'Carrito vacío'}
+      aria-label={itemCount > 0 ? `${itemCount} producto${itemCount !== 1 ? 's' : ''} en el carrito` : 'Ver carrito'}
+      className="fixed bottom-6 right-6 z-[100] flex items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_4px_20px_rgba(37,211,102,0.45)] transition-all hover:scale-105 hover:shadow-[0_6px_24px_rgba(37,211,102,0.55)] active:scale-95"
+      style={{ width: 56, height: 56 }}
     >
-      🛒
+      <span className="text-2xl leading-none">🛒</span>
       {itemCount > 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '-8px',
-            right: '-8px',
-            background: '#dc2626',
-            color: 'white',
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            border: '2px solid var(--bg)',
-          }}
-        >
-          {itemCount}
-        </div>
+        <span className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] px-1 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center border-2 border-[var(--bg)]">
+          {itemCount > 99 ? '99+' : itemCount}
+        </span>
       )}
     </button>
   );

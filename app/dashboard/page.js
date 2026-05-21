@@ -2,16 +2,21 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import db from "../../db/index.js";
 import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
+import { Button } from "@/app/components/ui/button";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
   if (!session) {
     return (
-      <main style={{ padding: "1.5rem", fontFamily: "Arial, sans-serif" }}>
-        <h1>No autorizado</h1>
-        <p>Necesitas iniciar sesión primero.</p>
-        <Link href="/login">Ir a login</Link>
+      <main className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
+        <Card className="w-full max-w-sm border-[var(--border)] bg-[var(--surface)]">
+          <CardContent className="pt-6 text-center space-y-4">
+            <p className="text-[var(--text)]">Necesitas iniciar sesión primero.</p>
+            <Link href="/login"><Button className="w-full">Ir a login</Button></Link>
+          </CardContent>
+        </Card>
       </main>
     );
   }
@@ -19,24 +24,19 @@ export default async function DashboardPage() {
   if (session.user.role === 'admin') {
     return (
       <main className="page-shell">
-        <section className="page-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <h1 className="page-title">Panel de administración</h1>
-              <p className="page-subtitle">Gestiona vendedores y categorías de forma segura.</p>
+        <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+          <CardHeader>
+            <CardTitle className="page-title">Panel de administración</CardTitle>
+            <p className="page-subtitle">Gestiona vendedores y categorías de forma segura.</p>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-sm text-[var(--muted)]">Usuario: {session.user?.email}</p>
+            <div className="flex gap-3 flex-wrap mt-4">
+              <Link href="/admin/vendors"><Button variant="outline">Gestionar tiendas</Button></Link>
+              <Link href="/admin/categories"><Button variant="outline">Gestionar categorías</Button></Link>
             </div>
-            <div className="hero-actions">
-              <Link href="/logout" className="secondary-button">Cerrar sesión</Link>
-            </div>
-          </div>
-          <div style={{ marginTop: '1.5rem' }}>
-            <p style={{ margin: '0.5rem 0' }}>Usuario: {session.user?.email}</p>
-            <ul style={{ margin: '1rem 0', paddingLeft: '1.25rem', color: 'var(--text)' }}>
-              <li><Link href="/admin/vendors">Gestionar vendedores / tiendas</Link></li>
-              <li><Link href="/admin/categories">Gestionar categorías</Link></li>
-            </ul>
-          </div>
-        </section>
+          </CardContent>
+        </Card>
       </main>
     );
   }
@@ -47,30 +47,24 @@ export default async function DashboardPage() {
 
   return (
     <main className="page-shell">
-      <section className="page-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 className="page-title">Dashboard</h1>
-            <p className="page-subtitle">Accede a las herramientas para administrar tu tienda.</p>
+      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <CardHeader>
+          <CardTitle className="page-title">Dashboard</CardTitle>
+          <p className="page-subtitle">Accede a las herramientas para administrar tu tienda.</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid gap-1.5 text-sm">
+            <p className="text-[var(--text)]">Usuario: <span className="font-medium">{session.user?.email}</span></p>
+            <p className="text-[var(--text)]">Vendor: <span className="font-medium">{vendor?.slug || 'N/A'}</span></p>
+            <p className="text-[var(--text)]">URL pública: <a href={publicUrl} target="_blank" rel="noreferrer" className="text-[var(--accent)] hover:underline">{publicUrl}</a></p>
           </div>
-          <div className="hero-actions">
-            <Link href="/logout" className="secondary-button">Cerrar sesión</Link>
+          <div className="flex gap-3 flex-wrap pt-2">
+            <Link href="/dashboard/categories"><Button variant="outline">Categorías</Button></Link>
+            <Link href="/dashboard/products"><Button variant="outline">Productos</Button></Link>
+            <Link href="/dashboard/config"><Button variant="outline">Configuración</Button></Link>
           </div>
-        </div>
-
-        <div style={{ marginTop: '1.5rem', display: 'grid', gap: '0.85rem' }}>
-          <p style={{ margin: 0 }}>Usuario: {session.user?.email}</p>
-          <p style={{ margin: 0 }}>VendorId: {session.user?.vendorId}</p>
-          <p style={{ margin: 0 }}>Vendor slug: {vendor?.slug || 'N/A'}</p>
-          <p style={{ margin: 0 }}>URL pública: {publicUrl}</p>
-        </div>
-
-        <div className="cta-row" style={{ marginTop: '1.25rem' }}>
-          <Link href="/dashboard/categories" className="secondary-button">Editar categorías</Link>
-          <Link href="/dashboard/products" className="secondary-button">Editar productos</Link>
-          <Link href="/dashboard/config" className="secondary-button">Config de tienda</Link>
-        </div>
-      </section>
+        </CardContent>
+      </Card>
     </main>
   );
 }

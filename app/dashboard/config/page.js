@@ -2,15 +2,21 @@ import { getUserSession } from '../../../lib/auth/getSession';
 import db from '../../../db/index.js';
 import ConfigForm from './ConfigForm';
 import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
+import { Button } from '@/app/components/ui/button';
+import { Badge } from '@/app/components/ui/badge';
 
 export default async function DashboardConfigPage() {
   const session = await getUserSession();
   if (!session) {
     return (
-      <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-        <h1>No autorizado</h1>
-        <p>Inicia sesión para administrar tu tienda.</p>
-        <Link href="/login">Iniciar sesión</Link>
+      <main className="page-shell">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
+          <CardContent className="pt-6 text-center space-y-3">
+            <p className="text-[var(--text)]">Sesión requerida.</p>
+            <Link href="/login"><Button>Iniciar sesión</Button></Link>
+          </CardContent>
+        </Card>
       </main>
     );
   }
@@ -18,36 +24,61 @@ export default async function DashboardConfigPage() {
   const vendorModel = await db.Vendor.findByPk(session.user.vendorId);
   if (!vendorModel) {
     return (
-      <main style={{ padding: '1.5rem', fontFamily: 'Arial, sans-serif' }}>
-        <h1>Vendor no encontrado</h1>
+      <main className="page-shell">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
+          <CardContent className="pt-6 text-center">
+            <p className="text-[var(--text)]">Tienda no encontrada.</p>
+          </CardContent>
+        </Card>
       </main>
     );
   }
 
   const vendor = vendorModel.get({ plain: true });
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  const publicUrl = `${baseUrl}/${vendor.slug}`;
+  const tags = [vendor.tag1, vendor.tag2].filter(Boolean);
 
   return (
     <main className="page-shell">
-      <section className="page-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 className="page-title">Dashboard - Configuración</h1>
-            <p className="page-subtitle">Personaliza tu tienda con colores y contacto directo.</p>
+      {/* Header con resumen de la tienda */}
+      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <CardHeader>
+          <div className="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <CardTitle className="page-title">Configuración</CardTitle>
+              <p className="page-subtitle">Personaliza el perfil público de tu tienda.</p>
+            </div>
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm">← Volver</Button>
+            </Link>
           </div>
-          <Link href="/dashboard" className="secondary-button">Volver</Link>
-        </div>
 
-        <div style={{ marginTop: '1.5rem', display: 'grid', gap: '0.75rem' }}>
-          <p style={{ margin: 0 }}>Vendor actual: {vendor.name}</p>
-          <p style={{ margin: 0 }}>Slug público: {vendor.slug}</p>
-          <p style={{ margin: 0 }}>Slogan actual: {vendor.slogan || 'No definido'}</p>
-          <p style={{ margin: 0 }}>URL pública: {process.env.NEXTAUTH_URL || 'http://localhost:3000'}/{vendor.slug}</p>
-        </div>
-      </section>
+          {/* Info rápida de la tienda */}
+          <div className="flex flex-wrap gap-4 pt-3 text-sm text-[var(--muted)]">
+            <span>
+              <span className="font-medium text-[var(--text)]">{vendor.name}</span>
+            </span>
+            <a href={publicUrl} target="_blank" rel="noreferrer"
+              className="text-[var(--accent)] hover:underline">
+              /{vendor.slug}
+            </a>
+            {vendor.state && (
+              <span>📍 {vendor.city ? `${vendor.city}, ` : ''}{vendor.state}</span>
+            )}
+            {tags.map((tag) => (
+              <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+            ))}
+          </div>
+        </CardHeader>
+      </Card>
 
-      <section className="page-card">
-        <ConfigForm vendor={vendor} />
-      </section>
+      {/* Formulario */}
+      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <CardContent className="pt-6">
+          <ConfigForm vendor={vendor} />
+        </CardContent>
+      </Card>
     </main>
   );
 }

@@ -31,17 +31,25 @@ export default function AddCategoryForm({ vendorId, onCreated }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form-card" style={{ maxWidth: '520px' }}>
-      <div className="form-field">
-        <label>Nombre</label>
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" required />
+    <form onSubmit={handleSubmit} className="grid gap-4 max-w-lg">
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Nombre</label>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de la categoría" required />
       </div>
-      <div className="form-field">
-        <label>Slug</label>
-        <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="Slug" required />
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Slug</label>
+        <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="slug-de-categoria" required />
       </div>
-      <button type="submit" className="primary-button">Crear categoría</button>
-      {message && <p className="text-small" style={{ margin: 0 }}>{message}</p>}
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="primary-button"
+      >
+        {isSubmitting ? 'Creando...' : 'Crear categoría'}
+      </button>
+      {message && (
+        <p className={`text-sm ${message.includes('Error') ? 'text-red-500' : 'text-green-600'}`}>{message}</p>
+      )}
     </form>
   );
 }

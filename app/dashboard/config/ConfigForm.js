@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import * as F from "@/app/lib/form-styles";
+import RegionSelect from "@/app/components/RegionSelect";
 
 const COUNTRY_CODES = [
   { code: '+598', label: '+598 (Uruguay)' },
@@ -36,6 +38,8 @@ export default function ConfigForm({ vendor }) {
   const [countryCode, setCountryCode] = useState(extractCountryCode(vendor.whatsappPhone || ""));
   const [whatsappNumber, setWhatsappNumber] = useState(extractPhoneNumber(vendor.whatsappPhone || ""));
   const [slogan, setSlogan] = useState(vendor.slogan || "");
+  const [state, setState] = useState(vendor.state || "");
+  const [city, setCity] = useState(vendor.city || "");
   const [message, setMessage] = useState("");
   const [logoUrl, setLogoUrl] = useState(vendor.logoUrl || "");
   const [uploading, setUploading] = useState(false);
@@ -48,7 +52,7 @@ export default function ConfigForm({ vendor }) {
     const response = await fetch(`/api/vendors/${vendor.id}/config`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, slug, whatsappPhone: fullWhatsappPhone, slogan }),
+      body: JSON.stringify({ name, slug, whatsappPhone: fullWhatsappPhone, slogan, state, city }),
     });
 
     const data = await response.json();
@@ -98,85 +102,55 @@ export default function ConfigForm({ vendor }) {
 
   return (
     <div>
-      <h2 style={{ marginTop: 0 }}>Editar configuración</h2>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 150px", gap: "2rem", alignItems: "start" }}>
-        <form onSubmit={handleSubmit} className="form-card" style={{ margin: 0 }}>
-          <div className="form-field">
-            <label>Nombre</label>
-            <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" required />
+      <h2 className="text-xl font-semibold text-[var(--text)] mb-4">Editar configuración</h2>
+      <div className="grid gap-8 md:grid-cols-[1fr_160px] items-start">
+        <form onSubmit={handleSubmit} className="grid gap-4 max-w-lg">
+          {/* Logo preview inline (igual que EditVendorForm) */}
+          <div className="flex items-center gap-4">
+            {displayLogoUrl && (
+              <img src={displayLogoUrl} alt="Logo" className="w-16 h-16 rounded-xl object-cover shadow-sm flex-shrink-0" />
+            )}
+            <div className={F.field + ' flex-1'}>
+              <label htmlFor="logo-input" className={F.label}>Logo de tienda</label>
+              <input id="logo-input" type="file" accept="image/*" onChange={handleLogoUpload} disabled={uploading}
+                className="input text-xs py-2 cursor-pointer disabled:cursor-not-allowed" />
+              {logoMessage && <p className={`text-xs ${F.msg(logoMessage)}`}>{logoMessage}</p>}
+            </div>
           </div>
-          <div className="form-field">
-            <label>Slug (URL pública)</label>
-            <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="mi-tienda" required />
+
+          <div className={F.field}>
+            <label className={F.label}>Nombre</label>
+            <input className={F.input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre de tu tienda" required />
           </div>
-          <div className="form-field">
-            <label>Slogan</label>
-            <input className="input" value={slogan} onChange={(e) => setSlogan(e.target.value)} placeholder="Slogan de tu tienda" />
+          <div className={F.field}>
+            <label className={F.label}>Slug (URL pública)</label>
+            <input className={F.input} value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="mi-tienda" required />
           </div>
-          <div className="form-field">
-            <label>Código de país</label>
-            <select className="select" value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
-              {COUNTRY_CODES.map((c) => (
-                <option key={c.code} value={c.code}>{c.label}</option>
-              ))}
-            </select>
+          <div className={F.field}>
+            <label className={F.label}>Slogan</label>
+            <input className={F.input} value={slogan} onChange={(e) => setSlogan(e.target.value)} placeholder="Slogan de tu tienda" />
           </div>
-          <div className="form-field">
-            <label>Número de WhatsApp (sin código de país)</label>
-            <input
-              className="input"
-              value={whatsappNumber}
-              onChange={(e) => setWhatsappNumber(e.target.value)}
-              placeholder="Ej. 6222334455"
-              required
-            />
+          <RegionSelect
+            state={state}
+            city={city}
+            onStateChange={setState}
+            onCityChange={setCity}
+          />
+          <div className="grid grid-cols-[160px_1fr] gap-3">
+            <div className={F.field}>
+              <label className={F.label}>País</label>
+              <select className={F.select} value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
+                {COUNTRY_CODES.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}
+              </select>
+            </div>
+            <div className={F.field}>
+              <label className={F.label}>WhatsApp</label>
+              <input className={F.input} value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} placeholder="6222334455" required />
+            </div>
           </div>
           <button type="submit" className="primary-button">Guardar cambios</button>
-          {message && <p className="text-small" style={{ margin: 0 }}>{message}</p>}
+          {message && <p className={F.msg(message)}>{message}</p>}
         </form>
-
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
-          {displayLogoUrl && (
-            <img
-              src={displayLogoUrl}
-              alt="Logo"
-              style={{
-                width: "150px",
-                height: "150px",
-                objectFit: "cover",
-                borderRadius: "10px",
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-              }}
-            />
-          )}
-          <div style={{ width: "100%", textAlign: "center" }}>
-            <label htmlFor="logo-input" style={{ fontSize: "0.85rem", display: "block", marginBottom: "0.5rem" }}>
-              Logo
-            </label>
-            <input
-              id="logo-input"
-              type="file"
-              accept="image/*"
-              onChange={handleLogoUpload}
-              disabled={uploading}
-              className="input"
-              style={{
-                cursor: uploading ? "not-allowed" : "pointer",
-                fontSize: "0.75rem",
-                padding: "0.5rem",
-              }}
-            />
-            {logoMessage && (
-              <p style={{
-                fontSize: "0.75rem",
-                margin: "0.5rem 0 0 0",
-                color: logoMessage.includes("exitosamente") ? "#2ecc71" : "#e74c3c",
-              }}>
-                {logoMessage}
-              </p>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );

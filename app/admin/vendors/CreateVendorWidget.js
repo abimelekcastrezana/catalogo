@@ -2,36 +2,24 @@
 
 import { useState } from 'react';
 import CreateVendorForm from './CreateVendorForm';
+import { Button } from '@/app/components/ui/button';
 
 export default function CreateVendorWidget() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div style={{ marginBottom: '1.5rem' }}>
-      <button
+    <div className="space-y-4">
+      <Button
         type="button"
-        onClick={() => setOpen(!open)}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          padding: '0.75rem 1rem',
-          border: '1px solid #ccc',
-          borderRadius: '999px',
-          background: '#fff',
-          cursor: 'pointer',
-          fontWeight: 600,
-        }}
+        variant="outline"
+        onClick={() => setOpen((prev) => !prev)}
+        className="gap-2"
       >
-        <span style={{ fontSize: '1.1rem' }}>+</span>
+        <span className="text-base">{open ? '−' : '+'}</span>
         {open ? 'Cancelar' : 'Crear tienda nueva'}
-      </button>
+      </Button>
 
-      {open && (
-        <div style={{ marginTop: '1rem', maxWidth: '520px' }}>
-          <CreateVendorForm />
-        </div>
-      )}
+      {open && <CreateVendorForm />}
     </div>
   );
 }

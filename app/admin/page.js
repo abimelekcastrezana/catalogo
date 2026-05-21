@@ -1,63 +1,89 @@
-import Link from 'next/link';
 import { getUserSession } from '@/lib/auth/getSession';
 import db from '@/db/index.js';
+import Link from 'next/link';
 import CreateVendorWidget from './vendors/CreateVendorWidget';
 import VendorCard from './vendors/VendorCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 
 export default async function AdminPage({ searchParams }) {
   const resolvedSearchParams = await searchParams;
   const session = await getUserSession();
+
   if (!session || session.user.role !== 'admin') {
     return (
       <main className="page-shell">
-        <section className="page-card">
-          <h1 className="page-title">No autorizado</h1>
-          <p className="page-subtitle">Necesitas iniciar sesión como admin.</p>
-          <Link href="/login" className="primary-button">Ir a login</Link>
-        </section>
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
+          <CardContent className="pt-6 text-center space-y-4">
+            <p className="text-[var(--text)]">Necesitas iniciar sesión como admin.</p>
+            <Link href="/login" className="primary-button inline-block">Ir a login</Link>
+          </CardContent>
+        </Card>
       </main>
     );
   }
 
   const searchSlug = (resolvedSearchParams?.slug || '').trim().toLowerCase();
-  const vendors = await db.Vendor.findAll({ include: [{ model: db.User }], order: [['createdAt', 'DESC']] });
+  const vendors = await db.Vendor.findAll({
+    include: [{ model: db.User }],
+    order: [['createdAt', 'DESC']],
+  });
   const visibleVendors = vendors
-    .map((vendor) => vendor.get({ plain: true }))
-    .filter((vendor) => vendor.slug !== 'gatunoide')
-    .filter((vendor) => !searchSlug || vendor.slug.toLowerCase().includes(searchSlug));
+    .map((v) => v.get({ plain: true }))
+    .filter((v) => v.slug !== 'gatunoide')
+    .filter((v) => !searchSlug || v.slug.toLowerCase().includes(searchSlug) || v.name.toLowerCase().includes(searchSlug));
 
   return (
     <main className="page-shell">
-      <section className="page-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h1 className="page-title">Panel de administración</h1>
-            <p className="page-subtitle">{session.user.email}</p>
+      {/* Header del panel */}
+      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <CardTitle className="page-title">Panel de administración</CardTitle>
+              <p className="text-sm text-[var(--muted)] mt-1">{session.user.email}</p>
+            </div>
           </div>
-          <Link href="/logout" className="secondary-button">Cerrar sesión</Link>
-        </div>
-        <CreateVendorWidget />
-      </section>
+        </CardHeader>
+        <CardContent>
+          <CreateVendorWidget />
+        </CardContent>
+      </Card>
 
-      <section className="page-card">
-        <h2 style={{ margin: '0 0 1rem' }}>Tiendas</h2>
-        <form method="get" style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '220px' }}>
-            Filtrar por slug
-            <input name="slug" defaultValue={searchSlug} placeholder="Buscar slug" className="input" />
-          </label>
-          <button type="submit" className="secondary-button">Filtrar</button>
-        </form>
-        <div style={{
-          display: 'grid',
-          gap: '1rem',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(min(220px, 100%), 1fr))',
-        }}>
-          {visibleVendors.map((vendor) => (
-            <VendorCard key={vendor.id} vendor={vendor} />
-          ))}
-        </div>
-      </section>
+      {/* Lista de tiendas */}
+      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <CardTitle className="text-xl">
+              Tiendas
+              <span className="ml-2 text-sm font-normal text-[var(--muted)]">
+                ({visibleVendors.length})
+              </span>
+            </CardTitle>
+            <form method="get" className="flex items-end gap-2">
+              <input
+                name="slug"
+                defaultValue={searchSlug}
+                placeholder="Buscar por nombre o slug"
+                className="input text-sm py-2 min-w-[200px]"
+              />
+              <button type="submit" className="secondary-button text-sm py-2 px-4">
+                Filtrar
+              </button>
+            </form>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {visibleVendors.length === 0 ? (
+            <p className="text-center text-[var(--muted)] py-8">No hay tiendas que coincidan.</p>
+          ) : (
+            <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(min(220px,100%),1fr))]">
+              {visibleVendors.map((vendor) => (
+                <VendorCard key={vendor.id} vendor={vendor} />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </main>
   );
 }

@@ -49,6 +49,14 @@ module.exports = (sequelize) => {
       allowNull: false,
       defaultValue: true,
     },
+    state: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   }, {
     tableName: 'vendors',
     timestamps: true,

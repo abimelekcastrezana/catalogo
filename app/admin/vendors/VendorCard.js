@@ -70,66 +70,66 @@ export default function VendorCard({ vendor }) {
     : null;
 
   return (
-    <article className="card">
-      <div className="card-hero">
+    <article className="card overflow-hidden">
+      {/* Hero */}
+      <div className="card-hero relative">
         {logoPath ? (
-          <img src={logoPath} alt={`${vendor.name} logo`} />
+          <img src={logoPath} alt={`${vendor.name} logo`} className="w-full h-full object-cover" />
         ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '0.9rem' }}>
+          <div className="w-full h-full flex items-center justify-center text-[var(--muted)] text-sm">
             Sin logo
           </div>
         )}
-        <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem' }}>
-          <button
-            type="button"
-            onClick={handleToggle}
-            disabled={loading}
-            style={{
-              padding: '0.25rem 0.65rem',
-              borderRadius: '999px',
-              border: 'none',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              background: isActive ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
-              color: isActive ? '#15803d' : '#dc2626',
-            }}
-          >
-            {isActive ? 'Activa' : 'Inactiva'}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleToggle}
+          disabled={loading}
+          className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-semibold border-none cursor-pointer transition-colors ${
+            isActive
+              ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
+              : 'bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400'
+          }`}
+        >
+          {isActive ? 'Activa' : 'Inactiva'}
+        </button>
       </div>
 
+      {/* Body */}
       <div className="card-body">
-        <div style={{ display: 'grid', gap: '0.25rem' }}>
-          <h3 style={{ margin: 0, fontSize: '1.05rem' }}>{vendor.name}</h3>
-          <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>/{vendor.slug}</span>
+        <div className="space-y-0.5">
+          <h3 className="text-base font-semibold m-0">{vendor.name}</h3>
+          <span className="text-[var(--muted)] text-sm">/{vendor.slug}</span>
         </div>
-        <div style={{ display: 'grid', gap: '0.2rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
-          <span>WhatsApp: {vendor.whatsappPhone}</span>
-          <span>Email: {userEmail}</span>
+        <div className="space-y-0.5 text-sm text-[var(--muted)]">
+          <p className="m-0">WhatsApp: {vendor.whatsappPhone}</p>
+          <p className="m-0">Email: {userEmail}</p>
           {(vendor.tag1 || vendor.tag2) && (
-            <span>Tags: {[vendor.tag1, vendor.tag2].filter(Boolean).join(', ')}</span>
+            <p className="m-0">Tags: {[vendor.tag1, vendor.tag2].filter(Boolean).join(', ')}</p>
           )}
         </div>
       </div>
 
-      <div style={{ padding: '0 1.1rem 1.2rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-        <a href={`/admin/vendors/${vendor.id}`} className="secondary-button" style={{ fontSize: '0.88rem', padding: '0.5rem 0.85rem' }}>
+      {/* Actions */}
+      <div className="px-4 pb-4 flex gap-2 flex-wrap">
+        <a
+          href={`/admin/vendors/${vendor.id}`}
+          className="secondary-button text-sm py-2 px-3"
+        >
           Editar ›
         </a>
         <button
           type="button"
           onClick={handleDelete}
           disabled={loading}
-          className="secondary-button"
-          style={{ fontSize: '0.88rem', padding: '0.5rem 0.85rem', background: 'var(--danger)', color: '#fff', borderColor: 'transparent' }}
+          className="text-sm py-2 px-3 rounded-full border-none bg-[var(--danger)] text-white cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           Eliminar
         </button>
       </div>
 
-      {message && <p style={{ margin: '0 1.1rem 1rem', fontSize: '0.85rem', color: isActive ? '#15803d' : '#dc2626' }}>{message}</p>}
+      {message && (
+        <p className={`px-4 pb-3 text-sm m-0 ${isActive ? 'text-green-600' : 'text-red-500'}`}>{message}</p>
+      )}
     </article>
   );
 }

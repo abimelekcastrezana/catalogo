@@ -8,141 +8,95 @@ export default function PublicProductCard({ product }) {
   const inCart = isInCart(product.id);
   const images = (product.ProductImages || []).slice(0, 2);
   const [current, setCurrent] = useState(0);
-  const rawImagePath = images.length ? images[current].path || '' : '';
-  const cleanedPath = rawImagePath.replace(/^\/?uploads?\/?/, '/');
-  const imageUrl = images.length ? `/api/uploads${cleanedPath}` : null;
+
+  const imageUrl = images.length
+    ? `/api/uploads${(images[current].path || '').replace(/^\/?uploads?\/?/, '/')}`
+    : null;
 
   return (
-    <article className="card">
-      <div className="card-hero">
+    <article className="group flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden shadow-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+      {/* Imagen */}
+      <div className="relative w-full aspect-square bg-[var(--surface-strong)] overflow-hidden">
         {imageUrl ? (
-          <img src={imageUrl} alt={product.name} />
+          <img
+            src={imageUrl}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
         ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
-            Sin imagen
+          <div className="w-full h-full flex items-center justify-center text-[var(--muted)]">
+            <span className="text-4xl">📦</span>
           </div>
         )}
 
-        <div style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'rgba(255,255,255,0.92)', padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.78rem', color: 'var(--muted)', boxShadow: '0 8px 24px rgba(15,23,42,0.08)' }}>
-          {product.Category?.name ? `Categoría: ${product.Category.name}` : 'Sin categoría'}
-        </div>
+        {/* Badge categoría */}
+        {product.Category?.name && (
+          <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium">
+            {product.Category.name}
+          </span>
+        )}
 
+        {/* Carousel */}
         {images.length > 1 && (
           <>
             <button
               type="button"
-              onClick={() => setCurrent((current - 1 + images.length) % images.length)}
-              style={{
-                position: 'absolute',
-                left: '0.75rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '36px',
-                height: '36px',
-                borderRadius: '999px',
-                border: '1px solid rgba(255,255,255,0.85)',
-                background: 'rgba(15,23,42,0.6)',
-                color: '#fff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 2,
-                boxShadow: '0 10px 24px rgba(15,23,42,0.18)',
-              }}
+              onClick={(e) => { e.stopPropagation(); setCurrent((current - 1 + images.length) % images.length); }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center hover:bg-black/70 transition-colors"
               aria-label="Imagen anterior"
-            >
-              ‹
-            </button>
+            >‹</button>
             <button
               type="button"
-              onClick={() => setCurrent((current + 1) % images.length)}
-              style={{
-                position: 'absolute',
-                right: '0.75rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '36px',
-                height: '36px',
-                borderRadius: '999px',
-                border: '1px solid rgba(255,255,255,0.85)',
-                background: 'rgba(15,23,42,0.6)',
-                color: '#fff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 2,
-                boxShadow: '0 10px 24px rgba(15,23,42,0.18)',
-              }}
+              onClick={(e) => { e.stopPropagation(); setCurrent((current + 1) % images.length); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center hover:bg-black/70 transition-colors"
               aria-label="Siguiente imagen"
-            >
-              ›
-            </button>
-            <div style={{ position: 'absolute', bottom: '0.75rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.45rem', padding: '0 0.5rem' }}>
-              {images.map((_, index) => (
+            >›</button>
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+              {images.map((_, i) => (
                 <button
-                  key={index}
+                  key={i}
                   type="button"
-                  onClick={() => setCurrent(index)}
-                  style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    border: '1px solid rgba(255,255,255,0.9)',
-                    background: current === index ? '#fff' : 'rgba(255,255,255,0.7)',
-                    cursor: 'pointer',
-                  }}
-                  aria-label={`Imagen ${index + 1}`}
+                  onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+                  className={`w-1.5 h-1.5 rounded-full transition-colors ${i === current ? 'bg-white' : 'bg-white/50'}`}
+                  aria-label={`Imagen ${i + 1}`}
                 />
               ))}
             </div>
           </>
         )}
+
+        {/* Badge "en carrito" */}
+        {inCart && (
+          <span className="absolute top-2 right-2 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+            <span className="text-white text-xs font-bold">✓</span>
+          </span>
+        )}
       </div>
 
-      <div className="card-body">
-        <div style={{ display: 'grid', gap: '0.35rem', minHeight: '5.2rem' }}>
-          <h3 style={{ margin: 0, fontSize: '1.05rem', lineHeight: '1.2' }}>{product.name}</h3>
-          <p style={{ margin: 0, color: 'var(--muted)', minHeight: '2.4rem', overflowWrap: 'anywhere', fontSize: '0.9rem' }}>{product.description || 'Sin descripción'}</p>
-          <div style={{ color: 'var(--muted)', fontSize: '0.85rem', minHeight: '1.2rem' }}>
-            {product.sku ? `SKU: ${product.sku}` : ''}
-          </div>
+      {/* Info */}
+      <div className="flex flex-col flex-1 p-3 gap-2">
+        <div className="flex-1 space-y-0.5">
+          <h3 className="font-semibold text-sm leading-snug text-[var(--text)] line-clamp-2">{product.name}</h3>
+          {product.description && (
+            <p className="text-[var(--muted)] text-xs line-clamp-2 leading-relaxed">{product.description}</p>
+          )}
         </div>
 
-        <div className="card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ fontSize: '1.15rem', fontWeight: 700 }}>${Number(product.price).toFixed(2)}</div>
+        <div className="flex items-center justify-between gap-2 pt-1">
+          <span className="text-base font-bold text-[var(--text)]">
+            ${Number(product.price).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+          </span>
+          <button
+            onClick={() => addToCart(product)}
+            className={`flex-1 max-w-[120px] py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
+              inCart
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)] hover:shadow-sm'
+            }`}
+          >
+            {inCart ? '✓ Agregado' : '+ Agregar'}
+          </button>
         </div>
-
-        <button
-          onClick={() => addToCart(product)}
-          style={{
-            width: '100%',
-            padding: '0.85rem',
-            background: inCart ? '#15803d' : '#25D366',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '0.95rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.opacity = '0.9';
-            e.target.style.transform = 'translateY(-2px)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.opacity = '1';
-            e.target.style.transform = 'translateY(0)';
-          }}
-        >
-          💬 {inCart ? 'Quitar del carrito' : 'Agregar'}
-        </button>
       </div>
     </article>
   );

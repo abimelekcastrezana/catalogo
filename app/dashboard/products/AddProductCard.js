@@ -2,27 +2,38 @@
 
 import { useState } from 'react';
 import AddProductForm from './AddProductForm';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/app/components/ui/sheet';
+import { Button } from '@/app/components/ui/button';
 
 export default function AddProductCard({ vendorId, categories, apiBase = '/api/vendors' }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="secondary-button"
-        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}
-      >
-        <span style={{ fontSize: '1.2rem' }}>+</span>
-        {open ? 'Cerrar formulario' : 'Crear producto nuevo'}
-      </button>
+    <>
+      <Button variant="outline" onClick={() => setOpen(true)} className="gap-2">
+        <span className="text-base">+</span>
+        Crear producto
+      </Button>
 
-      {open && (
-        <div style={{ width: '100%', maxWidth: '520px' }}>
-          <AddProductForm vendorId={vendorId} categories={categories} apiBase={apiBase} />
-        </div>
-      )}
-    </div>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-[560px] overflow-y-auto bg-[var(--bg)] text-[var(--text)]"
+        >
+          <SheetHeader className="mb-6">
+            <SheetTitle className="text-xl text-[var(--text)]">Nuevo producto</SheetTitle>
+          </SheetHeader>
+          <AddProductForm
+            vendorId={vendorId}
+            categories={categories}
+            apiBase={apiBase}
+            onSuccess={() => {
+              setOpen(false);
+              window.location.reload();
+            }}
+          />
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
