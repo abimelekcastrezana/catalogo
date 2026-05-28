@@ -3,9 +3,9 @@
 import { useCartContext } from '@/app/context/CartContext';
 
 export default function CartButton() {
-  const { itemCount, setShowCart, isLoaded } = useCartContext();
+  const { itemCount, setShowCart, isLoaded, showCart } = useCartContext();
 
-  if (!isLoaded) return null;
+  if (!isLoaded || showCart) return null;
 
   return (
     <button
