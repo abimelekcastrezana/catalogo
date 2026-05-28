@@ -13,6 +13,7 @@ const ProductImage = require('./models/productImage')(sequelize);
 const Cart = require('./models/cart')(sequelize);
 const CartItem = require('./models/cartItem')(sequelize);
 const User = require('./models/user')(sequelize);
+const VendorLike = require('./models/vendorLike')(sequelize);
 
 // Relacionamientos
 Vendor.hasMany(Category, { foreignKey: 'vendorId' });
@@ -39,6 +40,9 @@ CartItem.belongsTo(Product, { foreignKey: 'productId' });
 Vendor.hasMany(User, { foreignKey: 'vendorId' });
 User.belongsTo(Vendor, { foreignKey: 'vendorId' });
 
+Vendor.hasMany(VendorLike, { foreignKey: 'vendorId' });
+VendorLike.belongsTo(Vendor, { foreignKey: 'vendorId' });
+
 module.exports = {
   sequelize,
   Vendor,
@@ -48,4 +52,5 @@ module.exports = {
   Cart,
   CartItem,
   User,
+  VendorLike,
 };

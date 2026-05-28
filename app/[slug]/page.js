@@ -7,6 +7,7 @@ import VendorPageClient from '@/app/components/VendorPageClient';
 import CategorySelect from '@/app/components/CategorySelect';
 import ThemeSwitcher from '@/app/components/ThemeSwitcher';
 import { Button } from '@/app/components/ui/button';
+import LikeButton from '@/app/components/LikeButton';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -60,7 +61,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
   const vendor = await db.Vendor.findOne({ where: { slug } });
   if (!vendor || !vendor.isActive) return notFound();
 
-  const [categoryModels, totalProducts] = await Promise.all([
+  const [categoryModels, totalProducts, likeCount] = await Promise.all([
     db.Category.findAll({
       where: { vendorId: vendor.id },
       order: [['position', 'ASC'], ['name', 'ASC']],
@@ -68,6 +69,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
     db.Product.count({
       where: { vendorId: vendor.id, isActive: true, ...(categoryId ? { categoryId } : {}) },
     }),
+    db.VendorLike.count({ where: { vendorId: vendor.id } }),
   ]);
 
   const categories = categoryModels.map((c) => c.get({ plain: true }));
@@ -128,8 +130,8 @@ export default async function VendorPublicPage({ params, searchParams }) {
                   📍 {vendor.city ? `${vendor.city}, ` : ''}{vendor.state}
                 </p>
               )}
-              {vendorPhone && (
-                <div className="pt-1">
+              <div className="flex items-center gap-3 pt-1">
+                {vendorPhone && (
                   <a
                     href={`https://wa.me/${vendorPhone.replace(/^\+/, '')}?text=${encodeURIComponent(`Hola, estoy interesado en tu tienda ${vendor.name}`)}`}
                     target="_blank"
@@ -137,8 +139,9 @@ export default async function VendorPublicPage({ params, searchParams }) {
                   >
                     <Button size="sm">Contactar</Button>
                   </a>
-                </div>
-              )}
+                )}
+                <LikeButton slug={slug} initialCount={likeCount} />
+              </div>
             </div>
           </div>
         </section>
