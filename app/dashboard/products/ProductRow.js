@@ -88,12 +88,52 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [editOpen, setEditOpen] = useState(false);
   const [message, setMessage] = useState('');
+  const [isActive, setIsActive] = useState(product.isActive ?? true);
+  const [toggling, setToggling] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
 
   const deleteProduct = async () => {
     if (!confirm('¿Eliminar producto?')) return;
     const res = await fetch(`${apiBase}/${vendorId}/products/${product.id}`, { method: 'DELETE' });
     if (!res.ok) { setMessage((await res.json()).error || 'Error al eliminar'); return; }
     window.location.reload();
+  };
+
+  const toggleActive = async () => {
+    if (toggling) return;
+    setToggling(true);
+    const res = await fetch(`${apiBase}/${vendorId}/products/${product.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: product.name,
+        sku: product.sku || null,
+        description: product.description || '',
+        categoryId: product.categoryId || null,
+        price: product.price,
+        isActive: !isActive,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setIsActive(data.product.isActive);
+    } else {
+      setMessage('Error al cambiar estado');
+    }
+    setToggling(false);
+  };
+
+  const duplicateProduct = async () => {
+    if (duplicating) return;
+    setDuplicating(true);
+    const res = await fetch(`${apiBase}/${vendorId}/products/${product.id}/duplicate`, { method: 'POST' });
+    if (res.ok) {
+      window.location.reload();
+    } else {
+      const data = await res.json();
+      setMessage(data.error || 'Error al duplicar');
+    }
+    setDuplicating(false);
   };
 
   const imageUrls = (product.ProductImages || [])
@@ -116,6 +156,16 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
           <Badge variant="secondary" className="absolute top-3 left-3 bg-white/90 text-[var(--muted)] text-xs shadow-sm">
             {categoryName || 'Sin categoría'}
           </Badge>
+          {/* Toggle isActive */}
+          <button
+            type="button"
+            onClick={toggleActive}
+            disabled={toggling}
+            title={isActive ? 'Deshabilitar producto' : 'Habilitar producto'}
+            className={`absolute top-3 right-3 w-6 h-6 rounded-full border-2 border-white/80 cursor-pointer transition-colors disabled:opacity-50 ${
+              isActive ? 'bg-green-500' : 'bg-yellow-400'
+            }`}
+          />
           {imageUrls.length > 1 && (
             <>
               <button type="button" onClick={() => setCurrentImageIndex((currentImageIndex - 1 + imageUrls.length) % imageUrls.length)}
@@ -134,9 +184,19 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
         </CardContent>
 
         {/* Actions */}
-        <CardFooter className="p-4 pt-0 flex gap-2">
+        <CardFooter className="p-4 pt-0 flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" className="flex-1" onClick={() => setEditOpen(true)}>
             Editar
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={duplicateProduct}
+            disabled={duplicating}
+            title="Duplicar producto"
+            className="px-3"
+          >
+            {duplicating ? '...' : '⧉'}
           </Button>
           <Button
             size="sm"

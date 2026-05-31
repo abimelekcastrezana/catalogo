@@ -49,6 +49,11 @@ module.exports = (sequelize) => {
       allowNull: false,
       defaultValue: true,
     },
+    isOnline: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
     state: {
       type: DataTypes.STRING,
       allowNull: true,

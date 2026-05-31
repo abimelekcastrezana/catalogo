@@ -15,7 +15,7 @@ export async function PUT(request, { params }) {
 
   const resolvedParams = await params;
   const body = await request.json();
-  const { name, slug, whatsappPhone, slogan, tag1, tag2, isActive, email, newPassword, state, city } = body;
+  const { name, slug, whatsappPhone, slogan, tag1, tag2, isActive, isOnline, email, newPassword, state, city } = body;
   const vendorId = resolvedParams.vendorId;
   const slugRegex = /^[A-Za-z0-9-]+$/;
 
@@ -52,6 +52,7 @@ export async function PUT(request, { params }) {
     vendor.tag1 = tag1;
     vendor.tag2 = tag2;
     vendor.isActive = Boolean(isActive);
+    vendor.isOnline = typeof isOnline === 'boolean' ? isOnline : vendor.isOnline;
     vendor.state = state || null;
     vendor.city = city || null;
     await vendor.save();

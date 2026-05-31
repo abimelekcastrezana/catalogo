@@ -16,7 +16,7 @@ export async function PUT(request, { params }) {
   }
 
   const body = await request.json();
-  const { name, slug, whatsappPhone, slogan, state, city } = body;
+  const { name, slug, whatsappPhone, slogan, state, city, isOnline } = body;
 
   if (!name || !slug || !whatsappPhone) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -33,7 +33,9 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ error: 'Slug already in use' }, { status: 409 });
   }
 
-  await vendor.update({ name, slug, whatsappPhone, slogan, state: state || null, city: city || null });
+  const updateData = { name, slug, whatsappPhone, slogan, state: state || null, city: city || null };
+  if (typeof isOnline === 'boolean') updateData.isOnline = isOnline;
+  await vendor.update(updateData);
   const vendorPlain = vendor.get({ plain: true });
 
   return NextResponse.json({ vendor: vendorPlain }, { status: 200 });

@@ -8,6 +8,7 @@ import CategorySelect from '@/app/components/CategorySelect';
 import ThemeSwitcher from '@/app/components/ThemeSwitcher';
 import { Button } from '@/app/components/ui/button';
 import LikeButton from '@/app/components/LikeButton';
+import OnlineIndicator from '@/app/components/OnlineIndicator';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -131,6 +132,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
                 </p>
               )}
               <div className="flex items-center gap-3 pt-1">
+                <OnlineIndicator isOnline={vendor.isOnline ?? true} />
                 {vendorPhone && (
                   <a
                     href={`https://wa.me/${vendorPhone.replace(/^\+/, '')}?text=${encodeURIComponent(`Hola, estoy interesado en tu tienda ${vendor.name}`)}`}

@@ -4,6 +4,7 @@ import db from "../../db/index.js";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
+import OnlineToggle from "./OnlineToggle";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -58,6 +59,22 @@ export default async function DashboardPage() {
             <p className="text-[var(--text)]">Vendor: <span className="font-medium">{vendor?.slug || 'N/A'}</span></p>
             <p className="text-[var(--text)]">URL pública: <a href={publicUrl} target="_blank" rel="noreferrer" className="text-[var(--accent)] hover:underline">{publicUrl}</a></p>
           </div>
+          {vendor && (
+            <div className="pt-1">
+              <OnlineToggle
+                vendorId={vendor.id}
+                initialIsOnline={vendor.isOnline ?? true}
+                vendorData={{
+                  name: vendor.name,
+                  slug: vendor.slug,
+                  whatsappPhone: vendor.whatsappPhone,
+                  slogan: vendor.slogan || '',
+                  state: vendor.state || '',
+                  city: vendor.city || '',
+                }}
+              />
+            </div>
+          )}
           <div className="flex gap-3 flex-wrap pt-2">
             <Link href="/dashboard/categories"><Button variant="outline">Categorías</Button></Link>
             <Link href="/dashboard/products"><Button variant="outline">Productos</Button></Link>
