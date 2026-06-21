@@ -32,6 +32,18 @@ module.exports = (sequelize) => {
       allowNull: false,
       defaultValue: 0.0,
     },
+    wholesalePrice: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+    },
+    wholesaleMinQty: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    wholesaleDescription: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,

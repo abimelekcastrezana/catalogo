@@ -83,6 +83,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
     include: [
       { model: db.ProductImage, order: [['position', 'ASC']] },
       { model: db.Category },
+      { model: db.ProductVariant, order: [['position', 'ASC']] },
     ],
     order: [['position', 'ASC'], ['createdAt', 'DESC']],
     limit: PAGE_SIZE,

@@ -13,7 +13,7 @@ export async function POST(request, { params }) {
   }
 
   const body = await request.json();
-  const { name, sku, description, categoryId, price } = body;
+  const { name, sku, description, categoryId, price, wholesalePrice, wholesaleMinQty, wholesaleDescription, variants } = body;
   if (!name || price === undefined || price === null) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
@@ -41,8 +41,26 @@ export async function POST(request, { params }) {
       description,
       price: normalizedPrice,
       position: nextPosition,
+      wholesalePrice: wholesalePrice ? Number(wholesalePrice) : null,
+      wholesaleMinQty: wholesaleMinQty ? parseInt(wholesaleMinQty, 10) : null,
+      wholesaleDescription: wholesaleDescription || null,
     });
-    return NextResponse.json({ product }, { status: 201 });
+
+    let createdVariants = [];
+    if (Array.isArray(variants) && variants.length > 0) {
+      createdVariants = await Promise.all(
+        variants.map((v, i) =>
+          db.ProductVariant.create({
+            productId: product.id,
+            name: v.name,
+            price: v.price ? Number(v.price) : null,
+            position: i,
+          })
+        )
+      );
+    }
+
+    return NextResponse.json({ product, variants: createdVariants.map(v => v.get({ plain: true })) }, { status: 201 });
   } catch (error) {
     if (error instanceof UniqueConstraintError) {
       return NextResponse.json({ error: 'Constraint error' }, { status: 409 });

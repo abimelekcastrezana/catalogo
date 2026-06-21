@@ -13,20 +13,45 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
   const [catId, setCatId] = useState(product.categoryId || '');
   const [price, setPrice] = useState(product.price || '');
   const [imageFiles, setImageFiles] = useState([null, null]);
+
+  const [variants, setVariants] = useState(
+    (product.ProductVariants || []).map((v) => ({ id: v.id, name: v.name, price: v.price ?? '', imagePath: v.imagePath, imageFile: null }))
+  );
+  const [wholesaleOpen, setWholesaleOpen] = useState(!!product.wholesalePrice);
+  const [wholesalePrice, setWholesalePrice] = useState(product.wholesalePrice ?? '');
+  const [wholesaleMinQty, setWholesaleMinQty] = useState(product.wholesaleMinQty ?? '');
+  const [wholesaleDescription, setWholesaleDescription] = useState(product.wholesaleDescription ?? '');
+
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const addVariantRow = () =>
+    setVariants((prev) => [...prev, { tempId: Date.now(), name: '', price: '', imagePath: null, imageFile: null }]);
+
+  const removeVariant = (i) =>
+    setVariants((prev) => prev.filter((_, idx) => idx !== i));
+
+  const updateVariant = (i, field, value) =>
+    setVariants((prev) => prev.map((v, idx) => (idx === i ? { ...v, [field]: value } : v)));
 
   const handleSave = async () => {
     setSubmitting(true);
     const res = await fetch(`${apiBase}/${vendorId}/products/${product.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, sku, description, categoryId: catId || null, isActive: product.isActive, price }),
+      body: JSON.stringify({
+        name, sku, description, categoryId: catId || null, isActive: product.isActive, price,
+        wholesalePrice: wholesalePrice || null,
+        wholesaleMinQty: wholesaleMinQty || null,
+        wholesaleDescription: wholesaleDescription || null,
+        variants: variants.map((v, i) => ({ name: v.name, price: v.price || null, position: i })),
+      }),
     });
     let data = {};
     try { data = JSON.parse(await res.text()); } catch {}
     if (!res.ok) { setMessage(data.error || 'Error actualizando'); setSubmitting(false); return; }
 
+    // Upload product images
     await Promise.all(
       imageFiles.map((file, i) => ({ file, position: i + 1 }))
         .filter(({ file }) => file)
@@ -36,6 +61,19 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
           fd.append('replacePosition', String(position));
           return fetch(`/api/products/${product.id}/images`, { method: 'POST', body: fd });
         })
+    );
+
+    // Upload variant images for new variants
+    const updatedVariants = data.variants || [];
+    await Promise.all(
+      variants.map(async (v, i) => {
+        if (!v.imageFile) return;
+        const savedVariant = updatedVariants[i];
+        if (!savedVariant?.id) return;
+        const fd = new FormData();
+        fd.append('image', v.imageFile);
+        await fetch(`/api/products/${product.id}/variants/${savedVariant.id}/image`, { method: 'POST', body: fd });
+      })
     );
 
     setSubmitting(false);
@@ -73,6 +111,87 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
           <input className="input text-xs" type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
         </div>
       </div>
+
+      {/* Variantes */}
+      <div className="grid gap-2 border-t border-[var(--border)] pt-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold text-[var(--text)]">Variantes <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span></span>
+          <button type="button" onClick={addVariantRow} className="text-xs text-[var(--accent)] hover:underline font-medium">
+            + Agregar variante
+          </button>
+        </div>
+        {variants.length > 0 && (
+          <div className="grid gap-2">
+            {variants.map((v, i) => (
+              <div key={v.id || v.tempId} className="grid gap-2 p-3 rounded-xl bg-[var(--surface-strong)] border border-[var(--border)]">
+                <div className="flex items-center gap-2">
+                  <input
+                    className="input flex-1 text-sm"
+                    placeholder="Nombre (ej. Azul, Grande...)"
+                    value={v.name}
+                    onChange={(e) => updateVariant(i, 'name', e.target.value)}
+                  />
+                  <button type="button" onClick={() => removeVariant(i)} className="text-[var(--muted)] hover:text-red-500 transition-colors text-lg leading-none flex-shrink-0">✕</button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="grid gap-1">
+                    <label className="text-xs text-[var(--muted)]">Precio (opcional)</label>
+                    <input
+                      className="input text-sm"
+                      type="number" step="0.01" min="0"
+                      placeholder="0.00"
+                      value={v.price}
+                      onChange={(e) => updateVariant(i, 'price', e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <label className="text-xs text-[var(--muted)]">
+                      {v.imagePath ? 'Reemplazar foto' : 'Foto (opcional)'}
+                    </label>
+                    <input
+                      className="input text-xs"
+                      type="file" accept="image/*"
+                      onChange={(e) => updateVariant(i, 'imageFile', e.target.files[0])}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Precio mayoreo */}
+      <div className="border-t border-[var(--border)] pt-3">
+        <button
+          type="button"
+          onClick={() => setWholesaleOpen((v) => !v)}
+          className="text-sm font-medium text-[var(--accent)] hover:underline flex items-center gap-1"
+        >
+          <span>{wholesaleOpen ? '▲' : '▼'}</span> Precio mayoreo <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span>
+        </button>
+        {wholesaleOpen && (
+          <div className="grid gap-3 mt-3">
+            <div className="grid gap-1.5">
+              <label className="text-sm font-medium text-[var(--text)]">Precio mayoreo</label>
+              <input className="input" type="number" step="0.01" min="0" value={wholesalePrice}
+                onChange={(e) => setWholesalePrice(e.target.value)} placeholder="0.00" />
+            </div>
+            <div className="grid gap-1.5">
+              <label className="text-sm font-medium text-[var(--text)]">Cantidad mínima</label>
+              <input className="input" type="number" min="1" step="1" value={wholesaleMinQty}
+                onChange={(e) => setWholesaleMinQty(e.target.value)} placeholder="ej. 10" />
+            </div>
+            <div className="grid gap-1.5">
+              <label className="text-sm font-medium text-[var(--text)]">Descripción del trato</label>
+              <input className="input" value={wholesaleDescription}
+                onChange={(e) => setWholesaleDescription(e.target.value)}
+                placeholder="ej. Precio especial por docena" />
+            </div>
+          </div>
+        )}
+      </div>
+
       {message && <p className="text-sm text-red-500">{message}</p>}
       <div className="flex gap-2 pt-2">
         <Button onClick={handleSave} disabled={submitting} className="flex-1">

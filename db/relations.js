@@ -1,4 +1,4 @@
-const { Vendor, Category, Product, ProductImage, Cart, CartItem } = require('./index');
+const { Vendor, Category, Product, ProductImage, ProductVariant, Cart, CartItem } = require('./index');
 
 Vendor.hasMany(Category, { foreignKey: 'vendorId' });
 Category.belongsTo(Vendor, { foreignKey: 'vendorId' });
@@ -11,6 +11,9 @@ Product.belongsTo(Category, { foreignKey: 'categoryId' });
 
 Product.hasMany(ProductImage, { foreignKey: 'productId' });
 ProductImage.belongsTo(Product, { foreignKey: 'productId' });
+
+Product.hasMany(ProductVariant, { foreignKey: 'productId' });
+ProductVariant.belongsTo(Product, { foreignKey: 'productId' });
 
 Vendor.hasMany(Cart, { foreignKey: 'vendorId' });
 Cart.belongsTo(Vendor, { foreignKey: 'vendorId' });
@@ -26,6 +29,7 @@ module.exports = {
   Category,
   Product,
   ProductImage,
+  ProductVariant,
   Cart,
   CartItem,
 };

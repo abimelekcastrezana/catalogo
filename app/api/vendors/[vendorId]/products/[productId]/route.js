@@ -19,7 +19,7 @@ export async function PUT(request, { params }) {
     }
 
     const body = await request.json();
-    const { name, sku, description, categoryId, isActive, price } = body;
+    const { name, sku, description, categoryId, isActive, price, wholesalePrice, wholesaleMinQty, wholesaleDescription, variants } = body;
     if (!name || price === undefined || price === null) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
@@ -34,8 +34,31 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    await product.update({ name, sku: sku || null, description, categoryId: categoryId || null, isActive: typeof isActive === 'boolean' ? isActive : product.isActive, price: normalizedPrice });
-    return NextResponse.json({ product: product.get({ plain: true }) });
+    await product.update({
+      name, sku: sku || null, description, categoryId: categoryId || null,
+      isActive: typeof isActive === 'boolean' ? isActive : product.isActive,
+      price: normalizedPrice,
+      wholesalePrice: wholesalePrice ? Number(wholesalePrice) : null,
+      wholesaleMinQty: wholesaleMinQty ? parseInt(wholesaleMinQty, 10) : null,
+      wholesaleDescription: wholesaleDescription || null,
+    });
+
+    let updatedVariants = [];
+    if (Array.isArray(variants)) {
+      await db.ProductVariant.destroy({ where: { productId } });
+      updatedVariants = await Promise.all(
+        variants.map((v, i) =>
+          db.ProductVariant.create({
+            productId,
+            name: v.name,
+            price: v.price ? Number(v.price) : null,
+            position: i,
+          })
+        )
+      );
+    }
+
+    return NextResponse.json({ product: product.get({ plain: true }), variants: updatedVariants.map(v => v.get({ plain: true })) });
   } catch (error) {
     console.error('Error updating product:', error);
     return NextResponse.json({ error: 'Server error updating product' }, { status: 500 });

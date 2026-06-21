@@ -54,6 +54,7 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
     include: [
       { model: db.ProductImage, order: [['position', 'ASC']] },
       { model: db.Category },
+      { model: db.ProductVariant, order: [['position', 'ASC']] },
     ],
     order: [['position', 'ASC'], ['createdAt', 'DESC']],
   });

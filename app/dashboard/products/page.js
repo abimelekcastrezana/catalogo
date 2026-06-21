@@ -48,6 +48,7 @@ export default async function DashboardProductsPage({ searchParams }) {
     include: [
       { model: db.ProductImage, order: [['position', 'ASC']] },
       { model: db.Category },
+      { model: db.ProductVariant, order: [['position', 'ASC']] },
     ],
     limit: ITEMS_PER_PAGE,
     offset,

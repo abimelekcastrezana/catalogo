@@ -56,7 +56,7 @@ export default function CartDrawer() {
                 {/* Info del item */}
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm text-[var(--text)] leading-tight truncate">{item.name}</p>
-                  <p className="text-[var(--muted)] text-xs mt-0.5">${Number(item.price).toFixed(2)} c/u</p>
+                  <p className="text-[var(--muted)] text-xs mt-0.5">${Number(item.price).toFixed(2)} {item.name.includes('(Mayoreo)') ? 'c/lote' : 'c/u'}</p>
 
                   {/* Controles de cantidad */}
                   <div className="flex items-center gap-1 mt-2 w-fit bg-[var(--surface-strong)] rounded-lg p-0.5">

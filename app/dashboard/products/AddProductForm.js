@@ -9,8 +9,24 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
   const [categoryId, setCategoryId] = useState("");
   const [price, setPrice] = useState("");
   const [imageFiles, setImageFiles] = useState([null, null]);
+
+  const [variants, setVariants] = useState([]);
+  const [wholesaleOpen, setWholesaleOpen] = useState(false);
+  const [wholesalePrice, setWholesalePrice] = useState("");
+  const [wholesaleMinQty, setWholesaleMinQty] = useState("");
+  const [wholesaleDescription, setWholesaleDescription] = useState("");
+
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const addVariantRow = () =>
+    setVariants((prev) => [...prev, { tempId: Date.now(), name: "", price: "", imageFile: null }]);
+
+  const removeVariant = (i) =>
+    setVariants((prev) => prev.filter((_, idx) => idx !== i));
+
+  const updateVariant = (i, field, value) =>
+    setVariants((prev) => prev.map((v, idx) => (idx === i ? { ...v, [field]: value } : v)));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,10 +35,16 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
     setMessage('Creando producto...');
 
     try {
-const res = await fetch(`${apiBase}/${vendorId}/products`, {
+      const res = await fetch(`${apiBase}/${vendorId}/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, sku, description, categoryId: categoryId || null, price }),
+        body: JSON.stringify({
+          name, sku, description, categoryId: categoryId || null, price,
+          wholesalePrice: wholesalePrice || null,
+          wholesaleMinQty: wholesaleMinQty || null,
+          wholesaleDescription: wholesaleDescription || null,
+          variants: variants.map((v, i) => ({ name: v.name, price: v.price || null, position: i })),
+        }),
       });
 
       let data;
@@ -48,7 +70,7 @@ const res = await fetch(`${apiBase}/${vendorId}/products`, {
         return;
       }
 
-      // Upload images if provided
+      // Upload product images
       const uploadPromises = imageFiles
         .filter((f) => f)
         .slice(0, 2)
@@ -64,12 +86,33 @@ const res = await fetch(`${apiBase}/${vendorId}/products`, {
 
       await Promise.all(uploadPromises);
 
+      // Upload variant images
+      const createdVariants = data.variants || [];
+      await Promise.all(
+        variants.map(async (v, i) => {
+          if (!v.imageFile) return;
+          const savedVariant = createdVariants[i];
+          if (!savedVariant?.id) return;
+          const fd = new FormData();
+          fd.append('image', v.imageFile);
+          await fetch(`/api/products/${product.id}/variants/${savedVariant.id}/image`, {
+            method: 'POST',
+            body: fd,
+          });
+        })
+      );
+
       setName('');
       setSku('');
       setPrice('');
       setDescription('');
       setCategoryId('');
       setImageFiles([null, null]);
+      setVariants([]);
+      setWholesaleOpen(false);
+      setWholesalePrice('');
+      setWholesaleMinQty('');
+      setWholesaleDescription('');
       setIsSubmitting(false);
       if (onSuccess) { onSuccess(); } else { setMessage('Producto creado.'); }
     } catch (err) {
@@ -111,6 +154,86 @@ const res = await fetch(`${apiBase}/${vendorId}/products`, {
           <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
         </div>
       </div>
+
+      {/* Variantes */}
+      <div className="grid gap-2 border-t border-[var(--border)] pt-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold text-[var(--text)]">Variantes <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span></span>
+          <button type="button" onClick={addVariantRow} className="text-xs text-[var(--accent)] hover:underline font-medium">
+            + Agregar variante
+          </button>
+        </div>
+        {variants.length > 0 && (
+          <div className="grid gap-2">
+            {variants.map((v, i) => (
+              <div key={v.tempId} className="grid gap-2 p-3 rounded-xl bg-[var(--surface-strong)] border border-[var(--border)]">
+                <div className="flex items-center gap-2">
+                  <input
+                    className="input flex-1 text-sm"
+                    placeholder="Nombre (ej. Azul, Grande...)"
+                    value={v.name}
+                    onChange={(e) => updateVariant(i, 'name', e.target.value)}
+                    required
+                  />
+                  <button type="button" onClick={() => removeVariant(i)} className="text-[var(--muted)] hover:text-red-500 transition-colors text-lg leading-none flex-shrink-0">✕</button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="grid gap-1">
+                    <label className="text-xs text-[var(--muted)]">Precio (opcional)</label>
+                    <input
+                      className="input text-sm"
+                      type="number" step="0.01" min="0"
+                      placeholder="0.00"
+                      value={v.price}
+                      onChange={(e) => updateVariant(i, 'price', e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <label className="text-xs text-[var(--muted)]">Foto (opcional)</label>
+                    <input
+                      className="input text-xs"
+                      type="file" accept="image/*"
+                      onChange={(e) => updateVariant(i, 'imageFile', e.target.files[0])}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Precio mayoreo */}
+      <div className="border-t border-[var(--border)] pt-3">
+        <button
+          type="button"
+          onClick={() => setWholesaleOpen((v) => !v)}
+          className="text-sm font-medium text-[var(--accent)] hover:underline flex items-center gap-1"
+        >
+          <span>{wholesaleOpen ? '▲' : '▼'}</span> Precio mayoreo <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span>
+        </button>
+        {wholesaleOpen && (
+          <div className="grid gap-3 mt-3">
+            <div className="grid gap-1.5">
+              <label className="text-sm font-medium text-[var(--text)]">Precio mayoreo</label>
+              <input className="input" type="number" step="0.01" min="0" value={wholesalePrice}
+                onChange={(e) => setWholesalePrice(e.target.value)} placeholder="0.00" />
+            </div>
+            <div className="grid gap-1.5">
+              <label className="text-sm font-medium text-[var(--text)]">Cantidad mínima</label>
+              <input className="input" type="number" min="1" step="1" value={wholesaleMinQty}
+                onChange={(e) => setWholesaleMinQty(e.target.value)} placeholder="ej. 10" />
+            </div>
+            <div className="grid gap-1.5">
+              <label className="text-sm font-medium text-[var(--text)]">Descripción del trato</label>
+              <input className="input" value={wholesaleDescription}
+                onChange={(e) => setWholesaleDescription(e.target.value)}
+                placeholder="ej. Precio especial por docena" />
+            </div>
+          </div>
+        )}
+      </div>
+
       <button type="submit" className="primary-button" disabled={isSubmitting}>
         {isSubmitting ? 'Creando...' : 'Crear producto'}
       </button>
