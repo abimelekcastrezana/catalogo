@@ -69,6 +69,7 @@ export default async function DashboardCategoriesPage() {
               <SortableCategoryList
                 categories={categoriesPlain}
                 reorderEndpoint={`/api/vendors/${session.user.vendorId}/categories/reorder`}
+                deleteEndpoint={`/api/vendors/${session.user.vendorId}/categories`}
               />
             )}
           </CardContent>

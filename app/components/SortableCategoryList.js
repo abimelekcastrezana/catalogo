@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import SortableList from './SortableList';
 
-export default function SortableCategoryList({ categories, reorderEndpoint }) {
+export default function SortableCategoryList({ categories, reorderEndpoint, deleteEndpoint }) {
   const router = useRouter();
 
   const handleReorder = async (ids) => {
@@ -20,6 +20,16 @@ export default function SortableCategoryList({ categories, reorderEndpoint }) {
     router.refresh();
   };
 
+  const handleDelete = async (category) => {
+    const res = await fetch(`${deleteEndpoint}/${category.id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json();
+      alert(`Error al eliminar: ${err.error}`);
+      throw new Error(err.error);
+    }
+    router.refresh();
+  };
+
   return (
     <SortableList
       items={categories}
@@ -30,6 +40,7 @@ export default function SortableCategoryList({ categories, reorderEndpoint }) {
         </div>
       )}
       onReorder={handleReorder}
+      onDelete={deleteEndpoint ? handleDelete : undefined}
     />
   );
 }

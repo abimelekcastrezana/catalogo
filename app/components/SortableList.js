@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 
-export default function SortableList({ items, renderItem, onReorder }) {
+export default function SortableList({ items, renderItem, onReorder, onDelete }) {
   const [localItems, setLocalItems] = useState(items);
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => { setLocalItems(items); }, [items]);
 
@@ -21,6 +22,19 @@ export default function SortableList({ items, renderItem, onReorder }) {
     setSaving(true);
     try { await onReorder(items.map((i) => i.id)); }
     finally { setSaving(false); }
+  };
+
+  const handleDelete = async (item) => {
+    if (!onDelete) return;
+    const confirmed = window.confirm(`¿Seguro que quieres borrar la categoría "${item.name}"? Los productos no se eliminarán, solo quedarán sin categoría.`);
+    if (!confirmed) return;
+    setDeletingId(item.id);
+    try {
+      await onDelete(item);
+      setLocalItems((prev) => prev.filter((i) => i.id !== item.id));
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -48,6 +62,16 @@ export default function SortableList({ items, renderItem, onReorder }) {
             >
               ↓
             </button>
+            {onDelete && (
+              <button
+                onClick={() => handleDelete(item)}
+                disabled={saving || deletingId === item.id}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-red-600 hover:border-red-600 hover:text-white transition-colors"
+                title="Eliminar categoría"
+              >
+                🗑
+              </button>
+            )}
           </div>
         </li>
       ))}
