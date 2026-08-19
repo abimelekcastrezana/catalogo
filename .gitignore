@@ -16,3 +16,4 @@ out/
 uploads/
 .vscode
 .claude
+.devcontainer/devcontainer-lock.json
