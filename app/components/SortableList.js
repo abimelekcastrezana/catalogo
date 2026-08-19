@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-export default function SortableList({ items, renderItem, onReorder, onDelete }) {
+export default function SortableList({ items, renderItem, onReorder, onDelete, onEdit }) {
   const [localItems, setLocalItems] = useState(items);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -62,6 +62,16 @@ export default function SortableList({ items, renderItem, onReorder, onDelete })
             >
               ↓
             </button>
+            {onEdit && (
+              <button
+                onClick={() => onEdit(item)}
+                disabled={saving}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-[var(--accent-soft)] transition-colors"
+                title="Editar categoría"
+              >
+                ✏️
+              </button>
+            )}
             {onDelete && (
               <button
                 onClick={() => handleDelete(item)}

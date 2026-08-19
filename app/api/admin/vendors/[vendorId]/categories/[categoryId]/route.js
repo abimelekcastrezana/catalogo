@@ -5,13 +5,11 @@ import db from '@/db/index.js';
 
 export async function PATCH(request, { params }) {
   const session = await getUserSession();
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const { vendorId, categoryId } = await params;
-  if (session.user.vendorId !== vendorId) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!session || session.user.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const { vendorId, categoryId } = await params;
   const body = await request.json();
   const { name, slug } = body;
   if (!name || !slug) {
@@ -38,13 +36,11 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(request, { params }) {
   const session = await getUserSession();
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const { vendorId, categoryId } = await params;
-  if (session.user.vendorId !== vendorId) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!session || session.user.role !== 'admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const { vendorId, categoryId } = await params;
   const category = await db.Category.findOne({ where: { id: categoryId, vendorId } });
   if (!category) {
     return NextResponse.json({ error: 'Category not found' }, { status: 404 });

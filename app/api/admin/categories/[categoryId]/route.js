@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getUserSession } from '@/lib/auth/getSession';
+import { Op } from 'sequelize';
 import db from '@/db/index.js';
 
 export async function PUT(request, { params }) {
@@ -26,7 +27,7 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
   }
 
-  const duplicate = await db.Category.findOne({ where: { vendorId, slug, id: { [db.sequelize.Op.ne]: categoryId } } });
+  const duplicate = await db.Category.findOne({ where: { vendorId, slug, id: { [Op.ne]: categoryId } } });
   if (duplicate) {
     return NextResponse.json({ error: 'Category slug exists for this vendor' }, { status: 409 });
   }

@@ -75,24 +75,9 @@ export default async function AdminVendorCategoriesPage({ params }) {
             <SortableCategoryList
               categories={categories.map((c) => c.get({ plain: true }))}
               reorderEndpoint={`/api/admin/vendors/${vendorId}/categories/reorder`}
+              deleteEndpoint={`/api/admin/vendors/${vendorId}/categories`}
+              editEndpoint={`/api/admin/vendors/${vendorId}/categories`}
             />
-            {categories.length > 0 && (
-              <div>
-                <p className="text-sm font-medium text-[var(--text)] mb-2">Editar categoría</p>
-                <ul className="space-y-1">
-                  {categories.map((category) => (
-                    <li key={category.id}>
-                      <Link
-                        href={`/admin/categories/${category.id}`}
-                        className="text-sm text-[var(--accent)] hover:underline"
-                      >
-                        {category.name} <span className="text-[var(--muted)]">({category.slug})</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>

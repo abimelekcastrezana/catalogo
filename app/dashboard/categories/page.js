@@ -70,6 +70,7 @@ export default async function DashboardCategoriesPage() {
                 categories={categoriesPlain}
                 reorderEndpoint={`/api/vendors/${session.user.vendorId}/categories/reorder`}
                 deleteEndpoint={`/api/vendors/${session.user.vendorId}/categories`}
+                editEndpoint={`/api/vendors/${session.user.vendorId}/categories`}
               />
             )}
           </CardContent>
