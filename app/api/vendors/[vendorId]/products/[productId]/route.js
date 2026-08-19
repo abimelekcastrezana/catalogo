@@ -19,7 +19,7 @@ export async function PUT(request, { params }) {
     }
 
     const body = await request.json();
-    const { name, sku, description, categoryId, isActive, price, wholesalePrice, wholesaleMinQty, wholesaleDescription, variants } = body;
+    const { name, sku, description, categoryId, isActive, price, wholesalePrice, wholesaleMinQty, wholesaleDescription, variants, badge } = body;
     if (!name || price === undefined || price === null) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
@@ -41,6 +41,7 @@ export async function PUT(request, { params }) {
       wholesalePrice: wholesalePrice ? Number(wholesalePrice) : null,
       wholesaleMinQty: wholesaleMinQty ? parseInt(wholesaleMinQty, 10) : null,
       wholesaleDescription: wholesaleDescription || null,
+      badge: badge || null,
     });
 
     let updatedVariants = [];

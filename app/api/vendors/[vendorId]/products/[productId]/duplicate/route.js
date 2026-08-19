@@ -29,6 +29,7 @@ export async function POST(request, { params }) {
       sku: null,
       description: original.description,
       price: original.price,
+      badge: original.badge || null,
       isActive: false,
       position: original.position,
     }, { transaction });

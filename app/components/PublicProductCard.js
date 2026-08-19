@@ -4,6 +4,20 @@ import { useState } from 'react';
 import { useCartContext } from '@/app/context/CartContext';
 import ProductDetailSheet from '@/app/components/ProductDetailSheet';
 
+const BADGE_LABELS = {
+  nuevo: 'NUEVO',
+  oferta: 'OFERTA',
+  premium: 'PREMIUM',
+  mas_vendido: 'MÁS VENDIDO',
+};
+
+const BADGE_STYLES = {
+  nuevo: 'bg-black/80 text-white',
+  oferta: 'bg-red-600 text-white',
+  premium: 'bg-white text-black border border-black/20',
+  mas_vendido: 'bg-black/80 text-white',
+};
+
 export default function PublicProductCard({ product }) {
   const { addToCart, isInCart } = useCartContext();
   const inCart = isInCart(product.id);
@@ -14,6 +28,9 @@ export default function PublicProductCard({ product }) {
   const imageUrl = images.length
     ? `/api/uploads${(images[current].path || '').replace(/^\/?uploads?\/?/, '/')}`
     : null;
+
+  const badgeKey = product.badge && BADGE_LABELS[product.badge] ? product.badge : null;
+  const hasWholesaleDiscount = product.wholesalePrice && Number(product.wholesalePrice) < Number(product.price);
 
   return (
     <>
@@ -35,10 +52,10 @@ export default function PublicProductCard({ product }) {
             </div>
           )}
 
-          {/* Badge categoría */}
-          {product.Category?.name && (
-            <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium">
-              {product.Category.name}
+          {/* Badge de producto (nuevo/oferta/premium/más vendido) */}
+          {badgeKey && (
+            <span className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide ${BADGE_STYLES[badgeKey]}`}>
+              {BADGE_LABELS[badgeKey]}
             </span>
           )}
 
@@ -71,42 +88,46 @@ export default function PublicProductCard({ product }) {
             </>
           )}
 
-          {/* Badge "en carrito" */}
-          {inCart && (
-            <span className="absolute top-2 right-2 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">✓</span>
-            </span>
-          )}
+          {/* Botón agregar rápido — flotante sobre la imagen */}
+          <button
+            onClick={(e) => { e.stopPropagation(); addToCart(product); }}
+            aria-label={inCart ? 'Producto agregado' : 'Agregar al carrito'}
+            className={`absolute bottom-2 right-2 w-8 h-8 rounded-full flex items-center justify-center text-base font-bold shadow-md transition-all ${
+              inCart
+                ? 'bg-green-500 text-white'
+                : 'bg-[var(--text)] text-[var(--bg)] hover:scale-110'
+            }`}
+          >
+            {inCart ? '✓' : '+'}
+          </button>
         </div>
 
         {/* Info */}
-        <div className="flex flex-col flex-1 p-3 gap-2">
-          <div className="flex-1 space-y-0.5">
-            <h3
-              className="font-semibold text-sm leading-snug text-[var(--text)] line-clamp-2 cursor-pointer hover:text-[var(--accent)] transition-colors"
-              onClick={() => setDetailOpen(true)}
-            >
-              {product.name}
-            </h3>
-            {product.description && (
-              <p className="text-[var(--muted)] text-xs line-clamp-2 leading-relaxed">{product.description}</p>
-            )}
-          </div>
+        <div className="flex flex-col flex-1 p-3 gap-1">
+          {product.Category?.name && (
+            <span className="text-[10px] uppercase tracking-wide text-[var(--muted)] font-medium">
+              {product.Category.name}
+            </span>
+          )}
+          <h3
+            className="font-semibold text-sm leading-snug text-[var(--text)] line-clamp-2 cursor-pointer hover:text-[var(--accent)] transition-colors"
+            onClick={() => setDetailOpen(true)}
+          >
+            {product.name}
+          </h3>
+          {product.description && (
+            <p className="text-[var(--muted)] text-xs line-clamp-2 leading-relaxed">{product.description}</p>
+          )}
 
-          <div className="flex items-center justify-between gap-2 pt-1">
-            <span className="text-base font-bold text-[var(--text)] shrink-0">
+          <div className="flex items-baseline gap-2 pt-1">
+            <span className="text-base font-bold text-[var(--text)]">
               ${Number(product.price).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
             </span>
-            <button
-              onClick={() => addToCart(product)}
-              className={`shrink-0 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
-                inCart
-                  ? 'bg-green-600 text-white hover:bg-green-700'
-                  : 'bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)] hover:shadow-sm'
-              }`}
-            >
-              {inCart ? '✓ Agregado' : '+ Agregar'}
-            </button>
+            {hasWholesaleDiscount && (
+              <span className="text-xs font-medium text-red-600">
+                Desde ${Number(product.wholesalePrice).toLocaleString('es-MX', { minimumFractionDigits: 2 })} por mayoreo
+              </span>
+            )}
           </div>
         </div>
       </article>

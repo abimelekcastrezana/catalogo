@@ -12,6 +12,7 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
   const [description, setDescription] = useState(product.description || '');
   const [catId, setCatId] = useState(product.categoryId || '');
   const [price, setPrice] = useState(product.price || '');
+  const [badge, setBadge] = useState(product.badge || '');
   const [imageFiles, setImageFiles] = useState([null, null]);
 
   const [variants, setVariants] = useState(
@@ -41,6 +42,7 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name, sku, description, categoryId: catId || null, isActive: product.isActive, price,
+        badge: badge || null,
         wholesalePrice: wholesalePrice || null,
         wholesaleMinQty: wholesaleMinQty || null,
         wholesaleDescription: wholesaleDescription || null,
@@ -99,6 +101,16 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
         <select className="select" value={catId} onChange={(e) => setCatId(e.target.value)}>
           <option value="">Sin categoría</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Etiqueta <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span></label>
+        <select className="select" value={badge} onChange={(e) => setBadge(e.target.value)}>
+          <option value="">Ninguna</option>
+          <option value="nuevo">Nuevo</option>
+          <option value="oferta">Oferta</option>
+          <option value="premium">Premium</option>
+          <option value="mas_vendido">Más vendido</option>
         </select>
       </div>
       <div className="grid grid-cols-2 gap-3">
@@ -230,6 +242,10 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
         description: product.description || '',
         categoryId: product.categoryId || null,
         price: product.price,
+        badge: product.badge || null,
+        wholesalePrice: product.wholesalePrice || null,
+        wholesaleMinQty: product.wholesaleMinQty || null,
+        wholesaleDescription: product.wholesaleDescription || null,
         isActive: !isActive,
       }),
     });

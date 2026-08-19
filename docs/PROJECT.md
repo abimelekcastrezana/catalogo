@@ -29,24 +29,40 @@
 - CRUD de vendors (crear, editar, ver detalle).
 - CRUD de categorías globales, asociables a vendors.
 - Activar/desactivar vendor (`isActive`).
+- Categorías por tienda (`/admin/vendors/[vendorId]/categories`): crear, reordenar, **editar**
+  y **eliminar** — misma UI (`SortableCategoryList`) y mismas capacidades que el dashboard de
+  vendor, antes solo tenía reorder.
 
 ### Dashboard de vendedor (`/dashboard`)
 - CRUD de productos: crear, editar, **duplicar**, **habilitar/deshabilitar**.
 - Variantes de producto (nombre, precio opcional, foto opcional) — ver `Pendientes`.
 - Precio mayoreo a nivel de producto (precio unitario, cantidad mínima, descripción).
-- CRUD de categorías propias del vendor, con reorder (drag & drop, `position`).
+- CRUD de categorías propias del vendor, con reorder (drag & drop, `position`), **editar**
+  (nombre/slug) y eliminar.
+- Etiqueta de producto (`badge`: nuevo / oferta / premium / más vendido), seleccionable al
+  crear o editar producto, se refleja en la tienda pública.
 - Reorder de productos, incluido reorder por categoría (`SortableProductsByCategory`).
 - Configuración de tienda: logo, slogan, tags, colores de tema, región, teléfono de WhatsApp.
 - Toggle online/offline de la tienda (`isOnline` + `OnlineToggle`, `OnlineIndicator` en público).
 
 ### Tienda pública (`/[slug]`)
-- Listado de productos por categoría, filtro por categoría.
+- Header de tienda tipo "perfil" (referencia: apps de red social) — logo, nombre, slogan,
+  indicador online, botón de **ubicación** (popover con ciudad/estado desde config, solo si
+  el vendor los llenó), botón "Mensajes" (WhatsApp) y like con contador.
+- Tabs `Vitrina` (grid de productos actual) / `Presentaciones` (placeholder "Próximamente",
+  sin funcionalidad aún).
+- Catálogo (`CategoryFilterBar`): buscador con **autocompletado** (dropdown de hasta 6
+  sugerencias con foto/nombre/precio, debounce 300ms, endpoint
+  `/api/vendors/[vendorId]/products/search`), botón "Categorías" que despliega/colapsa los
+  chips de categoría, y orden "Relevancia" (más reciente / precio asc / precio desc).
+- Cards de producto (`PublicProductCard`): badge de etiqueta (nuevo/oferta/premium/más
+  vendido), botón "+" flotante sobre la imagen para agregar rápido al carrito sin abrir el
+  detalle, indicador de precio por mayoreo si aplica.
 - Detalle de producto (`ProductDetailSheet`) con lightbox de imágenes, selección de variante,
   precio mayoreo con desglose de lote.
 - Carrito de invitado (`CartProvider`, `CartDrawer`) persistente por `guestKey`.
 - Checkout por WhatsApp: genera link `wa.me` con el pedido formateado.
 - Sistema de likes por vendor (`VendorLike`, fingerprint + IP, sin cuenta requerida).
-- Selector de región (`RegionSelect`), header con acciones públicas del vendor.
 - Dark mode con `ThemeSwitcher`.
 
 ### Infra / calidad
@@ -64,6 +80,9 @@
 
 ## Changelog reciente
 
+- **2026-08-19** — rediseño del catálogo público (header tipo perfil, tabs Vitrina/
+  Presentaciones, buscador con autocompletado, orden, badges de producto, agregar rápido);
+  paridad de edición/eliminación de categorías entre admin y vendor.
 - **2026-08 (`bb5d743`)** — eliminación de categorías.
 - **2026-08 (`8081768`)** — variantes de producto, precio mayoreo, fix de lightbox y layout desktop.
 - **2026-08 (`614da16`)** — estado de vendedor (online/offline), habilitar/deshabilitar y

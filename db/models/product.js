@@ -48,6 +48,10 @@ module.exports = (sequelize) => {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
     },
+    badge: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     position: {
       type: DataTypes.INTEGER,
       allowNull: false,

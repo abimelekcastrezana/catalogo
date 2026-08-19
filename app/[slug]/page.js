@@ -1,14 +1,17 @@
 import { unstable_noStore } from 'next/cache';
+import { Op } from 'sequelize';
 import db from '@/db/index.js';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PublicProductCard from '@/app/components/PublicProductCard';
 import VendorPageClient from '@/app/components/VendorPageClient';
-import CategorySelect from '@/app/components/CategorySelect';
+import CategoryFilterBar from '@/app/components/CategoryFilterBar';
 import ThemeSwitcher from '@/app/components/ThemeSwitcher';
 import { Button } from '@/app/components/ui/button';
 import LikeButton from '@/app/components/LikeButton';
 import OnlineIndicator from '@/app/components/OnlineIndicator';
+import LocationButton from '@/app/components/LocationButton';
+import StoreTabs from '@/app/components/StoreTabs';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -56,20 +59,27 @@ export default async function VendorPublicPage({ params, searchParams }) {
   const { slug } = await params;
   const resolved = await searchParams;
   const categoryId = resolved?.categoryId || '';
+  const query = resolved?.q || '';
+  const sort = resolved?.sort || '';
   const rawPage = parseInt(resolved?.page ?? '1', 10);
   const currentPage = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
 
   const vendor = await db.Vendor.findOne({ where: { slug } });
   if (!vendor || !vendor.isActive) return notFound();
 
+  const productWhere = {
+    vendorId: vendor.id,
+    isActive: true,
+    ...(categoryId ? { categoryId } : {}),
+    ...(query ? { name: { [Op.iLike]: `%${query}%` } } : {}),
+  };
+
   const [categoryModels, totalProducts, likeCount] = await Promise.all([
     db.Category.findAll({
       where: { vendorId: vendor.id },
       order: [['position', 'ASC'], ['name', 'ASC']],
     }),
-    db.Product.count({
-      where: { vendorId: vendor.id, isActive: true, ...(categoryId ? { categoryId } : {}) },
-    }),
+    db.Product.count({ where: productWhere }),
     db.VendorLike.count({ where: { vendorId: vendor.id } }),
   ]);
 
@@ -78,14 +88,21 @@ export default async function VendorPublicPage({ params, searchParams }) {
   const pageToFetch = Math.min(currentPage, totalPages);
   const offset = (pageToFetch - 1) * PAGE_SIZE;
 
+  const SORT_ORDERS = {
+    recent: [['createdAt', 'DESC']],
+    price_asc: [['price', 'ASC']],
+    price_desc: [['price', 'DESC']],
+  };
+  const productOrder = SORT_ORDERS[sort] || [['position', 'ASC'], ['createdAt', 'DESC']];
+
   const productModels = await db.Product.findAll({
-    where: { vendorId: vendor.id, isActive: true, ...(categoryId ? { categoryId } : {}) },
+    where: productWhere,
     include: [
       { model: db.ProductImage, order: [['position', 'ASC']] },
       { model: db.Category },
       { model: db.ProductVariant, order: [['position', 'ASC']] },
     ],
-    order: [['position', 'ASC'], ['createdAt', 'DESC']],
+    order: productOrder,
     limit: PAGE_SIZE,
     offset,
   });
@@ -99,6 +116,8 @@ export default async function VendorPublicPage({ params, searchParams }) {
   const buildPageHref = (page) => {
     const p = new URLSearchParams();
     if (categoryId) p.set('categoryId', categoryId);
+    if (query) p.set('q', query);
+    if (sort) p.set('sort', sort);
     if (page > 1) p.set('page', String(page));
     return `/${slug}${p.toString() ? `?${p}` : ''}`;
   };
@@ -127,20 +146,20 @@ export default async function VendorPublicPage({ params, searchParams }) {
               {vendor.slogan && (
                 <p className="text-[var(--muted)] text-sm">{vendor.slogan}</p>
               )}
-              {(vendor.state || vendor.city) && (
-                <p className="text-xs text-[var(--muted)]">
-                  📍 {vendor.city ? `${vendor.city}, ` : ''}{vendor.state}
-                </p>
-              )}
-              <div className="flex items-center gap-3 pt-1">
+              <div className="flex items-center gap-2 pt-1">
                 <OnlineIndicator isOnline={vendor.isOnline ?? true} />
+              </div>
+              <div className="flex items-center gap-3 pt-2 flex-wrap justify-center sm:justify-start">
+                {(vendor.state || vendor.city) && (
+                  <LocationButton city={vendor.city} state={vendor.state} />
+                )}
                 {vendorPhone && (
                   <a
                     href={`https://wa.me/${vendorPhone.replace(/^\+/, '')}?text=${encodeURIComponent(`Hola, estoy interesado en tu tienda ${vendor.name}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Button size="sm">Contactar</Button>
+                    <Button size="sm">Mensajes</Button>
                   </a>
                 )}
                 <LikeButton slug={slug} initialCount={likeCount} />
@@ -149,12 +168,16 @@ export default async function VendorPublicPage({ params, searchParams }) {
           </div>
         </section>
 
+        {/* Tabs de la tienda */}
+        <StoreTabs />
+
         {/* Filtros */}
-        <section className="flex flex-col sm:flex-row items-start sm:items-end gap-3 flex-wrap">
-          <CategorySelect categories={categories} currentCategoryId={categoryId} />
-          <p className="text-sm text-[var(--muted)] pb-1">
+        <section className="flex flex-col gap-3">
+          <CategoryFilterBar vendorSlug={slug} categories={categories} currentCategoryId={categoryId} currentQuery={query} currentSort={sort} />
+          <p className="text-sm text-[var(--muted)]">
             {totalProducts} producto{totalProducts !== 1 ? 's' : ''}
             {categoryId ? ' en esta categoría' : ''}
+            {query ? ` que coinciden con "${query}"` : ''}
           </p>
         </section>
 

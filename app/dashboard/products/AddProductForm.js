@@ -8,6 +8,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [price, setPrice] = useState("");
+  const [badge, setBadge] = useState("");
   const [imageFiles, setImageFiles] = useState([null, null]);
 
   const [variants, setVariants] = useState([]);
@@ -40,6 +41,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name, sku, description, categoryId: categoryId || null, price,
+          badge: badge || null,
           wholesalePrice: wholesalePrice || null,
           wholesaleMinQty: wholesaleMinQty || null,
           wholesaleDescription: wholesaleDescription || null,
@@ -107,6 +109,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
       setPrice('');
       setDescription('');
       setCategoryId('');
+      setBadge('');
       setImageFiles([null, null]);
       setVariants([]);
       setWholesaleOpen(false);
@@ -142,6 +145,16 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
           {categories?.map((cat) => (
             <option key={cat.id} value={cat.id}>{cat.name}</option>
           ))}
+        </select>
+      </div>
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium text-[var(--text)]">Etiqueta <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span></label>
+        <select className="select" value={badge} onChange={(e) => setBadge(e.target.value)}>
+          <option value="">Ninguna</option>
+          <option value="nuevo">Nuevo</option>
+          <option value="oferta">Oferta</option>
+          <option value="premium">Premium</option>
+          <option value="mas_vendido">Más vendido</option>
         </select>
       </div>
       <div className="grid grid-cols-2 gap-3">
