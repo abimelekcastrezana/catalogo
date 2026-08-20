@@ -49,15 +49,17 @@
 - Header de tienda tipo "perfil" (referencia: apps de red social) — logo, nombre, slogan,
   indicador online, botón de **ubicación** (popover con ciudad/estado desde config, solo si
   el vendor los llenó), botón "Mensajes" (WhatsApp) y like con contador.
-- Tabs `Vitrina` (grid de productos actual) / `Presentaciones` (placeholder "Próximamente",
-  sin funcionalidad aún).
+- Tabs `Vitrina` (ícono 🛍️, sin texto — grid de productos actual) / `Presentaciones`
+  (placeholder "Próximamente", sin funcionalidad aún).
 - Catálogo (`CategoryFilterBar`): buscador con **autocompletado** (dropdown de hasta 6
   sugerencias con foto/nombre/precio, debounce 300ms, endpoint
   `/api/vendors/[vendorId]/products/search`), botón "Categorías" que despliega/colapsa los
   chips de categoría, y orden "Relevancia" (más reciente / precio asc / precio desc).
 - Cards de producto (`PublicProductCard`): badge de etiqueta (nuevo/oferta/premium/más
-  vendido), botón "+" flotante sobre la imagen para agregar rápido al carrito sin abrir el
-  detalle, indicador de precio por mayoreo si aplica.
+  vendido) sobre la imagen, botón "+ Agregar" junto al precio (mismo lugar en todas las
+  cards del grid — la columna de texto usa `flex-1` para que precio/botón queden siempre
+  alineados aunque un producto tenga descripción y otro no), indicador de precio por
+  mayoreo si aplica.
 - Detalle de producto (`ProductDetailSheet`) con lightbox de imágenes, selección de variante,
   precio mayoreo con desglose de lote.
 - Carrito de invitado (`CartProvider`, `CartDrawer`) persistente por `guestKey`.
@@ -80,6 +82,10 @@
 
 ## Changelog reciente
 
+- **2026-08-20** — ajustes de feedback en el catálogo público: tab Vitrina solo con ícono
+  (sin texto), botón de agregar vuelve a "+ Agregar" junto al precio (no flotante sobre la
+  imagen, así lo prefieren los clientes), y alineación consistente del botón entre cards
+  con/sin descripción.
 - **2026-08-19** — rediseño del catálogo público (header tipo perfil, tabs Vitrina/
   Presentaciones, buscador con autocompletado, orden, badges de producto, agregar rápido);
   paridad de edición/eliminación de categorías entre admin y vendor.
