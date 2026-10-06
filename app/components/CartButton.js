@@ -26,7 +26,7 @@ export default function CartButton() {
     <button
       onClick={() => setShowCart(true)}
       aria-label={itemCount > 0 ? `${itemCount} producto${itemCount !== 1 ? 's' : ''} en el carrito` : 'Ver carrito'}
-      className="fixed bottom-6 right-6 z-[100] flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--whatsapp-fill)] text-white shadow-[0_4px_0_0_var(--whatsapp-edge)] transition-[transform,box-shadow] duration-100 ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--whatsapp-edge)] active:translate-y-1 active:shadow-[0_0_0_0_var(--whatsapp-edge)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--whatsapp-fill)] focus-visible:ring-offset-2"
+      className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--whatsapp-fill)] text-white shadow-[0_4px_0_0_var(--whatsapp-edge)] transition-[transform,box-shadow] duration-100 ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--whatsapp-edge)] active:translate-y-1 active:shadow-[0_0_0_0_var(--whatsapp-edge)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--whatsapp-fill)] focus-visible:ring-offset-2"
       style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
     >
       <ShoppingBag className="h-6 w-6" strokeWidth={2} aria-hidden="true" />

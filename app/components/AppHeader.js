@@ -43,17 +43,6 @@ export default function AppHeader({ whatsappPhone }) {
       <div className="hidden md:flex items-center gap-3 flex-wrap">
         <ThemeSwitcher />
         {isAuthenticated && <SignOutButton />}
-        {isHome && whatsappPhone && (
-          <Button asChild>
-            <a
-              href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              ¡Quiero mi tienda!
-            </a>
-          </Button>
-        )}
         {!isAuthenticated && (
           <div className="flex gap-2 flex-wrap items-center">
             <Link href="/login"><Button variant="outline">Iniciar sesión</Button></Link>
@@ -78,18 +67,6 @@ export default function AppHeader({ whatsappPhone }) {
         {menuOpen && (
           <div id="mobile-menu" className="anim-pop-in absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-[200px] p-3 bg-[var(--surface)] border-2 border-[var(--border)] rounded-2xl shadow-card grid gap-3">
             <ThemeSwitcher />
-            {isHome && whatsappPhone && (
-              <Button asChild className="w-full">
-                <a
-                  href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  ¡Quiero mi tienda!
-                </a>
-              </Button>
-            )}
             {isAuthenticated ? (
               <Button
                 variant="ghost"

@@ -212,7 +212,7 @@ export default function ProductDetailSheet({ product, open, onClose }) {
             {/* Contenido scrolleable */}
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
               {/* Nombre + precio */}
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between gap-3 md:pr-10">
                 <h2 className="text-xl font-extrabold text-[var(--text)] leading-snug flex-1">
                   {product.name}
                 </h2>

@@ -157,7 +157,8 @@ img { max-width: 100%; display: block; }
 
 /* ── Utilidades ─────────────────────────────────────────────── */
 /* Amplía el área táctil a 44px sin cambiar el tamaño visible */
-.hit { position: relative; }
+/* :where() deja la especificidad en 0 para que `absolute`/`fixed` de Tailwind sigan mandando */
+:where(.hit) { position: relative; }
 .hit::after {
   content: '';
   position: absolute;
@@ -269,6 +270,21 @@ img { max-width: 100%; display: block; }
 .primary-button:disabled, .secondary-button:disabled { opacity: 0.5; box-shadow: none; pointer-events: none; }
 
 /* ── Forms ──────────────────────────────────────────────────── */
+.input::file-selector-button {
+  margin-right: 0.75rem;
+  padding: 0.35rem 0.85rem;
+  border: 2px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface-strong);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+.input::file-selector-button:hover { background: var(--accent-soft); }
+
 .input,
 .select {
   width: 100%;
