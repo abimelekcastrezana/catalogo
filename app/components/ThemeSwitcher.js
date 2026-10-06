@@ -2,29 +2,32 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
+import { Button } from "@/app/components/ui/button";
+import { IconSwap } from "@/app/components/ui/icon-swap";
 
 export default function ThemeSwitcher() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return (
-      <div className="w-11 h-11 rounded-full border border-[var(--border)] bg-[var(--surface-strong)]" />
-    );
+    return <div className="h-11 w-11 rounded-lg border-2 border-[var(--border-strong)] bg-[var(--surface-strong)]" />;
   }
 
   const isDark = resolvedTheme === "dark";
 
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="icon"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="w-11 h-11 rounded-full border-2 border-[var(--border)] bg-[var(--bg)] flex items-center justify-center text-2xl transition-transform hover:scale-110 hover:shadow-md"
+      aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
       title={isDark ? "Modo claro" : "Modo oscuro"}
     >
-      {isDark ? "☀️" : "🌙"}
-    </button>
+      <IconSwap active={isDark} from={Moon} to={Sun} />
+    </Button>
   );
 }

@@ -12,6 +12,8 @@ import LikeButton from '@/app/components/LikeButton';
 import OnlineIndicator from '@/app/components/OnlineIndicator';
 import LocationButton from '@/app/components/LocationButton';
 import StoreTabs from '@/app/components/StoreTabs';
+import { ArrowLeft, ArrowRight, Package } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -138,13 +140,15 @@ export default async function VendorPublicPage({ params, searchParams }) {
               <img
                 src={logoUrl}
                 alt={vendor.name}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover shadow-card flex-shrink-0"
+                width={96}
+                height={96}
+                className="img-outline w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover flex-shrink-0"
               />
             )}
             <div className="space-y-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text)] leading-tight">{vendor.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--text)] leading-tight">{vendor.name}</h1>
               {vendor.slogan && (
-                <p className="text-[var(--muted)] text-sm">{vendor.slogan}</p>
+                <p className="text-[var(--muted)] text-sm font-medium">{vendor.slogan}</p>
               )}
               <div className="flex items-center gap-2 pt-1">
                 <OnlineIndicator isOnline={vendor.isOnline ?? true} />
@@ -159,7 +163,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Button size="sm">Mensajes</Button>
+                    <Button size="sm" variant="whatsapp"><MessageCircle aria-hidden="true" /> Mensajes</Button>
                   </a>
                 )}
                 <LikeButton slug={slug} initialCount={likeCount} />
@@ -174,7 +178,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
         {/* Filtros */}
         <section className="flex flex-col gap-3">
           <CategoryFilterBar vendorSlug={slug} categories={categories} currentCategoryId={categoryId} currentQuery={query} currentSort={sort} />
-          <p className="text-sm text-[var(--muted)]">
+          <p className="text-sm font-bold text-[var(--muted)] tabular-nums">
             {totalProducts} producto{totalProducts !== 1 ? 's' : ''}
             {categoryId ? ' en esta categoría' : ''}
             {query ? ` que coinciden con "${query}"` : ''}
@@ -190,8 +194,11 @@ export default async function VendorPublicPage({ params, searchParams }) {
           </section>
         ) : (
           <section className="text-center py-16 text-[var(--muted)]">
-            <p className="text-4xl mb-3">📦</p>
-            <p>No hay productos en esta categoría.</p>
+            <span className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-text)]">
+              <Package className="h-8 w-8" strokeWidth={1.75} aria-hidden="true" />
+            </span>
+            <p className="m-0 font-extrabold text-[var(--text)]">No hay productos aquí todavía</p>
+            <p className="m-0 mt-1 text-sm">Prueba con otra categoría o cambia la búsqueda.</p>
           </section>
         )}
 
@@ -200,15 +207,15 @@ export default async function VendorPublicPage({ params, searchParams }) {
           <div className="flex items-center justify-center gap-3 flex-wrap">
             {pageToFetch > 1 && (
               <Link href={buildPageHref(pageToFetch - 1)}>
-                <Button variant="outline" size="sm">← Anterior</Button>
+                <Button variant="outline" size="sm"><ArrowLeft aria-hidden="true" /> Anterior</Button>
               </Link>
             )}
-            <span className="text-sm text-[var(--muted)]">
+            <span className="text-sm font-bold text-[var(--muted)] tabular-nums">
               Página {pageToFetch} de {totalPages}
             </span>
             {pageToFetch < totalPages && (
               <Link href={buildPageHref(pageToFetch + 1)}>
-                <Button variant="outline" size="sm">Siguiente →</Button>
+                <Button variant="outline" size="sm">Siguiente <ArrowRight aria-hidden="true" /></Button>
               </Link>
             )}
           </div>

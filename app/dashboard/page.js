@@ -25,7 +25,7 @@ export default async function DashboardPage() {
   if (session.user.role === 'admin') {
     return (
       <main className="page-shell">
-        <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
           <CardHeader>
             <CardTitle className="page-title">Panel de administración</CardTitle>
             <p className="page-subtitle">Gestiona vendedores y categorías de forma segura.</p>
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="page-shell">
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardHeader>
           <CardTitle className="page-title">Dashboard</CardTitle>
           <p className="page-subtitle">Accede a las herramientas para administrar tu tienda.</p>

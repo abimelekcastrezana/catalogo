@@ -68,7 +68,7 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-8 bg-[var(--bg)]">
-      <Card className="w-full max-w-md border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="w-full max-w-md border-[var(--border)] bg-[var(--surface)]">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl text-[var(--text)]">Crear cuenta</CardTitle>
           <p className="text-sm text-[var(--muted)] mt-1">Registra tu tienda en minutos</p>
@@ -76,29 +76,31 @@ export default function RegisterPage() {
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[var(--text)]">Email</Label>
-              <Input type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-[var(--surface-strong)] border-[var(--border)] text-[var(--text)]" />
+              <Label htmlFor="reg-email" className="text-[var(--text)]">Email</Label>
+              <Input id="reg-email" name="email" autoComplete="email" spellCheck={false} type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div className="space-y-2">
-              <Label className="text-[var(--text)]">Contraseña</Label>
-              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="bg-[var(--surface-strong)] border-[var(--border)] text-[var(--text)]" />
+              <Label htmlFor="reg-password" className="text-[var(--text)]">Contraseña</Label>
+              <Input id="reg-password" name="password" autoComplete="new-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
             <div className="space-y-2">
-              <Label className="text-[var(--text)]">Nombre de la tienda</Label>
-              <Input placeholder="Mi Tienda" value={vendorName} onChange={(e) => setVendorName(e.target.value)} required className="bg-[var(--surface-strong)] border-[var(--border)] text-[var(--text)]" />
+              <Label htmlFor="reg-store" className="text-[var(--text)]">Nombre de la tienda</Label>
+              <Input id="reg-store" name="store" autoComplete="organization" placeholder="Mi Tienda…" value={vendorName} onChange={(e) => setVendorName(e.target.value)} required />
             </div>
             <div className="space-y-2">
-              <Label className="text-[var(--text)]">Slug (URL pública)</Label>
-              <Input placeholder="mi-tienda" value={slug} onChange={(e) => setSlug(e.target.value)} required pattern="[A-Za-z0-9-]+" title="Solo letras, números y guiones" className="bg-[var(--surface-strong)] border-[var(--border)] text-[var(--text)]" />
+              <Label htmlFor="reg-slug" className="text-[var(--text)]">Slug (URL pública)</Label>
+              <Input id="reg-slug" name="slug" autoComplete="off" spellCheck={false} placeholder="mi-tienda" value={slug} onChange={(e) => setSlug(e.target.value)} required pattern="[A-Za-z0-9-]+" title="Solo letras, números y guiones" />
               <p className="text-xs text-[var(--muted)]">Solo letras, números y guiones. Ej: mi-tienda</p>
             </div>
             <div className="grid grid-cols-[140px_1fr] gap-2">
               <div className="space-y-2">
-                <Label className="text-[var(--text)]">País</Label>
+                <Label htmlFor="reg-country" className="text-[var(--text)]">País</Label>
                 <select
+                  id="reg-country"
+                  name="country"
                   value={countryCode}
                   onChange={(e) => setCountryCode(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--surface-strong)] text-[var(--text)] text-sm"
+                  className="select"
                 >
                   {COUNTRY_CODES.map((c) => (
                     <option key={c.value} value={c.value}>{c.label}</option>
@@ -106,21 +108,21 @@ export default function RegisterPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label className="text-[var(--text)]">WhatsApp</Label>
-                <Input type="text" placeholder="6222334455" value={whatsappPhone} onChange={(e) => setWhatsappPhone(e.target.value)} required className="bg-[var(--surface-strong)] border-[var(--border)] text-[var(--text)]" />
+                <Label htmlFor="reg-phone" className="text-[var(--text)]">WhatsApp</Label>
+                <Input id="reg-phone" name="phone" autoComplete="tel-national" inputMode="tel" type="text" placeholder="6222334455" value={whatsappPhone} onChange={(e) => setWhatsappPhone(e.target.value)} required />
               </div>
             </div>
 
             {message && (
-              <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950 px-3 py-2 rounded-lg">{message}</p>
+              <p role="alert" className="text-sm font-bold text-[var(--danger)] bg-[var(--danger-soft)] px-3 py-2 rounded-xl">{message}</p>
             )}
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Registrando..." : "Crear cuenta"}
+              {loading ? "Registrando…" : "Crear cuenta"}
             </Button>
           </form>
           <p className="text-center text-sm text-[var(--muted)] mt-4">
             ¿Ya tienes cuenta?{" "}
-            <Link href="/login" className="text-[var(--accent-text)] hover:underline font-medium">
+            <Link href="/login" className="text-[var(--accent-text)] hover:underline font-bold">
               Inicia sesión
             </Link>
           </p>

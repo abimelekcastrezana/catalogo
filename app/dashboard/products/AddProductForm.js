@@ -188,7 +188,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
                     onChange={(e) => updateVariant(i, 'name', e.target.value)}
                     required
                   />
-                  <button type="button" onClick={() => removeVariant(i)} className="text-[var(--muted)] hover:text-red-500 transition-colors text-lg leading-none flex-shrink-0">✕</button>
+                  <button type="button" onClick={() => removeVariant(i)} className="text-[var(--muted)] hover:text-[var(--danger)] transition-colors text-lg leading-none flex-shrink-0">✕</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="grid gap-1">
@@ -251,7 +251,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
         {isSubmitting ? 'Creando...' : 'Crear producto'}
       </button>
       {message && (
-        <p className={`text-sm ${message.includes('Error') ? 'text-red-500' : 'text-[var(--muted)]'}`}>{message}</p>
+        <p className={`text-sm ${message.includes('Error') ? 'text-[var(--danger)]' : 'text-[var(--muted)]'}`}>{message}</p>
       )}
     </form>
   );

@@ -5,6 +5,7 @@ import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/app/components/ui/sheet";
 import { Card, CardContent, CardFooter } from "@/app/components/ui/card";
+import { ChevronLeft, ChevronRight, Copy } from 'lucide-react';
 
 function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel }) {
   const [name, setName] = useState(product.name);
@@ -143,7 +144,7 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
                     value={v.name}
                     onChange={(e) => updateVariant(i, 'name', e.target.value)}
                   />
-                  <button type="button" onClick={() => removeVariant(i)} className="text-[var(--muted)] hover:text-red-500 transition-colors text-lg leading-none flex-shrink-0">✕</button>
+                  <button type="button" onClick={() => removeVariant(i)} aria-label="Quitar variante" className="hit text-[var(--muted)] hover:text-[var(--danger)] transition-colors text-lg leading-none flex-shrink-0">✕</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="grid gap-1">
@@ -204,10 +205,10 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
         )}
       </div>
 
-      {message && <p className="text-sm text-red-500">{message}</p>}
+      {message && <p className="text-sm text-[var(--danger)]">{message}</p>}
       <div className="flex gap-2 pt-2">
         <Button onClick={handleSave} disabled={submitting} className="flex-1">
-          {submitting ? 'Guardando...' : 'Guardar cambios'}
+          {submitting ? 'Guardando…' : 'Guardar cambios'}
         </Button>
         <Button variant="outline" onClick={onCancel}>Cancelar</Button>
       </div>
@@ -280,15 +281,15 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
 
   return (
     <>
-      <Card className="overflow-hidden border-[var(--border)] bg-[var(--card)] shadow-card flex flex-col">
+      <Card className="overflow-hidden border-[var(--border)] bg-[var(--card)] flex flex-col">
         {/* Image */}
         <div className="relative w-full h-48 bg-[var(--surface-strong)] flex items-center justify-center overflow-hidden">
           {imageUrls.length ? (
-            <img src={imageUrls[currentImageIndex]} alt={product.name} className="w-full h-full object-cover" />
+            <img src={imageUrls[currentImageIndex]} alt={product.name} width={400} height={192} loading="lazy" decoding="async" className="img-outline w-full h-full object-cover" />
           ) : (
             <span className="text-[var(--muted)] text-sm">Sin imagen</span>
           )}
-          <Badge variant="secondary" className="absolute top-3 left-3 bg-white/90 text-[var(--muted)] text-xs shadow-sm">
+          <Badge variant="secondary" className="absolute top-3 left-3 bg-[var(--card)] text-[var(--muted)] text-xs">
             {categoryName || 'Sin categoría'}
           </Badge>
           {/* Toggle isActive */}
@@ -297,25 +298,32 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
             onClick={toggleActive}
             disabled={toggling}
             title={isActive ? 'Deshabilitar producto' : 'Habilitar producto'}
-            className={`absolute top-3 right-3 w-6 h-6 rounded-full border-2 border-white/80 cursor-pointer transition-colors disabled:opacity-50 ${
-              isActive ? 'bg-green-500' : 'bg-yellow-400'
+            aria-label={isActive ? 'Deshabilitar producto' : 'Habilitar producto'}
+            aria-pressed={isActive}
+            className={`hit absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full border-2 px-2.5 py-1 text-xs font-bold cursor-pointer transition-colors duration-150 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              isActive
+                ? 'border-[var(--whatsapp)] bg-[var(--success-soft)] text-[var(--success)]'
+                : 'border-[var(--highlight)] bg-[var(--highlight-soft)] text-[var(--text)]'
             }`}
-          />
+          >
+            <span aria-hidden="true" className={`h-2 w-2 rounded-full ${isActive ? 'bg-[var(--whatsapp)]' : 'bg-[var(--highlight)]'}`} />
+            {isActive ? 'Activo' : 'Oculto'}
+          </button>
           {imageUrls.length > 1 && (
             <>
               <button type="button" onClick={() => setCurrentImageIndex((currentImageIndex - 1 + imageUrls.length) % imageUrls.length)}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full border border-white/80 bg-black/60 text-white flex items-center justify-center z-10">‹</button>
+                aria-label="Imagen anterior" className="hit absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/55 text-white flex items-center justify-center z-10 transition-[background-color,transform] duration-150 hover:bg-black/70 active:scale-[0.96]"><ChevronLeft className="h-5 w-5" aria-hidden="true" /></button>
               <button type="button" onClick={() => setCurrentImageIndex((currentImageIndex + 1) % imageUrls.length)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full border border-white/80 bg-black/60 text-white flex items-center justify-center z-10">›</button>
+                aria-label="Imagen siguiente" className="hit absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/55 text-white flex items-center justify-center z-10 transition-[background-color,transform] duration-150 hover:bg-black/70 active:scale-[0.96]"><ChevronRight className="h-5 w-5" aria-hidden="true" /></button>
             </>
           )}
         </div>
 
         {/* Info */}
         <CardContent className="p-4 flex-1 space-y-1">
-          <h3 className="font-semibold text-base leading-tight text-[var(--text)]">{product.name}</h3>
+          <h3 className="font-extrabold text-base leading-tight text-[var(--text)]">{product.name}</h3>
           <p className="text-[var(--muted)] text-sm line-clamp-2">{product.description || 'Sin descripción'}</p>
-          <p className="font-bold text-lg text-[var(--text)] pt-1">${Number(product.price).toFixed(2)}</p>
+          <p className="font-extrabold text-lg text-[var(--text)] pt-1 tabular-nums">${Number(product.price).toFixed(2)}</p>
         </CardContent>
 
         {/* Actions */}
@@ -329,20 +337,22 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
             onClick={duplicateProduct}
             disabled={duplicating}
             title="Duplicar producto"
+            aria-label="Duplicar producto"
             className="px-3"
           >
-            {duplicating ? '...' : '⧉'}
+            <Copy aria-hidden="true" />
           </Button>
           <Button
             size="sm"
-            className="bg-[var(--danger)] hover:opacity-90 text-white border-none flex-1"
+            variant="destructive"
+            className="flex-1"
             onClick={deleteProduct}
           >
             Eliminar
           </Button>
         </CardFooter>
 
-        {message && <p className="text-sm text-red-500 px-4 pb-3">{message}</p>}
+        {message && <p className="text-sm text-[var(--danger)] px-4 pb-3">{message}</p>}
       </Card>
 
       {/* Sheet de edición */}

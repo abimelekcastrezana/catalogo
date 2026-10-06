@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ArrowUp, ArrowDown, Pencil, Trash2 } from 'lucide-react';
 
 export default function SortableList({ items, renderItem, onReorder, onDelete, onEdit }) {
   const [localItems, setLocalItems] = useState(items);
@@ -42,44 +43,52 @@ export default function SortableList({ items, renderItem, onReorder, onDelete, o
       {localItems.map((item, index) => (
         <li
           key={item.id}
-          className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] transition-opacity ${saving ? 'opacity-50' : 'opacity-100'}`}
+          className={`flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface-strong)] transition-opacity ${saving ? 'opacity-50' : 'opacity-100'}`}
         >
           <div className="flex-1 min-w-0">{renderItem(item)}</div>
           <div className="flex gap-1 flex-shrink-0">
             <button
+              type="button"
               onClick={() => swap(index, -1)}
               disabled={index === 0 || saving}
-              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-[var(--accent-soft)] transition-colors"
+              className="icon-btn hit"
               title="Mover arriba"
+              aria-label="Mover arriba"
             >
-              ↑
+              <ArrowUp aria-hidden="true" />
             </button>
             <button
+              type="button"
               onClick={() => swap(index, 1)}
               disabled={index === localItems.length - 1 || saving}
-              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-[var(--accent-soft)] transition-colors"
+              className="icon-btn hit"
               title="Mover abajo"
+              aria-label="Mover abajo"
             >
-              ↓
+              <ArrowDown aria-hidden="true" />
             </button>
             {onEdit && (
               <button
+                type="button"
                 onClick={() => onEdit(item)}
                 disabled={saving}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-[var(--accent-soft)] transition-colors"
+                className="icon-btn hit"
                 title="Editar categoría"
+                aria-label={`Editar ${item.name}`}
               >
-                ✏️
+                <Pencil aria-hidden="true" />
               </button>
             )}
             {onDelete && (
               <button
+                type="button"
                 onClick={() => handleDelete(item)}
                 disabled={saving || deletingId === item.id}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-red-600 hover:border-red-600 hover:text-white transition-colors"
+                className="icon-btn icon-btn--danger hit"
                 title="Eliminar categoría"
+                aria-label={`Eliminar ${item.name}`}
               >
-                🗑
+                <Trash2 aria-hidden="true" />
               </button>
             )}
           </div>

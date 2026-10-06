@@ -35,7 +35,7 @@ export default async function AdminPage({ searchParams }) {
   return (
     <main className="page-shell">
       {/* Header del panel */}
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
@@ -50,7 +50,7 @@ export default async function AdminPage({ searchParams }) {
       </Card>
 
       {/* Lista de tiendas */}
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <CardTitle className="text-xl">

@@ -3,23 +3,29 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority"
 import { cn } from "@/app/lib/utils"
 
+// Botones "con volumen": un canto inferior (--btn-edge) que se hunde al presionar.
+// --d es la profundidad del canto. Los botones planos (ghost/link) usan scale(0.96).
+const raised =
+  "shadow-[0_var(--d)_0_0_var(--btn-edge)] hover:-translate-y-0.5 hover:shadow-[0_calc(var(--d)+2px)_0_0_var(--btn-edge)] active:translate-y-[var(--d)] active:shadow-[0_0_0_0_var(--btn-edge)]"
+
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-bold select-none transition-[transform,box-shadow,background-color,color,border-color] duration-100 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none [&_svg]:size-[18px] [&_svg]:shrink-0 [&_svg]:stroke-[2]",
   {
     variants: {
       variant: {
-        default:     "bg-primary text-primary-foreground hover:opacity-90 hover:-translate-y-px shadow-sm",
-        destructive: "bg-destructive text-destructive-foreground hover:opacity-90",
-        outline:     "border border-border bg-transparent hover:bg-accent hover:text-accent-foreground",
-        secondary:   "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground border border-border",
-        ghost:       "hover:bg-accent hover:text-accent-foreground",
-        link:        "text-primary underline-offset-4 hover:underline",
+        default:     `${raised} [--btn-edge:var(--accent-edge)] bg-primary text-primary-foreground`,
+        whatsapp:    `${raised} [--btn-edge:var(--whatsapp-edge)] bg-whatsapp-fill text-white`,
+        destructive: `${raised} [--btn-edge:var(--danger-edge)] bg-destructive text-destructive-foreground`,
+        secondary:   `${raised} [--btn-edge:var(--border-strong)] border-2 border-border-strong bg-secondary text-secondary-foreground`,
+        outline:     `${raised} [--btn-edge:var(--border-strong)] border-2 border-border-strong bg-card text-foreground`,
+        ghost:       "active:scale-[0.96] hover:bg-accent hover:text-accent-foreground",
+        link:        "active:scale-[0.96] text-[var(--accent-text)] underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-10 px-5 py-2",
-        sm:      "h-8 px-4 text-xs",
-        lg:      "h-12 px-6 text-base",
-        icon:    "h-10 w-10",
+        default: "h-11 px-5 py-2 [--d:4px]",
+        sm:      "h-9 px-4 text-[13px] [--d:3px] hit",
+        lg:      "h-12 px-6 text-base [--d:4px]",
+        icon:    "h-11 w-11 [--d:4px]",
       },
     },
     defaultVariants: {

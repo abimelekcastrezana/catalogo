@@ -7,6 +7,8 @@ import { signOut, useSession } from 'next-auth/react';
 import ThemeSwitcher from './ThemeSwitcher';
 import SignOutButton from './SignOutButton';
 import { Button } from '@/app/components/ui/button';
+import { IconSwap } from '@/app/components/ui/icon-swap';
+import { Menu, X } from 'lucide-react';
 
 export default function AppHeader({ whatsappPhone }) {
   const pathname = usePathname();
@@ -27,9 +29,11 @@ export default function AppHeader({ whatsappPhone }) {
           <img
             src="/tiendatap_logo.jpg"
             alt="TiendaTap logo"
-            className="w-12 h-12 rounded-xl object-cover"
+            width={48}
+            height={48}
+            className="img-outline w-12 h-12 rounded-xl object-cover"
           />
-          <h1 className="m-0 text-xl font-semibold">TiendaTap</h1>
+          <h1 className="m-0 text-xl font-extrabold">TiendaTap</h1>
         </Link>
       ) : (
         <div className="h-9" />
@@ -40,14 +44,15 @@ export default function AppHeader({ whatsappPhone }) {
         <ThemeSwitcher />
         {isAuthenticated && <SignOutButton />}
         {isHome && whatsappPhone && (
-          <a
-            href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="primary-button"
-          >
-            ¡Quiero mi tienda!
-          </a>
+          <Button asChild>
+            <a
+              href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ¡Quiero mi tienda!
+            </a>
+          </Button>
         )}
         {!isAuthenticated && (
           <div className="flex gap-2 flex-wrap items-center">
@@ -59,27 +64,31 @@ export default function AppHeader({ whatsappPhone }) {
 
       {/* Mobile */}
       <div className="flex md:hidden items-center relative">
-        <button
+        <Button
           type="button"
-          className="w-11 h-11 rounded-full border border-[var(--border)] bg-[var(--surface-strong)] flex items-center justify-center text-xl"
+          variant="outline"
+          size="icon"
           onClick={() => setMenuOpen((o) => !o)}
-          aria-label="Abrir menú móvil"
+          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
         >
-          ☰
-        </button>
+          <IconSwap active={menuOpen} from={Menu} to={X} />
+        </Button>
         {menuOpen && (
-          <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-[180px] p-3 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-xl grid gap-3">
+          <div id="mobile-menu" className="anim-pop-in absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-[200px] p-3 bg-[var(--surface)] border-2 border-[var(--border)] rounded-2xl shadow-card grid gap-3">
             <ThemeSwitcher />
             {isHome && whatsappPhone && (
-              <a
-                href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="primary-button w-full"
-                onClick={() => setMenuOpen(false)}
-              >
-                ¡Quiero mi tienda!
-              </a>
+              <Button asChild className="w-full">
+                <a
+                  href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent('Hola, quiero más información sobre el catálogo')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  ¡Quiero mi tienda!
+                </a>
+              </Button>
             )}
             {isAuthenticated ? (
               <Button

@@ -43,7 +43,7 @@ export default async function AdminVendorCategoriesPage({ params }) {
 
   return (
     <main className="page-shell">
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardHeader>
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
@@ -57,7 +57,7 @@ export default async function AdminVendorCategoriesPage({ params }) {
 
       <div className="grid md:grid-cols-2 gap-4">
         {/* Crear categoría */}
-        <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
           <CardHeader>
             <CardTitle className="text-lg">Agregar categoría</CardTitle>
           </CardHeader>
@@ -67,7 +67,7 @@ export default async function AdminVendorCategoriesPage({ params }) {
         </Card>
 
         {/* Ordenar y editar */}
-        <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
           <CardHeader>
             <CardTitle className="text-lg">Ordenar categorías</CardTitle>
           </CardHeader>

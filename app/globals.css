@@ -24,6 +24,7 @@
 
   /* Bordes y sombras (capas suaves con tinte cálido) */
   --border: rgba(43, 43, 43, 0.12);
+  --border-strong: rgba(43, 43, 43, 0.18);
   --shadow:
     0 0 0 1px rgba(43, 28, 18, 0.04),
     0 1px 2px rgba(43, 28, 18, 0.06),
@@ -35,16 +36,24 @@
   --accent-soft:   #FCE6D8;
   --accent-text:   #B5460F;
   --accent-fg:     #FFFFFF;
+  --accent-edge:   #8F3510; /* "canto" inferior de los botones con volumen */
 
   /* Estado */
   --success:    #1B7F43; /* texto verde */
   --whatsapp:   #25A55D; /* Verde Pedido: iconos e indicadores */
   --whatsapp-fill: #1B7F43; /* relleno con texto blanco (5.0:1) */
-  --danger:     #B91C1C;
+  --whatsapp-edge: #11592E;
+  --danger:     #B91C1C; /* texto de error */
+  --danger-fill: #B91C1C; /* relleno con texto blanco (6.5:1) */
+  --danger-edge: #7F1414;
   --info:       #1D63C9; /* Azul Confianza, versión legible como texto */
+  --info-fill:  #1D63C9; /* relleno con texto blanco (5.7:1) */
   --info-soft:  #E3EEFD;
   --highlight:  #FFC93C; /* Amarillo Aviso */
   --highlight-fg: #2B2B2B;
+  --success-soft: #E4F5EB;
+  --danger-soft: #FDE8E8;
+  --highlight-soft: #FFF3CC;
 
   /* Radios */
   --radius: 16px;
@@ -62,7 +71,7 @@
   --muted-foreground:  var(--muted);
   --input:             var(--border);
   --ring:              var(--accent);
-  --destructive:       var(--danger);
+  --destructive:       var(--danger-fill);
   --destructive-foreground: #ffffff;
 }
 
@@ -79,6 +88,7 @@
   --muted: #A8A097;
 
   --border: rgba(243, 238, 233, 0.14);
+  --border-strong: rgba(243, 238, 233, 0.22);
   --shadow:
     0 0 0 1px rgba(255, 255, 255, 0.04),
     0 1px 2px rgba(0, 0, 0, 0.4),
@@ -91,34 +101,102 @@
   --accent-soft:   #4A2412;
   --accent-text:   #F4A261;
   --accent-fg:     #FFFFFF;
+  --accent-edge:   #8F3510;
 
   --success:    #4ADE80;
   --whatsapp:   #3DBE76;
   --whatsapp-fill: #1B7F43;
   --danger:     #F87171;
+  --danger-fill: #B91C1C;
   --info:       #6AA6F5;
+  --info-fill:  #1D63C9;
   --info-soft:  #1B2D4A;
   --highlight:  #FFC93C;
   --highlight-fg: #2B2B2B;
+  --success-soft: #14301F;
+  --danger-soft: #3A1616;
+  --highlight-soft: #3A3112;
 }
 
 /* ── Reset base ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+:root {
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --font-sans: var(--font-nunito), ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
 
 body {
   margin: 0;
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
+
+h1, h2, h3, h4 { text-wrap: balance; font-weight: 800; letter-spacing: -0.01em; }
+p { text-wrap: pretty; }
 
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
+button, a, [role="button"], summary, label { touch-action: manipulation; }
 a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── Utilidades ─────────────────────────────────────────────── */
+/* Amplía el área táctil a 44px sin cambiar el tamaño visible */
+.hit { position: relative; }
+.hit::after {
+  content: '';
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2));
+}
+
+/* Contorno sutil para imágenes (negro puro en claro, blanco puro en oscuro) */
+.img-outline { outline: 1px solid oklch(0 0 0 / 0.1); outline-offset: -1px; }
+.dark .img-outline, [data-theme="dark"] .img-outline { outline-color: oklch(1 0 0 / 0.1); }
+
+/* Dos iconos apilados que se cruzan (opacity + scale + blur) */
+.icon-swap { display: inline-grid; place-items: center; width: 1.125rem; height: 1.125rem; }
+.icon-swap > * {
+  grid-area: 1 / 1;
+  transition: opacity 200ms var(--ease-out), scale 200ms var(--ease-out), filter 200ms var(--ease-out);
+}
+.icon-swap > [data-hidden="true"] { opacity: 0; scale: 0.25; filter: blur(4px); }
+
+/* Botón cuadrado de icono (reordenar/editar/eliminar en listas) */
+.icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 2px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  transition: background-color 150ms ease-out, color 150ms ease-out, border-color 150ms ease-out, transform 100ms ease-out;
+}
+.icon-btn svg { width: 18px; height: 18px; }
+.icon-btn:active { transform: scale(0.96); }
+.icon-btn:disabled { opacity: 0.35; pointer-events: none; }
+@media (hover: hover) {
+  .icon-btn:hover { background: var(--accent-soft); }
+  .icon-btn--danger:hover { background: var(--danger-fill); border-color: var(--danger-fill); color: #fff; }
+}
 
 /* ── Layout ─────────────────────────────────────────────────── */
 .app-shell  { min-height: 100vh; }
@@ -133,9 +211,8 @@ img { max-width: 100%; display: block; }
 
 .page-card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border: 2px solid var(--border);
+  border-radius: 24px;
   padding: 1.5rem;
 }
 
@@ -144,7 +221,7 @@ img { max-width: 100%; display: block; }
   margin: 0;
   font-size: clamp(1.75rem, 2.8vw, 2.4rem);
   line-height: 1.1;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text);
 }
 
@@ -154,58 +231,62 @@ img { max-width: 100%; display: block; }
   font-size: 0.95rem;
 }
 
-/* ── Buttons (CSS classes — usadas donde no se importa Button) ─ */
-.primary-button {
+/* ── Botones con volumen (clases para vistas que no importan <Button>) ─
+   Misma receta que components/ui/button.jsx: canto inferior + se hunde al presionar. */
+.primary-button,
+.secondary-button {
+  --d: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  border-radius: var(--radius-full);
+  min-height: 44px;
+  padding: 0.6rem 1.25rem;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  user-select: none;
+  box-shadow: 0 var(--d) 0 0 var(--btn-edge);
+  transition: transform 100ms ease-out, box-shadow 100ms ease-out, background-color 100ms ease-out;
+}
+.primary-button {
+  --btn-edge: var(--accent-edge);
   border: none;
   background: var(--accent);
   color: var(--accent-fg);
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-  white-space: nowrap;
 }
-.primary-button:hover { opacity: 0.9; transform: translateY(-1px); }
-
 .secondary-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.1rem;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border);
-  background: var(--surface-strong);
+  --btn-edge: var(--border-strong);
+  border: 2px solid var(--border-strong);
+  background: var(--card);
   color: var(--text);
-  font-weight: 500;
-  font-size: 0.9rem;
-  transition: background 0.15s ease;
-  white-space: nowrap;
 }
-.secondary-button:hover { background: var(--accent-soft); }
+@media (hover: hover) {
+  .primary-button:hover, .secondary-button:hover { transform: translateY(-2px); box-shadow: 0 calc(var(--d) + 2px) 0 0 var(--btn-edge); }
+}
+.primary-button:active, .secondary-button:active { transform: translateY(var(--d)); box-shadow: 0 0 0 0 var(--btn-edge); }
+.primary-button:disabled, .secondary-button:disabled { opacity: 0.5; box-shadow: none; pointer-events: none; }
 
 /* ── Forms ──────────────────────────────────────────────────── */
 .input,
 .select {
   width: 100%;
+  min-height: 44px;
   padding: 0.65rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-strong);
+  border: 2px solid var(--border-strong);
+  border-radius: 16px;
+  background: var(--surface);
   color: var(--text);
-  font-size: 0.95rem;
-  transition: border-color 0.15s ease;
+  font-size: 1rem; /* 16px: evita el zoom automático de iOS al enfocar */
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
 }
+.input::placeholder { color: var(--muted); opacity: 0.8; }
 .input:focus,
 .select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
 }
 .select { appearance: none; }
 
@@ -213,8 +294,8 @@ img { max-width: 100%; display: block; }
   display: grid;
   gap: 1rem;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  border-radius: 24px;
   padding: 1.5rem;
 }
 
@@ -222,10 +303,9 @@ img { max-width: 100%; display: block; }
 .card {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  border-radius: 24px;
   background: var(--card);
-  box-shadow: var(--shadow);
   overflow: hidden;
 }
 
@@ -251,6 +331,47 @@ img { max-width: 100%; display: block; }
 
 .hero-actions, .cta-row, .form-actions, .pagination-row {
   display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;
+}
+
+/* ── Movimiento: hojas, modales y popovers ───────────────────────
+   Entradas 200–280ms ease-out; salidas más cortas y suaves (translate corto).
+   Usan las propiedades individuales translate/scale para no chocar con
+   el transform de centrado de Tailwind. */
+@keyframes overlay-in  { from { opacity: 0; } }
+@keyframes overlay-out { to   { opacity: 0; } }
+@keyframes sheet-bottom-in  { from { translate: 0 100%; } }
+@keyframes sheet-bottom-out { to   { translate: 0 24px; opacity: 0; } }
+@keyframes sheet-right-in   { from { translate: 100% 0; } }
+@keyframes sheet-right-out  { to   { translate: 24px 0; opacity: 0; } }
+@keyframes modal-in  { from { opacity: 0; scale: 0.96; } }
+@keyframes modal-out { to   { opacity: 0; scale: 0.98; } }
+@keyframes pop-in    { from { opacity: 0; translate: 0 -4px; scale: 0.97; } }
+@keyframes bump      { 40% { scale: 1.18; } }
+
+.anim-overlay[data-state="open"]  { animation: overlay-in 200ms var(--ease-out); }
+.anim-overlay[data-state="closed"] { animation: overlay-out 150ms ease-out forwards; }
+
+.sheet-bottom[data-state="open"]  { animation: sheet-bottom-in 280ms var(--ease-out); }
+.sheet-bottom[data-state="closed"] { animation: sheet-bottom-out 160ms ease-out forwards; }
+.sheet-right[data-state="open"]   { animation: sheet-right-in 280ms var(--ease-out); }
+.sheet-right[data-state="closed"] { animation: sheet-right-out 160ms ease-out forwards; }
+
+/* Hoja inferior en móvil que pasa a modal centrado en escritorio */
+@media (min-width: 768px) {
+  .sheet-modal-md[data-state="open"]   { animation: modal-in 200ms var(--ease-out); }
+  .sheet-modal-md[data-state="closed"] { animation: modal-out 150ms ease-out forwards; }
+}
+
+.anim-pop-in { animation: pop-in 150ms var(--ease-out); }
+.anim-bump   { animation: bump 220ms var(--ease-out); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ── Mobile ──────────────────────────────────────────────────── */

@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom';
 import { Sheet, SheetContent, SheetTitle } from '@/app/components/ui/sheet';
 import { Button } from '@/app/components/ui/button';
 import { useCartContext } from '@/app/context/CartContext';
+import { IconSwap } from '@/app/components/ui/icon-swap';
+import { X, ChevronLeft, ChevronRight, Plus, Check, Package } from 'lucide-react';
 
 function imageUrl(path) {
   return `/api/uploads${(path || '').replace(/^\/?uploads?\/?/, '/')}`;
@@ -52,12 +54,13 @@ function Lightbox({ images, startIndex, onClose }) {
       {/* Header */}
       <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 py-3 z-10">
         <button
+          type="button"
           onClick={onClose}
-          className="text-white text-2xl font-light w-10 h-10 flex items-center justify-center"
+          className="hit text-white w-11 h-11 rounded-xl flex items-center justify-center transition-[background-color,transform] duration-150 hover:bg-white/10 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           aria-label="Cerrar"
-        >✕</button>
+        ><X className="h-6 w-6" strokeWidth={2} aria-hidden="true" /></button>
         {images.length > 1 && (
-          <span className="text-white/70 text-sm">{current + 1}/{images.length}</span>
+          <span className="text-white/80 text-sm font-bold tabular-nums">{current + 1}/{images.length}</span>
         )}
       </div>
 
@@ -73,15 +76,17 @@ function Lightbox({ images, startIndex, onClose }) {
       {images.length > 1 && (
         <>
           <button
+            type="button"
             onClick={(e) => { e.stopPropagation(); prev(); }}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white text-xl flex items-center justify-center hover:bg-white/20 transition-colors"
+            className="hit absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center transition-[background-color,transform] duration-150 hover:bg-white/20 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             aria-label="Anterior"
-          >‹</button>
+          ><ChevronLeft className="h-6 w-6" strokeWidth={2} aria-hidden="true" /></button>
           <button
+            type="button"
             onClick={(e) => { e.stopPropagation(); next(); }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white text-xl flex items-center justify-center hover:bg-white/20 transition-colors"
+            className="hit absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center transition-[background-color,transform] duration-150 hover:bg-white/20 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             aria-label="Siguiente"
-          >›</button>
+          ><ChevronRight className="h-6 w-6" strokeWidth={2} aria-hidden="true" /></button>
         </>
       )}
     </div>,
@@ -160,37 +165,42 @@ export default function ProductDetailSheet({ product, open, onClose }) {
       <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
         <SheetContent
           side="bottom"
-          className="p-0 bg-[var(--bg)] text-[var(--text)] rounded-t-2xl max-h-[92dvh] flex flex-col md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:rounded-2xl md:max-w-2xl md:w-full md:max-h-[90vh] md:flex-row"
+          className="sheet-modal-md p-0 bg-[var(--bg)] text-[var(--text)] rounded-t-2xl max-h-[92dvh] flex flex-col md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:rounded-2xl md:max-w-2xl md:w-full md:max-h-[90vh] md:flex-row"
         >
           <SheetTitle className="sr-only">{product.name}</SheetTitle>
 
           {/* Imagen principal */}
-          <div className="relative w-full aspect-[4/3] bg-black flex-shrink-0 overflow-hidden rounded-t-2xl md:w-[45%] md:aspect-auto md:rounded-l-2xl md:rounded-tr-none md:self-stretch">
+          <div className="relative w-full aspect-[4/3] bg-[var(--surface-strong)] flex-shrink-0 overflow-hidden rounded-t-2xl md:w-[45%] md:aspect-auto md:rounded-l-2xl md:rounded-tr-none md:self-stretch">
             {currentImageUrl ? (
               <img
                 src={currentImageUrl}
                 alt={product.name}
                 className="w-full h-full object-contain cursor-zoom-in"
+                width={600}
+                height={450}
+                decoding="async"
                 onClick={() => setLightboxOpen(true)}
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-5xl">📦</div>
+              <div className="w-full h-full flex items-center justify-center text-[var(--muted)]"><Package className="h-12 w-12" strokeWidth={1.5} aria-hidden="true" /></div>
             )}
 
             {/* Navegación entre fotos */}
             {effectiveImages.length > 1 && (
               <>
                 <button
+                  type="button"
                   onClick={() => setCurrentImg((currentImg - 1 + effectiveImages.length) % effectiveImages.length)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center text-lg hover:bg-black/70 transition-colors"
+                  className="hit absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center transition-[background-color,transform] duration-150 hover:bg-black/70 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                   aria-label="Anterior"
-                >‹</button>
+                ><ChevronLeft className="h-5 w-5" strokeWidth={2} aria-hidden="true" /></button>
                 <button
+                  type="button"
                   onClick={() => setCurrentImg((currentImg + 1) % effectiveImages.length)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center text-lg hover:bg-black/70 transition-colors"
+                  className="hit absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center transition-[background-color,transform] duration-150 hover:bg-black/70 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                   aria-label="Siguiente"
-                >›</button>
-                <div className="absolute bottom-2 right-3 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
+                ><ChevronRight className="h-5 w-5" strokeWidth={2} aria-hidden="true" /></button>
+                <div className="absolute bottom-2 right-3 bg-black/55 text-white text-xs font-bold tabular-nums px-2 py-0.5 rounded-full">
                   {currentImg + 1}/{effectiveImages.length}
                 </div>
               </>
@@ -203,21 +213,23 @@ export default function ProductDetailSheet({ product, open, onClose }) {
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
               {/* Nombre + precio */}
               <div className="flex items-start justify-between gap-3">
-                <h2 className="text-lg font-bold text-[var(--text)] leading-snug flex-1">
+                <h2 className="text-xl font-extrabold text-[var(--text)] leading-snug flex-1">
                   {product.name}
                 </h2>
                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xl font-bold text-[var(--text)]">
+                    <span className="text-2xl font-extrabold text-[var(--text)] tabular-nums">
                       ${displayPrice.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                     </span>
                     {hasWholesale && (
                       <button
+                        type="button"
                         onClick={() => setWholesaleActive((v) => !v)}
-                        className={`px-2 py-0.5 rounded-full text-xs font-semibold border transition-all ${
+                        aria-pressed={wholesaleActive}
+                        className={`hit px-2.5 py-1 rounded-lg text-xs font-extrabold border-2 transition-[background-color,border-color,color,transform] duration-100 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                           wholesaleActive
-                            ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
-                            : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--accent)]'
+                            ? 'bg-[var(--accent-soft)] text-[var(--accent-text)] border-[var(--accent)]'
+                            : 'border-[var(--border-strong)] text-[var(--muted)] hover:border-[var(--accent)]'
                         }`}
                       >
                         Mayoreo
@@ -239,7 +251,7 @@ export default function ProductDetailSheet({ product, open, onClose }) {
 
               {/* Categoría */}
               {product.Category?.name && (
-                <span className="inline-block px-2.5 py-0.5 rounded-full bg-[var(--surface-strong)] text-[var(--muted)] text-xs font-medium">
+                <span className="inline-block px-2.5 py-1 rounded-lg bg-[var(--surface-strong)] text-[var(--muted)] text-xs font-bold">
                   {product.Category.name}
                 </span>
               )}
@@ -252,8 +264,10 @@ export default function ProductDetailSheet({ product, open, onClose }) {
                   </p>
                   {isLong && (
                     <button
+                      type="button"
                       onClick={() => setDescExpanded((v) => !v)}
-                      className="text-xs text-[var(--accent-text)] font-medium hover:underline"
+                      aria-expanded={descExpanded}
+                      className="hit text-sm text-[var(--accent-text)] font-bold hover:underline focus-visible:outline-none focus-visible:underline"
                     >
                       {descExpanded ? 'Ver menos' : 'Ver más'}
                     </button>
@@ -264,16 +278,18 @@ export default function ProductDetailSheet({ product, open, onClose }) {
               {/* Variantes */}
               {hasVariants && (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wide">Variante</p>
+                  <p className="text-sm font-extrabold text-[var(--text)]">Variante</p>
                   <div className="flex flex-wrap gap-2">
                     {variants.map((v) => (
                       <button
                         key={v.id}
+                        type="button"
                         onClick={() => setSelectedVariant(selectedVariant?.id === v.id ? null : v)}
-                        className={`px-3 py-1.5 rounded-xl border text-sm font-medium transition-all ${
+                        aria-pressed={selectedVariant?.id === v.id}
+                        className={`min-h-10 px-3.5 py-1.5 rounded-lg border-2 text-sm font-bold transition-[background-color,border-color,box-shadow,transform] duration-100 active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                           selectedVariant?.id === v.id
-                            ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
-                            : 'border-[var(--border)] text-[var(--text)] hover:border-[var(--accent)]'
+                            ? 'bg-[var(--accent-soft)] text-[var(--accent-text)] border-[var(--accent)] shadow-[0_2px_0_0_var(--accent)]'
+                            : 'border-[var(--border-strong)] text-[var(--text)] shadow-[0_2px_0_0_var(--border-strong)] hover:bg-[var(--accent-soft)]'
                         }`}
                       >
                         {v.name}{v.price != null ? ` — $${Number(v.price).toFixed(2)}` : ''}
@@ -285,23 +301,20 @@ export default function ProductDetailSheet({ product, open, onClose }) {
             </div>
 
             {/* Botón fijo abajo */}
-            <div className="px-5 py-4 border-t border-[var(--border)] flex-shrink-0">
+            <div className="px-5 py-4 border-t-2 border-[var(--border)] flex-shrink-0">
               <Button
                 onClick={() => { if (!addDisabled) { addToCart(cartItem); onClose(); } }}
                 disabled={addDisabled}
-                className={`w-full font-semibold ${
-                  addDisabled
-                    ? 'bg-[var(--surface-strong)] text-[var(--muted)] cursor-not-allowed'
-                    : inCart
-                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                    : 'bg-[var(--accent)] hover:bg-[var(--accent-strong)] text-white'
-                }`}
+                variant={inCart ? 'whatsapp' : 'default'}
+                size="lg"
+                className="w-full"
               >
+                {!addDisabled && <IconSwap active={inCart} from={Plus} to={Check} />}
                 {addDisabled
                   ? 'Selecciona una variante'
                   : inCart
-                  ? '✓ Ya está en el carrito'
-                  : '+ Agregar al carrito'}
+                  ? 'Ya está en el carrito'
+                  : 'Agregar al carrito'}
               </Button>
             </div>
           </div>

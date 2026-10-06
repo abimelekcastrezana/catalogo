@@ -48,7 +48,7 @@ export default function AddCategoryForm({ vendorId, onCreated }) {
         {isSubmitting ? 'Creando...' : 'Crear categoría'}
       </button>
       {message && (
-        <p className={`text-sm ${message.includes('Error') ? 'text-red-500' : 'text-green-600'}`}>{message}</p>
+        <p className={`text-sm ${message.includes('Error') ? 'text-[var(--danger)]' : 'text-[var(--success)]'}`}>{message}</p>
       )}
     </form>
   );

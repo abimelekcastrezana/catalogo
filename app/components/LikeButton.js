@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Heart } from 'lucide-react';
+import { Button } from '@/app/components/ui/button';
 
 function buildFingerprint() {
   const raw = [
@@ -64,25 +66,22 @@ export default function LikeButton({ slug, initialCount = 0 }) {
   };
 
   return (
-    <button
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
       onClick={handleClick}
       disabled={loading}
-      aria-label={liked ? 'Ya diste like' : 'Dar like a esta tienda'}
-      className={[
-        'flex items-center gap-1.5 text-sm font-medium transition-all select-none cursor-pointer',
-        liked ? 'text-pink-500' : 'text-[var(--muted)] hover:text-pink-500',
-        loading ? 'opacity-60' : '',
-      ].join(' ')}
+      aria-pressed={liked}
+      aria-label={liked ? 'Quitar like a esta tienda' : 'Dar like a esta tienda'}
+      className={liked ? 'text-[var(--danger)]' : 'text-[var(--muted)]'}
     >
-      <span
-        className={[
-          'text-lg leading-none transition-transform',
-          loading ? 'animate-pulse' : liked ? 'scale-110' : 'hover:scale-110',
-        ].join(' ')}
-      >
-        {liked ? '❤️' : '🤍'}
-      </span>
-      <span>{count > 0 ? count : ''}</span>
-    </button>
+      <Heart
+        aria-hidden="true"
+        className="transition-[fill] duration-150"
+        fill={liked ? 'currentColor' : 'none'}
+      />
+      <span className="tabular-nums">{count > 0 ? count : ''}</span>
+    </Button>
   );
 }

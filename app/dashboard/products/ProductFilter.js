@@ -23,12 +23,13 @@ export default function ProductFilter({ categories }) {
   return (
     <form onSubmit={handleSubmit} className="flex items-end gap-2 flex-wrap">
       <div className="grid gap-1">
-        <span className="text-xs font-medium text-[var(--muted)]">Categoría</span>
+        <label htmlFor="product-filter-category" className="text-xs font-bold text-[var(--muted)]">Categoría</label>
         <select
+          id="product-filter-category"
           name="categoryId"
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
-          className="select text-sm py-2 min-w-[160px]"
+          className="select min-w-[160px]"
         >
           <option value="">Todas</option>
           {categories.map((c) => (
@@ -36,7 +37,7 @@ export default function ProductFilter({ categories }) {
           ))}
         </select>
       </div>
-      <button type="submit" className="secondary-button text-sm py-2 px-4">Filtrar</button>
+      <button type="submit" className="secondary-button">Filtrar</button>
     </form>
   );
 }

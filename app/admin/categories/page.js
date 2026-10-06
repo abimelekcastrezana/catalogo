@@ -4,6 +4,7 @@ import db from '@/db/index.js';
 import CreateCategoryForm from './CreateCategoryForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 export default async function AdminCategoriesPage({ searchParams }) {
   const session = await getUserSession();
@@ -34,14 +35,14 @@ export default async function AdminCategoriesPage({ searchParams }) {
   return (
     <main className="page-shell">
       {/* Header */}
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardHeader>
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
               <CardTitle className="page-title">Categorías</CardTitle>
               <p className="page-subtitle">{categories.length} categoría{categories.length !== 1 ? 's' : ''}</p>
             </div>
-            <Link href="/admin"><Button variant="ghost" size="sm">← Volver</Button></Link>
+            <Link href="/admin"><Button variant="ghost" size="sm"><ArrowLeft aria-hidden="true" /> Volver</Button></Link>
           </div>
           <form method="get" className="flex items-end gap-2 flex-wrap pt-2">
             <div className="grid gap-1">
@@ -60,7 +61,7 @@ export default async function AdminCategoriesPage({ searchParams }) {
 
       <div className="grid md:grid-cols-2 gap-4">
         {/* Crear categoría */}
-        <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
           <CardHeader>
             <CardTitle className="text-lg">Agregar categoría</CardTitle>
           </CardHeader>
@@ -70,7 +71,7 @@ export default async function AdminCategoriesPage({ searchParams }) {
         </Card>
 
         {/* Lista de categorías */}
-        <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+        <Card className="border-[var(--border)] bg-[var(--surface)]">
           <CardHeader>
             <CardTitle className="text-lg">Categorías existentes</CardTitle>
           </CardHeader>

@@ -63,7 +63,7 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
   return (
     <main className="page-shell">
       {/* Header */}
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardHeader>
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
@@ -84,7 +84,7 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
       </Card>
 
       {/* Grid de productos */}
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardContent className="pt-6">
           {products.length === 0 ? (
             <p className="text-center text-[var(--muted)] py-8">No hay productos en esta tienda.</p>

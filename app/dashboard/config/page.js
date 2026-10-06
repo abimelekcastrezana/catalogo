@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
+import { ArrowLeft, MapPin } from 'lucide-react';
 
 export default async function DashboardConfigPage() {
   const session = await getUserSession();
@@ -42,7 +43,7 @@ export default async function DashboardConfigPage() {
   return (
     <main className="page-shell">
       {/* Header con resumen de la tienda */}
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardHeader>
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
@@ -50,7 +51,7 @@ export default async function DashboardConfigPage() {
               <p className="page-subtitle">Personaliza el perfil público de tu tienda.</p>
             </div>
             <Link href="/dashboard">
-              <Button variant="ghost" size="sm">← Volver</Button>
+              <Button variant="ghost" size="sm"><ArrowLeft aria-hidden="true" /> Volver</Button>
             </Link>
           </div>
 
@@ -64,7 +65,7 @@ export default async function DashboardConfigPage() {
               /{vendor.slug}
             </a>
             {vendor.state && (
-              <span>📍 {vendor.city ? `${vendor.city}, ` : ''}{vendor.state}</span>
+              <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" aria-hidden="true" /> {vendor.city ? `${vendor.city}, ` : ''}{vendor.state}</span>
             )}
             {tags.map((tag) => (
               <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
@@ -74,7 +75,7 @@ export default async function DashboardConfigPage() {
       </Card>
 
       {/* Formulario */}
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardContent className="pt-6">
           <ConfigForm vendor={vendor} />
         </CardContent>

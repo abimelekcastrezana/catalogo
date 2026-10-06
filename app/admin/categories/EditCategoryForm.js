@@ -45,7 +45,7 @@ export default function EditCategoryForm({ category, vendors }) {
         <input className={F.input} value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="slug-categoria" required />
       </div>
       <button type="submit" className="primary-button" disabled={isSubmitting}>
-        {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
+        {isSubmitting ? 'Guardando…' : 'Guardar cambios'}
       </button>
       {message && <p className={F.msg(message)}>{message}</p>}
     </form>

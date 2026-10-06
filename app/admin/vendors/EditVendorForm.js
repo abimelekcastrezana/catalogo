@@ -161,7 +161,7 @@ export default function EditVendorForm({ vendor }) {
       </label>
 
       <button type="submit" className="primary-button" disabled={isSubmitting}>
-        {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
+        {isSubmitting ? 'Guardando…' : 'Guardar cambios'}
       </button>
       {message && <p className={F.msg(message)}>{message}</p>}
     </form>

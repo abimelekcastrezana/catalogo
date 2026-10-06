@@ -35,7 +35,7 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg)]">
-      <Card className="w-full max-w-sm border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="w-full max-w-sm border-[var(--border)] bg-[var(--surface)]">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl text-[var(--text)]">Iniciar sesión</CardTitle>
           <p className="text-sm text-[var(--muted)] mt-1">Accede a tu panel de tienda</p>
@@ -46,36 +46,41 @@ export default function LoginPage() {
               <Label htmlFor="email" className="text-[var(--text)]">Email</Label>
               <Input
                 id="email"
+                name="email"
+                autoComplete="email"
+                spellCheck={false}
                 type="email"
                 placeholder="tu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-[var(--surface-strong)] border-[var(--border)] text-[var(--text)]"
+               
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-[var(--text)]">Contraseña</Label>
               <Input
                 id="password"
+                name="password"
+                autoComplete="current-password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-[var(--surface-strong)] border-[var(--border)] text-[var(--text)]"
+               
               />
             </div>
             {message && (
-              <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950 px-3 py-2 rounded-lg">{message}</p>
+              <p role="alert" className="text-sm font-bold text-[var(--danger)] bg-[var(--danger-soft)] px-3 py-2 rounded-xl">{message}</p>
             )}
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Entrando..." : "Entrar"}
+              {loading ? "Entrando…" : "Entrar"}
             </Button>
           </form>
           <p className="text-center text-sm text-[var(--muted)] mt-4">
             ¿No tienes cuenta?{" "}
-            <Link href="/register" className="text-[var(--accent-text)] hover:underline font-medium">
+            <Link href="/register" className="text-[var(--accent-text)] hover:underline font-bold">
               Regístrate
             </Link>
           </p>

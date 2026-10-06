@@ -1,12 +1,16 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
+  future: { hoverOnlyWhenSupported: true },
   content: [
     './app/**/*.{js,jsx,ts,tsx}',
     './components/**/*.{js,jsx,ts,tsx}',
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-nunito)', 'ui-rounded', 'system-ui', 'sans-serif'],
+      },
       colors: {
         /* Mapear tokens shadcn a nuestras CSS vars */
         background:  'var(--bg)',
@@ -28,7 +32,7 @@ module.exports = {
           foreground: 'var(--accent-text)',
         },
         destructive: {
-          DEFAULT:    'var(--danger)',
+          DEFAULT:    'var(--danger-fill)',
           foreground: '#ffffff',
         },
         brand: {
@@ -43,12 +47,14 @@ module.exports = {
         info: {
           DEFAULT: 'var(--info)',
           soft:    'var(--info-soft)',
+          fill:    'var(--info-fill)',
         },
         highlight: {
           DEFAULT:    'var(--highlight)',
           foreground: 'var(--highlight-fg)',
         },
         border:  'var(--border)',
+        'border-strong': 'var(--border-strong)',
         input:   'var(--border)',
         ring:    'var(--accent)',
         card: {

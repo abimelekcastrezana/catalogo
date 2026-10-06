@@ -80,13 +80,16 @@ export default function SortableCategoryList({ categories, reorderEndpoint, dele
       />
 
       {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={closeEdit}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgb(28_25_23/0.6)] p-4" onClick={closeEdit}>
           <form
+            role="dialog"
+            aria-modal="true"
+            aria-label="Editar categoría"
             onClick={(e) => e.stopPropagation()}
             onSubmit={handleSaveEdit}
-            className="w-full max-w-sm rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 grid gap-4"
+            className="anim-pop-in w-full max-w-sm rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] p-5 grid gap-4"
           >
-            <h3 className="font-semibold text-[var(--text)] m-0">Editar categoría</h3>
+            <h3 className="font-extrabold text-[var(--text)] m-0">Editar categoría</h3>
             <div className="grid gap-1.5">
               <label className="text-sm font-medium text-[var(--text)]">Nombre</label>
               <input className="input" value={name} onChange={(e) => setName(e.target.value)} required />
@@ -95,13 +98,13 @@ export default function SortableCategoryList({ categories, reorderEndpoint, dele
               <label className="text-sm font-medium text-[var(--text)]">Slug</label>
               <input className="input" value={slug} onChange={(e) => setSlug(e.target.value)} required />
             </div>
-            {error && <p className="text-sm text-red-500 m-0">{error}</p>}
+            {error && <p className="text-sm text-[var(--danger)] m-0">{error}</p>}
             <div className="flex gap-2 justify-end">
               <button type="button" onClick={closeEdit} className="secondary-button text-sm py-2 px-4">
                 Cancelar
               </button>
               <button type="submit" disabled={saving} className="primary-button text-sm py-2 px-4">
-                {saving ? 'Guardando...' : 'Guardar'}
+                {saving ? 'Guardando…' : 'Guardar'}
               </button>
             </div>
           </form>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowUp, ArrowDown, ChevronDown } from 'lucide-react';
 
 export default function SortableProductsByCategory({ products, categories, reorderEndpoint }) {
   const router = useRouter();
@@ -73,7 +74,7 @@ export default function SortableProductsByCategory({ products, categories, reord
   return (
     <div className="grid gap-3">
       {saving && (
-        <p className="text-xs text-[var(--muted)] text-center animate-pulse">Guardando orden...</p>
+        <p className="text-xs text-[var(--muted)] text-center animate-pulse">Guardando orden…</p>
       )}
       {sortedKeys.map((catKey) => {
         const catId = catKey === 'no-category' ? null : catKey;
@@ -82,16 +83,18 @@ export default function SortableProductsByCategory({ products, categories, reord
         const items = groupedProducts[catKey];
 
         return (
-          <div key={catKey} className="rounded-2xl border border-[var(--border)] overflow-hidden">
+          <div key={catKey} className="rounded-2xl border-2 border-[var(--border)] overflow-hidden">
             {/* Header de categoría */}
             <button
+              type="button"
               onClick={() => toggleCategory(catId)}
-              className="w-full flex items-center justify-between px-5 py-4 bg-[var(--surface-strong)] hover:bg-[var(--accent-soft)] transition-colors text-left"
+              aria-expanded={isExpanded}
+              className="w-full flex items-center justify-between px-5 py-4 bg-[var(--surface-strong)] hover:bg-[var(--accent-soft)] transition-colors duration-150 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
             >
-              <span className="font-semibold text-sm text-[var(--text)]">{catName}</span>
-              <span className="text-xs text-[var(--muted)] flex items-center gap-2">
+              <span className="font-extrabold text-sm text-[var(--text)]">{catName}</span>
+              <span className="text-xs font-bold text-[var(--muted)] flex items-center gap-2">
                 {items.length} producto{items.length !== 1 ? 's' : ''}
-                <span className="text-base">{isExpanded ? '▼' : '▶'}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? '' : '-rotate-90'}`} strokeWidth={2} aria-hidden="true" />
               </span>
             </button>
 
@@ -101,23 +104,27 @@ export default function SortableProductsByCategory({ products, categories, reord
                 {items.map((product, index) => (
                   <li
                     key={product.id}
-                    className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] transition-opacity ${saving ? 'opacity-50' : ''}`}
+                    className={`flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface-strong)] transition-opacity ${saving ? 'opacity-50' : ''}`}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-[var(--text)] truncate m-0">{product.name}</p>
-                      <p className="text-xs text-[var(--muted)] m-0">${parseFloat(product.price).toFixed(2)}</p>
+                      <p className="font-bold text-sm text-[var(--text)] truncate m-0">{product.name}</p>
+                      <p className="text-xs text-[var(--muted)] m-0 tabular-nums">${parseFloat(product.price).toFixed(2)}</p>
                     </div>
                     <div className="flex gap-1 flex-shrink-0">
                       <button
+                        type="button"
                         onClick={() => swap(catKey, index, -1)}
                         disabled={index === 0 || saving}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-[var(--accent-soft)] transition-colors"
-                      >↑</button>
+                        className="icon-btn hit"
+                        aria-label={`Mover ${product.name} arriba`}
+                      ><ArrowUp aria-hidden="true" /></button>
                       <button
+                        type="button"
                         onClick={() => swap(catKey, index, 1)}
                         disabled={index === items.length - 1 || saving}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm disabled:opacity-30 hover:bg-[var(--accent-soft)] transition-colors"
-                      >↓</button>
+                        className="icon-btn hit"
+                        aria-label={`Mover ${product.name} abajo`}
+                      ><ArrowDown aria-hidden="true" /></button>
                     </div>
                   </li>
                 ))}

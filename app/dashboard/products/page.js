@@ -6,6 +6,7 @@ import ProductFilter from './ProductFilter';
 import ProductRow from './ProductRow';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
+import { ArrowLeft, ArrowRight, Package } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -67,7 +68,7 @@ export default async function DashboardProductsPage({ searchParams }) {
   return (
     <main className="page-shell">
       {/* Header */}
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardHeader>
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
@@ -86,18 +87,18 @@ export default async function DashboardProductsPage({ searchParams }) {
               <Button variant="outline" size="sm">Reordenar</Button>
             </Link>
             <Link href="/dashboard">
-              <Button variant="ghost" size="sm">← Volver</Button>
+              <Button variant="ghost" size="sm"><ArrowLeft aria-hidden="true" /> Volver</Button>
             </Link>
           </div>
         </CardHeader>
       </Card>
 
       {/* Grid de productos */}
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardContent className="pt-6">
           {products.length === 0 ? (
             <div className="text-center py-12 space-y-3">
-              <p className="text-4xl">📦</p>
+              <Package className="mx-auto h-10 w-10 text-[var(--muted)]" strokeWidth={1.5} aria-hidden="true" />
               <p className="text-[var(--muted)]">No hay productos aún.</p>
               <AddProductCard vendorId={vendorId} categories={categories} />
             </div>
@@ -118,7 +119,7 @@ export default async function DashboardProductsPage({ searchParams }) {
             <div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
               {pageToFetch > 1 && (
                 <Link href={buildPageLink(pageToFetch - 1)}>
-                  <Button variant="outline" size="sm">← Anterior</Button>
+                  <Button variant="outline" size="sm"><ArrowLeft aria-hidden="true" /> Anterior</Button>
                 </Link>
               )}
               <span className="text-sm text-[var(--muted)]">
@@ -126,7 +127,7 @@ export default async function DashboardProductsPage({ searchParams }) {
               </span>
               {pageToFetch < totalPages && (
                 <Link href={buildPageLink(pageToFetch + 1)}>
-                  <Button variant="outline" size="sm">Siguiente →</Button>
+                  <Button variant="outline" size="sm">Siguiente <ArrowRight aria-hidden="true" /></Button>
                 </Link>
               )}
             </div>

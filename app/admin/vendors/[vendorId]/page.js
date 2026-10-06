@@ -41,7 +41,7 @@ export default async function AdminVendorDetailsPage({ params }) {
   return (
     <main className="page-shell">
       {/* Header */}
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardHeader>
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
@@ -62,7 +62,7 @@ export default async function AdminVendorDetailsPage({ params }) {
       </Card>
 
       {/* Formulario */}
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardContent className="pt-6">
           <EditVendorForm vendor={vendorData} />
         </CardContent>

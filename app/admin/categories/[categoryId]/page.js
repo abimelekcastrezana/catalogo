@@ -42,7 +42,7 @@ export default async function AdminCategoryEditPage({ params }) {
 
   return (
     <main className="page-shell">
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardHeader>
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
@@ -56,7 +56,7 @@ export default async function AdminCategoryEditPage({ params }) {
         </CardHeader>
       </Card>
 
-      <Card className="border-[var(--border)] bg-[var(--surface)] shadow-card">
+      <Card className="border-[var(--border)] bg-[var(--surface)]">
         <CardContent className="pt-6">
           <EditCategoryForm
             category={category.get({ plain: true })}
