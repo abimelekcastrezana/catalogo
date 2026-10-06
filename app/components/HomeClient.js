@@ -82,17 +82,21 @@ function VendorCard({ vendor }) {
 }
 
 /* ── Main ── */
-export default function HomeClient({ vendors, tags, search, region, whatsappPhone }) {
+export default function HomeClient({ vendors, total, page, tags, search, region, whatsappPhone }) {
   const router = useRouter();
   const [query, setQuery] = useState(search || '');
 
-  const go = ({ q = search, r = region } = {}) => {
+  // Cambiar filtros reinicia la paginación; "Cargar más" sube ?page= sin saltar al inicio
+  const go = ({ q = search, r = region, p = 1 } = {}) => {
     const params = new URLSearchParams();
     if (q) params.set('search', q);
     if (r) params.set('region', r);
+    if (p > 1) params.set('page', String(p));
     const qs = params.toString();
-    router.push(qs ? `/?${qs}` : '/');
+    router.push(qs ? `/?${qs}` : '/', { scroll: p === 1 });
   };
+
+  const hasMore = vendors.length < total;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -180,7 +184,7 @@ export default function HomeClient({ vendors, tags, search, region, whatsappPhon
       {/* Resultado */}
       <div className="flex flex-wrap items-center gap-2">
         <p className="m-0 text-sm font-bold text-[var(--muted)] tabular-nums" aria-live="polite">
-          {vendors.length} tienda{vendors.length !== 1 ? 's' : ''}
+          {total} tienda{total !== 1 ? 's' : ''}
           {regionName ? ` en ${regionName}` : ''}
           {search && !activeTag ? ` para “${search}”` : ''}
         </p>
@@ -208,6 +212,17 @@ export default function HomeClient({ vendors, tags, search, region, whatsappPhon
           {vendors.map((vendor) => (
             <VendorCard key={vendor.id} vendor={vendor} />
           ))}
+        </div>
+      )}
+
+      {hasMore && (
+        <div className="flex flex-col items-center gap-2">
+          <p className="m-0 text-sm font-bold text-[var(--muted)] tabular-nums">
+            Mostrando {vendors.length} de {total}
+          </p>
+          <Button type="button" variant="outline" size="lg" onClick={() => go({ p: page + 1 })}>
+            Cargar más tiendas
+          </Button>
         </div>
       )}
 

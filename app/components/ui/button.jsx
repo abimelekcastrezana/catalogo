@@ -17,6 +17,8 @@ const buttonVariants = cva(
         whatsapp:    `${raised} [--btn-edge:var(--whatsapp-edge)] bg-whatsapp-fill text-white`,
         destructive: `${raised} [--btn-edge:var(--danger-edge)] bg-destructive text-destructive-foreground`,
         secondary:   `${raised} [--btn-edge:var(--border-strong)] border-2 border-border-strong bg-secondary text-secondary-foreground`,
+        // Destructivo discreto: para acciones que ya piden confirmación y no deben competir con la principal
+        dangerOutline: `${raised} [--btn-edge:var(--border-strong)] border-2 border-border-strong bg-card text-[var(--danger)] hover:bg-[var(--danger-soft)]`,
         outline:     `${raised} [--btn-edge:var(--border-strong)] border-2 border-border-strong bg-card text-foreground`,
         ghost:       "active:scale-[0.96] hover:bg-accent hover:text-accent-foreground",
         link:        "active:scale-[0.96] text-[var(--accent-text)] underline-offset-4 hover:underline",

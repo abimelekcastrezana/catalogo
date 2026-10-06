@@ -5,7 +5,7 @@ import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/app/components/ui/sheet";
 import { Card, CardContent, CardFooter } from "@/app/components/ui/card";
-import { ChevronLeft, ChevronRight, Copy } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy, Trash2 } from 'lucide-react';
 
 function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel }) {
   const [name, setName] = useState(product.name);
@@ -344,11 +344,11 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
           </Button>
           <Button
             size="sm"
-            variant="destructive"
+            variant="dangerOutline"
             className="flex-1"
             onClick={deleteProduct}
           >
-            Eliminar
+            <Trash2 aria-hidden="true" /> Eliminar
           </Button>
         </CardFooter>
 

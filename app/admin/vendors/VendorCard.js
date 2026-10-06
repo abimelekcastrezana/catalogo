@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Trash2 } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 
 export default function VendorCard({ vendor }) {
@@ -125,12 +125,12 @@ export default function VendorCard({ vendor }) {
         </Button>
         <Button
           type="button"
-          variant="destructive"
+          variant="dangerOutline"
           size="sm"
           onClick={handleDelete}
           disabled={loading}
         >
-          Eliminar
+          <Trash2 aria-hidden="true" /> Eliminar
         </Button>
       </div>
 
