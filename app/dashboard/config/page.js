@@ -60,7 +60,7 @@ export default async function DashboardConfigPage() {
               <span className="font-medium text-[var(--text)]">{vendor.name}</span>
             </span>
             <a href={publicUrl} target="_blank" rel="noreferrer"
-              className="text-[var(--accent)] hover:underline">
+              className="text-[var(--accent-text)] hover:underline">
               /{vendor.slug}
             </a>
             {vendor.state && (

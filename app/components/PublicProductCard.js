@@ -105,7 +105,7 @@ export default function PublicProductCard({ product }) {
               </span>
             )}
             <h3
-              className="font-semibold text-sm leading-snug text-[var(--text)] line-clamp-2 cursor-pointer hover:text-[var(--accent)] transition-colors"
+              className="font-semibold text-sm leading-snug text-[var(--text)] line-clamp-2 cursor-pointer hover:text-[var(--accent-text)] transition-colors"
               onClick={() => setDetailOpen(true)}
             >
               {product.name}

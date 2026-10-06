@@ -253,7 +253,7 @@ export default function ProductDetailSheet({ product, open, onClose }) {
                   {isLong && (
                     <button
                       onClick={() => setDescExpanded((v) => !v)}
-                      className="text-xs text-[var(--accent)] font-medium hover:underline"
+                      className="text-xs text-[var(--accent-text)] font-medium hover:underline"
                     >
                       {descExpanded ? 'Ver menos' : 'Ver más'}
                     </button>

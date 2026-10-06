@@ -115,7 +115,7 @@ export default function CartDrawer() {
               <button
                 type="button"
                 onClick={() => setShowAddress(true)}
-                className="text-xs text-[var(--accent)] hover:underline flex items-center gap-1"
+                className="text-xs text-[var(--accent-text)] hover:underline flex items-center gap-1"
               >
                 <span>+</span> Agregar dirección de entrega
               </button>

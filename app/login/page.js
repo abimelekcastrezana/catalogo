@@ -75,7 +75,7 @@ export default function LoginPage() {
           </form>
           <p className="text-center text-sm text-[var(--muted)] mt-4">
             ¿No tienes cuenta?{" "}
-            <Link href="/register" className="text-[var(--accent)] hover:underline font-medium">
+            <Link href="/register" className="text-[var(--accent-text)] hover:underline font-medium">
               Regístrate
             </Link>
           </p>

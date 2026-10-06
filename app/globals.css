@@ -3,32 +3,48 @@
 @tailwind utilities;
 
 /* ── Design tokens ─────────────────────────────────────────── */
+/* Paleta de marca: specs/color-marca.md. Contrastes verificados (WCAG AA):
+   --accent-fg sobre --accent ≥ 4.5, --accent-text sobre --bg/--surface ≥ 4.5. */
 :root {
   color-scheme: light;
 
+  /* Marca (valores puros; usar en fondos grandes, bordes y detalles, no como texto) */
+  --brand:        #D2571E; /* Terracota Tap */
+  --brand-soft:   #F4A261; /* Durazno */
+
   /* Superficie */
-  --bg:             #eef4ff;
-  --surface:        #ffffff;
-  --surface-strong: #f8fbff;
-  --card:           #ffffff;
+  --bg:             #FFF8F3;
+  --surface:        #FFFFFF;
+  --surface-strong: #FBF1EA;
+  --card:           #FFFFFF;
 
   /* Texto */
-  --text:   #0f172a;
-  --muted:  #475569;
+  --text:   #2B2B2B; /* Tinta */
+  --muted:  #6B6258;
 
-  /* Bordes y sombras */
-  --border: rgba(15, 23, 42, 0.12);
-  --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+  /* Bordes y sombras (capas suaves con tinte cálido) */
+  --border: rgba(43, 43, 43, 0.12);
+  --shadow:
+    0 0 0 1px rgba(43, 28, 18, 0.04),
+    0 1px 2px rgba(43, 28, 18, 0.06),
+    0 8px 24px rgba(43, 28, 18, 0.06);
 
-  /* Acento */
-  --accent:       #2563eb;
-  --accent-strong: #1d4ed8;
-  --accent-soft:  #dbeafe;
-  --accent-fg:    #ffffff;
+  /* Acento: --accent = relleno (botones), --accent-text = texto/enlaces */
+  --accent:        #C24E18;
+  --accent-strong: #A63F10;
+  --accent-soft:   #FCE6D8;
+  --accent-text:   #B5460F;
+  --accent-fg:     #FFFFFF;
 
   /* Estado */
-  --success: #16a34a;
-  --danger:  #dc2626;
+  --success:    #1B7F43; /* texto verde */
+  --whatsapp:   #25A55D; /* Verde Pedido: iconos e indicadores */
+  --whatsapp-fill: #1B7F43; /* relleno con texto blanco (5.0:1) */
+  --danger:     #B91C1C;
+  --info:       #1D63C9; /* Azul Confianza, versión legible como texto */
+  --info-soft:  #E3EEFD;
+  --highlight:  #FFC93C; /* Amarillo Aviso */
+  --highlight-fg: #2B2B2B;
 
   /* Radios */
   --radius: 16px;
@@ -54,24 +70,36 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg:             #020617;
-  --surface:        #0f172a;
-  --surface-strong: #131c2d;
-  --card:           #111827;
+  --bg:             #1C1917;
+  --surface:        #262220;
+  --surface-strong: #2E2926;
+  --card:           #262220;
 
-  --text:  #e2e8f0;
-  --muted: #94a3b8;
+  --text:  #F3EEE9;
+  --muted: #A8A097;
 
-  --border: rgba(148, 163, 184, 0.22);
-  --shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  --border: rgba(243, 238, 233, 0.14);
+  --shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.35);
 
-  --accent:        #60a5fa;
-  --accent-strong: #3b82f6;
-  --accent-soft:   #1e3a8a;
-  --accent-fg:     #0f172a;
+  /* El relleno se mantiene igual que en claro (texto blanco sigue pasando AA);
+     el texto/enlaces usan el durazno, legible sobre fondo oscuro. */
+  --accent:        #C24E18;
+  --accent-strong: #D2571E;
+  --accent-soft:   #4A2412;
+  --accent-text:   #F4A261;
+  --accent-fg:     #FFFFFF;
 
-  --success: #4ade80;
-  --danger:  #f87171;
+  --success:    #4ADE80;
+  --whatsapp:   #3DBE76;
+  --whatsapp-fill: #1B7F43;
+  --danger:     #F87171;
+  --info:       #6AA6F5;
+  --info-soft:  #1B2D4A;
+  --highlight:  #FFC93C;
+  --highlight-fg: #2B2B2B;
 }
 
 /* ── Reset base ─────────────────────────────────────────────── */

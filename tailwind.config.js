@@ -25,11 +25,28 @@ module.exports = {
         },
         accent: {
           DEFAULT:    'var(--accent-soft)',
-          foreground: 'var(--accent)',
+          foreground: 'var(--accent-text)',
         },
         destructive: {
           DEFAULT:    'var(--danger)',
           foreground: '#ffffff',
+        },
+        brand: {
+          DEFAULT: 'var(--brand)',
+          soft:    'var(--brand-soft)',
+        },
+        success:   'var(--success)',
+        whatsapp: {
+          DEFAULT: 'var(--whatsapp)',
+          fill:    'var(--whatsapp-fill)',
+        },
+        info: {
+          DEFAULT: 'var(--info)',
+          soft:    'var(--info-soft)',
+        },
+        highlight: {
+          DEFAULT:    'var(--highlight)',
+          foreground: 'var(--highlight-fg)',
         },
         border:  'var(--border)',
         input:   'var(--border)',
@@ -55,7 +72,6 @@ module.exports = {
       },
       boxShadow: {
         card:      'var(--shadow)',
-        'card-dark': '0 16px 35px rgba(0,0,0,0.35)',
       },
     },
   },

@@ -128,7 +128,7 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
       <div className="grid gap-2 border-t border-[var(--border)] pt-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-[var(--text)]">Variantes <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span></span>
-          <button type="button" onClick={addVariantRow} className="text-xs text-[var(--accent)] hover:underline font-medium">
+          <button type="button" onClick={addVariantRow} className="text-xs text-[var(--accent-text)] hover:underline font-medium">
             + Agregar variante
           </button>
         </div>
@@ -178,7 +178,7 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
         <button
           type="button"
           onClick={() => setWholesaleOpen((v) => !v)}
-          className="text-sm font-medium text-[var(--accent)] hover:underline flex items-center gap-1"
+          className="text-sm font-medium text-[var(--accent-text)] hover:underline flex items-center gap-1"
         >
           <span>{wholesaleOpen ? '▲' : '▼'}</span> Precio mayoreo <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span>
         </button>

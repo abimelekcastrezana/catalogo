@@ -100,7 +100,7 @@ function VendorDesktopRow({ vendor, selected, onSelect }) {
           )}
         </div>
       </div>
-      {isSelected && <span className="text-[var(--accent)] text-lg flex-shrink-0 self-center">›</span>}
+      {isSelected && <span className="text-[var(--accent-text)] text-lg flex-shrink-0 self-center">›</span>}
     </button>
   );
 }
