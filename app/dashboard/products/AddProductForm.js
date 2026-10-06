@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown, X } from 'lucide-react';
 
 export default function AddProductForm({ vendorId, categories, apiBase = '/api/vendors', onSuccess }) {
   const [name, setName] = useState("");
@@ -188,7 +189,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
                     onChange={(e) => updateVariant(i, 'name', e.target.value)}
                     required
                   />
-                  <button type="button" onClick={() => removeVariant(i)} className="text-[var(--muted)] hover:text-[var(--danger)] transition-colors text-lg leading-none flex-shrink-0">✕</button>
+                  <button type="button" onClick={() => removeVariant(i)} aria-label="Quitar variante" className="hit text-[var(--muted)] hover:text-[var(--danger)] transition-colors flex-shrink-0"><X className="h-5 w-5" strokeWidth={2} aria-hidden="true" /></button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="grid gap-1">
@@ -221,9 +222,10 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
         <button
           type="button"
           onClick={() => setWholesaleOpen((v) => !v)}
-          className="text-sm font-medium text-[var(--accent-text)] hover:underline flex items-center gap-1"
+          aria-expanded={wholesaleOpen}
+          className="hit text-sm font-bold text-[var(--accent-text)] hover:underline flex items-center gap-1"
         >
-          <span>{wholesaleOpen ? '▲' : '▼'}</span> Precio mayoreo <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span>
+          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${wholesaleOpen ? '' : '-rotate-90'}`} strokeWidth={2.5} aria-hidden="true" /> Precio mayoreo <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span>
         </button>
         {wholesaleOpen && (
           <div className="grid gap-3 mt-3">

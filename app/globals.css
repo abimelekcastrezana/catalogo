@@ -304,7 +304,16 @@ img { max-width: 100%; display: block; }
   border-color: var(--accent);
   box-shadow: 0 0 0 4px var(--accent-soft);
 }
-.select { appearance: none; }
+.select {
+  appearance: none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a8178' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+}
+/* Selector de archivo: compacto para que quepa en columnas estrechas */
+.input[type="file"] { padding: 0.4rem 0.5rem; font-size: 0.8rem; min-width: 0; }
+.input[type="file"]::file-selector-button { margin-right: 0.5rem; padding: 0.3rem 0.65rem; font-size: 0.8rem; }
 
 .form-card {
   display: grid;

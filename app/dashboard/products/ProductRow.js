@@ -5,7 +5,7 @@ import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/app/components/ui/sheet";
 import { Card, CardContent, CardFooter } from "@/app/components/ui/card";
-import { ChevronLeft, ChevronRight, Copy, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Copy, Trash2, X } from 'lucide-react';
 
 function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel }) {
   const [name, setName] = useState(product.name);
@@ -144,7 +144,7 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
                     value={v.name}
                     onChange={(e) => updateVariant(i, 'name', e.target.value)}
                   />
-                  <button type="button" onClick={() => removeVariant(i)} aria-label="Quitar variante" className="hit text-[var(--muted)] hover:text-[var(--danger)] transition-colors text-lg leading-none flex-shrink-0">✕</button>
+                  <button type="button" onClick={() => removeVariant(i)} aria-label="Quitar variante" className="hit text-[var(--muted)] hover:text-[var(--danger)] transition-colors flex-shrink-0"><X className="h-5 w-5" strokeWidth={2} aria-hidden="true" /></button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="grid gap-1">
@@ -179,9 +179,10 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
         <button
           type="button"
           onClick={() => setWholesaleOpen((v) => !v)}
-          className="text-sm font-medium text-[var(--accent-text)] hover:underline flex items-center gap-1"
+          aria-expanded={wholesaleOpen}
+          className="hit text-sm font-bold text-[var(--accent-text)] hover:underline flex items-center gap-1"
         >
-          <span>{wholesaleOpen ? '▲' : '▼'}</span> Precio mayoreo <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span>
+          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${wholesaleOpen ? '' : '-rotate-90'}`} strokeWidth={2.5} aria-hidden="true" /> Precio mayoreo <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span>
         </button>
         {wholesaleOpen && (
           <div className="grid gap-3 mt-3">
