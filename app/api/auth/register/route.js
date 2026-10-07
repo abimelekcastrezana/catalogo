@@ -11,8 +11,8 @@ export async function POST(request) {
   const { Vendor, User } = await getDb();
   const body = await request.json();
   const { email, password, vendorName, slug, whatsappPhone } = body;
-  const adminEmail = 'admin@example.com';
-  const userRole = email === adminEmail ? 'admin' : 'vendor';
+  // El registro público siempre crea vendedores; los admin se asignan fuera de este endpoint.
+  const userRole = 'vendor';
 
   if (!email || !password || !vendorName || !slug || !whatsappPhone) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });

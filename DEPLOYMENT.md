@@ -7,7 +7,7 @@
   - Docker Compose 2.0+
   - SSH access
   - `sudo` privileges
-- Domain `tiendatap.com` pointing to server IP (<SERVER_IP>)
+- Domain `tiendatap.com` pointing to server IP (<IP_DEL_SERVIDOR>)
 
 ## Deployment Steps
 
