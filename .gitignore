@@ -17,3 +17,5 @@ uploads/
 .vscode
 .claude
 .devcontainer/devcontainer-lock.json
+# Config local de cloudflared (real, no versionar)
+cloudflared-config.yml
