@@ -1,0 +1,20 @@
+# Base de datos SOLO para desarrollo local (no es el compose de producción).
+# Uso: npm run db:up
+name: tiendatap-dev
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tiendatap-dev-db
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: tiendatap_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - tiendatap-dev-pgdata:/var/lib/postgresql/data
+
+volumes:
+  tiendatap-dev-pgdata:
