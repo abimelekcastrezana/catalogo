@@ -12,7 +12,10 @@
     "migrations:delete": "npx sequelize-cli db:migrate:undo:all --config db/config.js",
     "db:up": "docker compose -f docker-compose.dev.yml up -d",
     "db:down": "docker compose -f docker-compose.dev.yml down",
-    "seed:dev": "node scripts/seed-dev.js"
+    "seed:dev": "node scripts/seed-dev.js",
+    "seed:tapi": "node scripts/seed-tapi.js",
+    "tapi:parse": "node scripts/tapi/cli.js",
+    "tapi:eval": "node scripts/tapi/eval.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
