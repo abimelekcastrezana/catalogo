@@ -9,7 +9,10 @@
     "lint": "next lint",
     "migrations:run": "npx sequelize-cli db:migrate --config db/config.js",
     "migrations:revert": "npx sequelize-cli db:migrate:undo --config db/config.js",
-    "migrations:delete": "npx sequelize-cli db:migrate:undo:all --config db/config.js"
+    "migrations:delete": "npx sequelize-cli db:migrate:undo:all --config db/config.js",
+    "db:up": "docker compose -f docker-compose.dev.yml up -d",
+    "db:down": "docker compose -f docker-compose.dev.yml down",
+    "seed:dev": "node scripts/seed-dev.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
