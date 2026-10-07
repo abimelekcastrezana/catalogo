@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ── Design tokens ─────────────────────────────────────────── */
-/* Paleta de marca: specs/color-marca.md. Contrastes verificados (WCAG AA):
+/* Paleta de marca: docs/color-marca.md. Contrastes verificados (WCAG AA):
    --accent-fg sobre --accent ≥ 4.5, --accent-text sobre --bg/--surface ≥ 4.5. */
 :root {
   color-scheme: light;

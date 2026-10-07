@@ -19,3 +19,5 @@ uploads/
 .devcontainer/devcontainer-lock.json
 # Config local de cloudflared (real, no versionar)
 cloudflared-config.yml
+specs/
+.env.production

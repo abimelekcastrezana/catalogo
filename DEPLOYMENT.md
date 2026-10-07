@@ -22,7 +22,7 @@ cd tiendatap
 ### 2. Create Production Environment
 
 ```bash
-cp .env.production .env
+cp .env.example .env
 ```
 
 Edit `.env` and change these values:
