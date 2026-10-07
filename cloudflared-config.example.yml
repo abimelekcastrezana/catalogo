@@ -1,0 +1,11 @@
+tunnel: <TUNNEL_UUID>
+credentials-file: /etc/cloudflared/<TUNNEL_UUID>.json
+
+ingress:
+  - hostname: tu-dominio.com
+    service: http://app:3000
+  - hostname: tu-dominio.com
+    service: http://app:3000
+  - hostname: tu-dominio.com
+    service: http://app:3000
+  - service: http_status:404

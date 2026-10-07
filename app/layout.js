@@ -16,7 +16,7 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const whatsappPhone = (process.env.CONTACT_WHATSAPP || '+524622222741').replace(/[^0-9+]/g, '').replace(/^\+/, '');
+  const whatsappPhone = (process.env.CONTACT_WHATSAPP || '').replace(/[^0-9+]/g, '').replace(/^\+/, '');
   return (
     <html lang="es" className={nunito.variable} suppressHydrationWarning>
       <body>

@@ -69,7 +69,7 @@ export default async function HomePage({ searchParams }) {
     .slice(0, MAX_TAGS)
     .map((t) => t.label);
 
-  const whatsappPhone = (process.env.CONTACT_WHATSAPP || '+524622222741').replace(/[^0-9+]/g, '').replace(/^\+/, '');
+  const whatsappPhone = (process.env.CONTACT_WHATSAPP || '').replace(/[^0-9+]/g, '').replace(/^\+/, '');
 
   return <HomeClient
       vendors={vendors}

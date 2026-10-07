@@ -20,7 +20,7 @@ services:
       - NEXTAUTH_URL=https://tiendatap.com
       - JWT_SECRET=${JWT_SECRET}
       - UPLOAD_PATH=/app/uploads
-      - CONTACT_WHATSAPP=${CONTACT_WHATSAPP:-+524622222741}
+      - CONTACT_WHATSAPP=${CONTACT_WHATSAPP:-}
     volumes:
       - ./uploads:/app/uploads
     depends_on:
