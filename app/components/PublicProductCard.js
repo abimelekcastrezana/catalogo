@@ -130,7 +130,7 @@ export default function PublicProductCard({ product }) {
             )}
           </div>
 
-          <div className="flex items-center justify-between gap-2 pt-1">
+          <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
             <span className="min-w-0 text-lg font-extrabold leading-tight text-[var(--text)] tabular-nums">
               ${money(product.price)}
             </span>
@@ -138,7 +138,7 @@ export default function PublicProductCard({ product }) {
               size="sm"
               variant={inCart ? 'whatsapp' : 'default'}
               onClick={() => addToCart(product)}
-              className="shrink-0 rounded-[12px]"
+              className="w-full shrink-0 rounded-[12px] sm:w-auto"
             >
               <IconSwap active={inCart} from={Plus} to={Check} />
               {inCart ? 'Agregado' : 'Agregar'}
