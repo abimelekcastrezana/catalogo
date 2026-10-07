@@ -1,0 +1,64 @@
+name: Bug report / Reporte de error
+description: Reporta algo que no funciona como debería / Report something that does not work as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ Este repositorio es **público**. No pegues contraseñas, tokens ni datos personales.
+        One bug per issue. / Un error por issue.
+  - type: input
+    id: build
+    attributes:
+      label: Build / Commit
+      description: "Output of `git rev-parse --short HEAD` / Resultado de `git rev-parse --short HEAD`"
+      placeholder: "abc1234"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / Pasos para reproducir
+      description: Numbered steps, starting from a known state (login, URL...). / Pasos numerados desde un estado conocido.
+      placeholder: |
+        1. Login as demo@tiendatap.test
+        2. Go to ...
+        3. Click ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result / Resultado esperado
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result / Resultado obtenido
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment / Entorno
+      description: Browser + version, OS, device. / Navegador y versión, sistema, dispositivo.
+      placeholder: "Chrome 130, macOS 15, desktop"
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity / Severidad
+      options:
+        - Critical (data loss or crash) / Crítica
+        - Major (a feature does not work) / Mayor
+        - Minor (works but looks or behaves badly) / Menor
+        - Trivial (typo, cosmetic) / Trivial
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence / Evidencia
+      description: Drag screenshots or a short screen recording here. / Arrastra capturas o un video corto.

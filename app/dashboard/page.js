@@ -75,10 +75,13 @@ export default async function DashboardPage() {
               />
             </div>
           )}
+          {/* TUTORIAL-JOSE: aquí va <ShareStore /> (borra este comentario) */}
           <div className="flex gap-3 flex-wrap pt-2">
             <Link href="/dashboard/categories"><Button variant="outline">Categorías</Button></Link>
             <Link href="/dashboard/products"><Button variant="outline">Productos</Button></Link>
+            {/* TUTORIAL-CESAR: aquí va el botón "Estadísticas" (borra este comentario) */}
             <Link href="/dashboard/config"><Button variant="outline">Configuración</Button></Link>
+            {/* TUTORIAL-PHOEBE: aquí va el botón "Info del negocio" (borra este comentario) */}
           </div>
         </CardContent>
       </Card>
