@@ -6,6 +6,8 @@ import SortableCategoryList from '../../components/SortableCategoryList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import PlanUsage from '@/app/components/PlanUsage';
+import { getPlan, isAtLimit, categoryLimitMessage } from '@/app/lib/plans';
 
 export default async function DashboardCategoriesPage() {
   const session = await getUserSession();
@@ -27,6 +29,9 @@ export default async function DashboardCategoriesPage() {
     order: [['position', 'ASC'], ['name', 'ASC']],
   });
   const categoriesPlain = categories.map((c) => c.get({ plain: true }));
+  const vendor = await db.Vendor.findByPk(session.user.vendorId, { attributes: ['plan'] });
+  const plan = getPlan(vendor?.plan);
+  const atCategoryLimit = isAtLimit(plan.maxCategories, categoriesPlain.length);
 
   return (
     <main className="page-shell">
@@ -44,6 +49,7 @@ export default async function DashboardCategoriesPage() {
               <Button variant="ghost" size="sm"><ArrowLeft aria-hidden="true" /> Volver</Button>
             </Link>
           </div>
+          <PlanUsage plan={plan} count={categoriesPlain.length} limit={plan.maxCategories} noun="categorías" />
         </CardHeader>
       </Card>
 
@@ -54,7 +60,11 @@ export default async function DashboardCategoriesPage() {
             <CardTitle className="text-lg">Agregar categoría</CardTitle>
           </CardHeader>
           <CardContent>
-            <AddCategoryForm vendorId={session.user.vendorId} />
+            {atCategoryLimit ? (
+              <p className="text-sm text-[var(--muted)]">{categoryLimitMessage(plan)}</p>
+            ) : (
+              <AddCategoryForm vendorId={session.user.vendorId} />
+            )}
           </CardContent>
         </Card>
 

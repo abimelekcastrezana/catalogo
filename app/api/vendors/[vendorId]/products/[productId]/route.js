@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { Op } from 'sequelize';
 import { uploadConfig } from '@/app/common/config.js';
+import { getVendorPlan, descriptionLimitError, productFieldsForPlan } from '@/lib/plan-limits';
 
 export async function PUT(request, { params }) {
   try {
@@ -19,7 +20,7 @@ export async function PUT(request, { params }) {
     }
 
     const body = await request.json();
-    const { name, sku, description, categoryId, isActive, price, wholesalePrice, wholesaleMinQty, wholesaleDescription, variants, badge } = body;
+    const { name, description, isActive, price, variants } = body;
     if (!name || price === undefined || price === null) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
@@ -34,18 +35,18 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
+    const plan = await getVendorPlan(vendorId);
+    // Solo se valida si cambió, para no bloquear productos creados en un plan anterior.
+    const descriptionError = description !== product.description && descriptionLimitError(plan, description);
+    if (descriptionError) return NextResponse.json({ error: descriptionError }, { status: 400 });
+
     await product.update({
-      name, sku: sku || null, description, categoryId: categoryId || null,
+      ...productFieldsForPlan(plan, body),
       isActive: typeof isActive === 'boolean' ? isActive : product.isActive,
-      price: normalizedPrice,
-      wholesalePrice: wholesalePrice ? Number(wholesalePrice) : null,
-      wholesaleMinQty: wholesaleMinQty ? parseInt(wholesaleMinQty, 10) : null,
-      wholesaleDescription: wholesaleDescription || null,
-      badge: badge || null,
     });
 
     let updatedVariants = [];
-    if (Array.isArray(variants)) {
+    if (plan.fullProductFeatures && Array.isArray(variants)) {
       await db.ProductVariant.destroy({ where: { productId } });
       updatedVariants = await Promise.all(
         variants.map((v, i) =>

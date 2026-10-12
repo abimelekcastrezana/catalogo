@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import * as F from '@/app/lib/form-styles';
+import { DEFAULT_PLAN } from '@/app/lib/plans';
+import PlanSelect from './PlanSelect';
 
 const COUNTRY_CODES = [
   { code: '+598', label: '+598 (Uruguay)' }, { code: '+57', label: '+57 (Colombia)' },
@@ -24,6 +26,8 @@ export default function CreateVendorForm() {
   const [password, setPassword] = useState('');
   const [tag1, setTag1] = useState('');
   const [tag2, setTag2] = useState('');
+  const [plan, setPlan] = useState(DEFAULT_PLAN);
+  const [planExpiresAt, setPlanExpiresAt] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -36,7 +40,7 @@ export default function CreateVendorForm() {
     const res = await fetch('/api/admin/vendors', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, slug, whatsappPhone: `${countryCode}${whatsappNumber.replace(/\D/g, '')}`, slogan, tag1, tag2, email, password }),
+      body: JSON.stringify({ name, slug, whatsappPhone: `${countryCode}${whatsappNumber.replace(/\D/g, '')}`, slogan, tag1, tag2, email, password, plan, planExpiresAt }),
     });
     const data = await res.json();
     if (!res.ok) { setMessage(data.error || 'Error al crear la tienda'); setIsSubmitting(false); return; }
@@ -99,6 +103,13 @@ export default function CreateVendorForm() {
         <label className={F.label}>Logo (opcional)</label>
         <input className={F.input} type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files[0] || null)} />
       </div>
+
+      <hr className={F.divider} />
+      <PlanSelect
+        plan={plan}
+        expiresAt={planExpiresAt}
+        onChange={(next) => { setPlan(next.plan); setPlanExpiresAt(next.expiresAt); }}
+      />
 
       <hr className={F.divider} />
       <p className={F.sectionTitle}>Usuario del vendedor</p>

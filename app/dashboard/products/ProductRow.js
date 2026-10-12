@@ -5,9 +5,11 @@ import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/app/components/ui/sheet";
 import { Card, CardContent, CardFooter } from "@/app/components/ui/card";
-import { ChevronLeft, ChevronRight, ChevronDown, Copy, Trash2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Copy, EyeOff, Trash2, X } from 'lucide-react';
+import DescriptionField from './DescriptionField';
 
-function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel }) {
+function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onCancel }) {
+  const full = plan.fullProductFeatures;
   const [name, setName] = useState(product.name);
   const [sku, setSku] = useState(product.sku || '');
   const [description, setDescription] = useState(product.description || '');
@@ -93,10 +95,8 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
         <label className="text-sm font-medium text-[var(--text)]">Precio</label>
         <input className="input" value={price} onChange={(e) => setPrice(e.target.value)} type="number" step="0.01" min="0" />
       </div>
-      <div className="grid gap-1.5">
-        <label className="text-sm font-medium text-[var(--text)]">Descripción</label>
-        <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción" />
-      </div>
+      <DescriptionField plan={plan} value={description} onChange={setDescription} placeholder="Descripción…" />
+      {full && (<>
       <div className="grid gap-1.5">
         <label className="text-sm font-medium text-[var(--text)]">Categoría</label>
         <select className="select" value={catId} onChange={(e) => setCatId(e.target.value)}>
@@ -114,6 +114,7 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
           <option value="mas_vendido">Más vendido</option>
         </select>
       </div>
+      </>)}
       <div className="grid grid-cols-2 gap-3">
         <div className="grid gap-1.5">
           <label className="text-xs font-medium text-[var(--muted)]">Reemplazar imagen 1</label>
@@ -125,6 +126,7 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
         </div>
       </div>
 
+      {full && (<>
       {/* Variantes */}
       <div className="grid gap-2 border-t border-[var(--border)] pt-3">
         <div className="flex items-center justify-between">
@@ -205,6 +207,7 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
           </div>
         )}
       </div>
+      </>)}
 
       {message && <p className="text-sm text-[var(--danger)]">{message}</p>}
       <div className="flex gap-2 pt-2">
@@ -217,7 +220,7 @@ function EditForm({ product, vendorId, categories, apiBase, onSuccess, onCancel 
   );
 }
 
-export default function ProductRow({ product, vendorId, categories, apiBase = '/api/vendors' }) {
+export default function ProductRow({ product, vendorId, categories, apiBase = '/api/vendors', plan, hiddenByPlan = false }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [editOpen, setEditOpen] = useState(false);
   const [message, setMessage] = useState('');
@@ -290,9 +293,11 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
           ) : (
             <span className="text-[var(--muted)] text-sm">Sin imagen</span>
           )}
-          <Badge variant="secondary" className="absolute top-3 left-3 bg-[var(--card)] text-[var(--muted)] text-xs">
-            {categoryName || 'Sin categoría'}
-          </Badge>
+          {plan.maxCategories !== 0 && (
+            <Badge variant="secondary" className="absolute top-3 left-3 bg-[var(--card)] text-[var(--muted)] text-xs">
+              {categoryName || 'Sin categoría'}
+            </Badge>
+          )}
           {/* Toggle isActive */}
           <button
             type="button"
@@ -325,6 +330,11 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
           <h3 className="font-extrabold text-base leading-tight text-[var(--text)]">{product.name}</h3>
           <p className="text-[var(--muted)] text-sm line-clamp-2">{product.description || 'Sin descripción'}</p>
           <p className="font-extrabold text-lg text-[var(--text)] pt-1 tabular-nums">${Number(product.price).toFixed(2)}</p>
+          {hiddenByPlan && (
+            <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--muted)] pt-1">
+              <EyeOff className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" /> No se muestra: excede tu plan
+            </p>
+          )}
         </CardContent>
 
         {/* Actions */}
@@ -367,6 +377,7 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
             vendorId={vendorId}
             categories={categories}
             apiBase={apiBase}
+            plan={plan}
             onSuccess={() => { setEditOpen(false); window.location.reload(); }}
             onCancel={() => setEditOpen(false)}
           />

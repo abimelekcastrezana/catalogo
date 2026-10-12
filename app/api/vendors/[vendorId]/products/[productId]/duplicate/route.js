@@ -4,6 +4,7 @@ import db from '@/db/index.js';
 import fs from 'fs';
 import path from 'path';
 import { uploadConfig } from '@/app/common/config.js';
+import { getVendorPlan, productLimitError } from '@/lib/plan-limits';
 
 export async function POST(request, { params }) {
   const session = await getUserSession();
@@ -19,6 +20,9 @@ export async function POST(request, { params }) {
     include: [{ model: db.ProductImage, order: [['position', 'ASC']] }],
   });
   if (!original) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+
+  const limitError = await productLimitError(vendorId, await getVendorPlan(vendorId));
+  if (limitError) return NextResponse.json({ error: limitError }, { status: 403 });
 
   const transaction = await db.sequelize.transaction();
   try {

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getUserSession } from '@/lib/auth/getSession';
 import { UniqueConstraintError } from 'sequelize';
 import db from '@/db/index.js';
+import { getVendorPlan, categoryLimitError } from '@/lib/plan-limits';
 
 export async function GET(request, { params }) {
   const resolvedParams = await params;
@@ -26,6 +27,9 @@ export async function POST(request, { params }) {
   if (!name || !slug) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
+
+  const limitError = await categoryLimitError(resolvedParams.vendorId, await getVendorPlan(resolvedParams.vendorId));
+  if (limitError) return NextResponse.json({ error: limitError }, { status: 403 });
 
   const existing = await db.Category.findOne({ where: { vendorId: resolvedParams.vendorId, slug } });
   if (existing) {

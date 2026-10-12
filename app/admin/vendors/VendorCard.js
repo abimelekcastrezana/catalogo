@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { ChevronRight, Trash2 } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
+import { Badge } from '@/app/components/ui/badge';
+import { getPlan, formatPlanExpiry } from '@/app/lib/plans';
 
 export default function VendorCard({ vendor }) {
   const [isActive, setIsActive] = useState(vendor.isActive);
@@ -104,7 +106,13 @@ export default function VendorCard({ vendor }) {
       {/* Body */}
       <div className="card-body">
         <div className="space-y-0.5">
-          <h3 className="text-base font-extrabold m-0">{vendor.name}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-extrabold m-0">{vendor.name}</h3>
+            <Badge variant="outline">Plan {getPlan(vendor.plan).label}</Badge>
+          </div>
+          {vendor.planExpiresAt && (
+            <p className="m-0 text-sm text-[var(--muted)]">Vence el {formatPlanExpiry(vendor.planExpiresAt)}</p>
+          )}
           <span className="text-[var(--muted)] text-sm">/{vendor.slug}</span>
         </div>
         <div className="space-y-0.5 text-sm text-[var(--muted)]">

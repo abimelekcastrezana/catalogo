@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isReservedSlug, RESERVED_SLUG_ERROR } from '@/app/lib/reserved-slugs';
 import { getUserSession } from '@/lib/auth/getSession';
 import bcrypt from 'bcrypt';
 import { Op } from 'sequelize';
@@ -6,6 +7,7 @@ import db from '@/db/index.js';
 import fs from 'fs';
 import path from 'path';
 import { uploadConfig } from '@/app/common/config.js';
+import { PLAN_KEYS, isValidDateOnly, resolvePlanExpiry } from '@/app/lib/plans';
 
 export async function PUT(request, { params }) {
   const session = await getUserSession();
@@ -15,15 +17,25 @@ export async function PUT(request, { params }) {
 
   const resolvedParams = await params;
   const body = await request.json();
-  const { name, slug, whatsappPhone, slogan, tag1, tag2, isActive, isOnline, email, newPassword, state, city } = body;
+  const { name, slug, whatsappPhone, slogan, tag1, tag2, isActive, isOnline, email, newPassword, state, city, plan, planExpiresAt } = body;
   const vendorId = resolvedParams.vendorId;
   const slugRegex = /^[A-Za-z0-9-]+$/;
 
   if (!name || !slug || !whatsappPhone) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
+  if (plan !== undefined && !PLAN_KEYS.includes(plan)) {
+    return NextResponse.json({ error: 'Plan inválido' }, { status: 400 });
+  }
+  if (planExpiresAt && !isValidDateOnly(planExpiresAt)) {
+    return NextResponse.json({ error: 'Fecha de vencimiento inválida' }, { status: 400 });
+  }
   if (!slugRegex.test(slug)) {
     return NextResponse.json({ error: 'Slug inválido. Solo letras, números y guiones.' }, { status: 400 });
+  }
+
+  if (isReservedSlug(slug)) {
+    return NextResponse.json({ error: RESERVED_SLUG_ERROR }, { status: 400 });
   }
 
   const vendor = await db.Vendor.findByPk(vendorId);
@@ -55,6 +67,10 @@ export async function PUT(request, { params }) {
     vendor.isOnline = typeof isOnline === 'boolean' ? isOnline : vendor.isOnline;
     vendor.state = state || null;
     vendor.city = city || null;
+    if (plan) vendor.plan = plan;
+    if (plan || planExpiresAt !== undefined) {
+      vendor.planExpiresAt = resolvePlanExpiry(vendor.plan, planExpiresAt, vendor.planExpiresAt);
+    }
     await vendor.save();
 
     if (email) {

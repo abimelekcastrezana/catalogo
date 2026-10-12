@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { ChevronDown, X } from 'lucide-react';
+import DescriptionField from './DescriptionField';
 
-export default function AddProductForm({ vendorId, categories, apiBase = '/api/vendors', onSuccess }) {
+export default function AddProductForm({ vendorId, categories, apiBase = '/api/vendors', plan, onSuccess }) {
+  const full = plan.fullProductFeatures;
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
@@ -135,10 +137,8 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
         <label className="text-sm font-medium text-[var(--text)]">Precio</label>
         <input className="input" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" type="number" step="0.01" min="0" required />
       </div>
-      <div className="grid gap-1.5">
-        <label className="text-sm font-medium text-[var(--text)]">Descripción</label>
-        <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descripción del producto" />
-      </div>
+      <DescriptionField plan={plan} value={description} onChange={setDescription} placeholder="Descripción del producto…" />
+      {full && (<>
       <div className="grid gap-1.5">
         <label className="text-sm font-medium text-[var(--text)]">Categoría</label>
         <select className="select" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
@@ -158,6 +158,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
           <option value="mas_vendido">Más vendido</option>
         </select>
       </div>
+      </>)}
       <div className="grid grid-cols-2 gap-3">
         <div className="grid gap-1.5">
           <label className="text-sm font-medium text-[var(--text)]">Imagen 1</label>
@@ -169,6 +170,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
         </div>
       </div>
 
+      {full && (<>
       {/* Variantes */}
       <div className="grid gap-2 border-t border-[var(--border)] pt-3">
         <div className="flex items-center justify-between">
@@ -248,6 +250,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
           </div>
         )}
       </div>
+      </>)}
 
       <button type="submit" className="primary-button" disabled={isSubmitting}>
         {isSubmitting ? 'Creando...' : 'Crear producto'}

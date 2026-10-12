@@ -71,7 +71,10 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md border-[var(--border)] bg-[var(--surface)]">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl text-[var(--text)]">Crear cuenta</CardTitle>
-          <p className="text-sm text-[var(--muted)] mt-1">Registra tu tienda en minutos</p>
+          <p className="text-sm text-[var(--muted)] mt-1">
+            Registra tu tienda en minutos. Empiezas con el plan Free;{" "}
+            <Link href="/planes" className="text-[var(--accent-text)] hover:underline font-bold">ver planes</Link>.
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">

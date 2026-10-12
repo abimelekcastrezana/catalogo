@@ -14,6 +14,8 @@ import LocationButton from '@/app/components/LocationButton';
 import StoreTabs from '@/app/components/StoreTabs';
 import { ArrowLeft, ArrowRight, Package } from 'lucide-react';
 import { MessageCircle } from 'lucide-react';
+import { getPlan, productForPublicPlan, visibleCategories } from '@/app/lib/plans';
+import { visibleProductIds } from '@/lib/plan-limits';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -68,24 +70,32 @@ export default async function VendorPublicPage({ params, searchParams }) {
 
   const vendor = await db.Vendor.findOne({ where: { slug } });
   if (!vendor || !vendor.isActive) return notFound();
-
-  const productWhere = {
-    vendorId: vendor.id,
-    isActive: true,
-    ...(categoryId ? { categoryId } : {}),
-    ...(query ? { name: { [Op.iLike]: `%${query}%` } } : {}),
-  };
-
-  const [categoryModels, totalProducts, likeCount] = await Promise.all([
+  const plan = getPlan(vendor.plan);
+  const [allCategoryModels, visibleIds] = await Promise.all([
     db.Category.findAll({
       where: { vendorId: vendor.id },
       order: [['position', 'ASC'], ['name', 'ASC']],
     }),
+    visibleProductIds(vendor.id, plan),
+  ]);
+  // Solo las categorías que entran en el plan; un filtro a otra categoría (vía URL) se ignora.
+  const categories = visibleCategories(plan, allCategoryModels.map((c) => c.get({ plain: true })));
+  const visibleCategoryIds = new Set(categories.map((c) => c.id));
+  const categoryFilter = visibleCategoryIds.has(categoryId) ? categoryId : '';
+
+  const productWhere = {
+    vendorId: vendor.id,
+    isActive: true,
+    ...(visibleIds ? { id: { [Op.in]: visibleIds } } : {}),
+    ...(categoryFilter ? { categoryId: categoryFilter } : {}),
+    ...(query ? { name: { [Op.iLike]: `%${query}%` } } : {}),
+  };
+
+  const [totalProducts, likeCount] = await Promise.all([
     db.Product.count({ where: productWhere }),
     db.VendorLike.count({ where: { vendorId: vendor.id } }),
   ]);
 
-  const categories = categoryModels.map((c) => c.get({ plain: true }));
   const totalPages = Math.max(1, Math.ceil(totalProducts / PAGE_SIZE));
   const pageToFetch = Math.min(currentPage, totalPages);
   const offset = (pageToFetch - 1) * PAGE_SIZE;
@@ -109,7 +119,11 @@ export default async function VendorPublicPage({ params, searchParams }) {
     offset,
   });
 
-  const products = productModels.map((p) => p.get({ plain: true }));
+  const products = productModels.map((model) => {
+    const p = productForPublicPlan(plan, model.get({ plain: true }));
+    // Producto en una categoría que quedó fuera del plan: se muestra sin categoría.
+    return p.categoryId && !visibleCategoryIds.has(p.categoryId) ? { ...p, categoryId: null, Category: null } : p;
+  });
   const vendorPhone = vendor.whatsappPhone?.replace(/[^0-9+]/g, '') || '';
   const logoUrl = vendor.logoUrl
     ? vendor.logoUrl.startsWith('/') ? `/api/uploads${vendor.logoUrl.replace(/^\/uploads\/?/, '/')}` : vendor.logoUrl
@@ -117,7 +131,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
 
   const buildPageHref = (page) => {
     const p = new URLSearchParams();
-    if (categoryId) p.set('categoryId', categoryId);
+    if (categoryFilter) p.set('categoryId', categoryFilter);
     if (query) p.set('q', query);
     if (sort) p.set('sort', sort);
     if (page > 1) p.set('page', String(page));
@@ -177,10 +191,10 @@ export default async function VendorPublicPage({ params, searchParams }) {
 
         {/* Filtros */}
         <section className="flex flex-col gap-3">
-          <CategoryFilterBar vendorSlug={slug} categories={categories} currentCategoryId={categoryId} currentQuery={query} currentSort={sort} />
+          <CategoryFilterBar vendorSlug={slug} categories={categories} currentCategoryId={categoryFilter} currentQuery={query} currentSort={sort} />
           <p className="text-sm font-bold text-[var(--muted)] tabular-nums">
             {totalProducts} producto{totalProducts !== 1 ? 's' : ''}
-            {categoryId ? ' en esta categoría' : ''}
+            {categoryFilter ? ' en esta categoría' : ''}
             {query ? ` que coinciden con "${query}"` : ''}
           </p>
         </section>

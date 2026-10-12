@@ -238,6 +238,9 @@ export default function HomeClient({ vendors, total, page, tags, search, region,
           <Button asChild size="lg">
             <Link href="/register">Crear mi tienda</Link>
           </Button>
+          <Button asChild size="lg" variant="outline">
+            <Link href="/planes">Ver planes</Link>
+          </Button>
           {ctaHref && (
             <Button asChild size="lg" variant="outline">
               <a href={ctaHref} target="_blank" rel="noopener noreferrer">
