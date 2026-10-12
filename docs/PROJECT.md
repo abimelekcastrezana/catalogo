@@ -93,6 +93,20 @@
 - Sistema de likes por vendor (`VendorLike`, fingerprint + IP, sin cuenta requerida).
 - Dark mode con `ThemeSwitcher`.
 
+### SEO y visibilidad en buscadores / IA
+- Metadatos globales en `app/layout.js` (datos en `app/lib/site.js`): título con marca y servicio,
+  plantilla "Página | TiendaTap", Open Graph, `metadataBase` desde `NEXTAUTH_URL`.
+- Home: canónica, sección "¿Qué es TiendaTap?" con texto de servicio y datos estructurados
+  `Organization` + `WebSite` (búsqueda). El logo del header ya no es `h1`.
+- `/planes`: `SoftwareApplication` con los precios de cada plan + `FAQPage`.
+- Tiendas: título "Nombre | TiendaTap", canónica, `Store` con región y un pie "Tienda creada con
+  TiendaTap · Crea la tuya gratis" que enlaza a la home (refuerza la marca).
+- `/robots.txt` y `/sitemap.xml` (home, planes, registro y tiendas activas) generados por la app;
+  `/llms.txt` con el resumen del servicio para asistentes de IA.
+- Fuera del código (pendiente del dueño): Google Search Console y Bing Webmaster Tools (enviar
+  sitemap), redirigir `www` en Cloudflare, decidir si permitir `GPTBot`/`ClaudeBot` (hoy Cloudflare
+  los bloquea con 403) y presencia de marca en otros sitios.
+
 ### Infra / calidad
 - Migraciones Sequelize incrementales (`db/migrations/`), una por cambio de esquema.
 - `revalidatePath` aplicado tras mutaciones (categorías, productos, reorder) para evitar
@@ -106,6 +120,8 @@
   el modelo `ProductVariant` y `ProductDetailSheet.js` si se retoma.
 - **Pagos in-app**: pendiente. Servirá para cobrar la suscripción a los vendors y, en Max, para
   que los clientes del vendor paguen con tarjeta. Hoy el plan se cambia manualmente desde admin.
+- **Comisiones en Max**: se planea cobrar comisión por las ventas con pago in-app del plan Max
+  (por definir). Mientras tanto, no prometer "sin comisiones" en textos, SEO ni `llms.txt`.
 - **Vencimiento de la suscripción (anual)**: la fecha ya se guarda; falta lo que pasa con ella, que
   va junto con los pagos: 5 días antes de que termine hay que avisar al vendor y pedirle que
   registre sus datos de pago, y decidir qué pasa si no paga. Las tiendas legadas (las que existían al lanzar los planes, 2026-10-12) se quedan en Max
@@ -116,6 +132,8 @@
 
 - **2026-10-12** — planes de suscripción Free / Plus / Max con límites de productos, categorías
   y funciones de producto; el admin asigna el plan y su vencimiento anual; página `/planes`.
+- **2026-10-12** — SEO: metadatos, datos estructurados, sitemap, robots, `llms.txt` y enlace a
+  TiendaTap en el pie de cada tienda.
 
 - **2026-08-20** — ajustes de feedback en el catálogo público: tab Vitrina solo con ícono
   (sin texto), botón de agregar vuelve a "+ Agregar" junto al precio (no flotante sobre la

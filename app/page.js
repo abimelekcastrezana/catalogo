@@ -1,10 +1,39 @@
 import db from '@/db/index.js';
 import { Op } from 'sequelize';
 import HomeClient from '@/app/components/HomeClient';
+import JsonLd from '@/app/components/JsonLd';
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_LOGO, HIDDEN_SLUGS } from '@/app/lib/site';
 
 const PAGE_SIZE = 12;
 const MAX_TAGS = 10;
-const HIDDEN_SLUGS = ['gatunoide'];
+
+export const metadata = {
+  alternates: { canonical: '/' },
+};
+
+const STRUCTURED_DATA = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}${SITE_LOGO}`,
+    description: SITE_DESCRIPTION,
+    areaServed: 'MX',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+    inLanguage: 'es-MX',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${SITE_URL}/?search={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  },
+];
 
 export default async function HomePage({ searchParams }) {
   const resolvedSearchParams = await searchParams;
@@ -71,13 +100,18 @@ export default async function HomePage({ searchParams }) {
 
   const whatsappPhone = (process.env.CONTACT_WHATSAPP || '').replace(/[^0-9+]/g, '').replace(/^\+/, '');
 
-  return <HomeClient
-      vendors={vendors}
-      total={total}
-      page={page}
-      tags={tags}
-      search={search}
-      region={region}
-      whatsappPhone={whatsappPhone}
-    />;
+  return (
+    <>
+      <JsonLd data={STRUCTURED_DATA} />
+      <HomeClient
+        vendors={vendors}
+        total={total}
+        page={page}
+        tags={tags}
+        search={search}
+        region={region}
+        whatsappPhone={whatsappPhone}
+      />
+    </>
+  );
 }

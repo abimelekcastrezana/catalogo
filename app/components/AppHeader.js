@@ -33,7 +33,7 @@ export default function AppHeader({ whatsappPhone }) {
             height={48}
             className="img-outline w-12 h-12 rounded-xl object-cover"
           />
-          <h1 className="m-0 text-xl font-extrabold">TiendaTap</h1>
+          <span className="text-xl font-extrabold">TiendaTap</span>
         </Link>
       ) : (
         <div className="h-9" />

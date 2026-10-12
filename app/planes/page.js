@@ -2,13 +2,17 @@ import Link from 'next/link';
 import { Check, Minus, MessageCircle } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { PLANS } from '@/app/lib/plans';
+import JsonLd from '@/app/components/JsonLd';
+import { SITE_URL, SITE_NAME } from '@/app/lib/site';
 
 // CONTACT_WHATSAPP se lee en cada request (en build no está disponible).
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Planes — TiendaTap',
-  description: 'Planes anuales de catálogo digital para tu negocio: Free, Plus y Max.',
+  title: 'Planes y precios: tienda en línea gratis o desde $399 al año',
+  description:
+    'Planes anuales de TiendaTap para tu catálogo en línea: Free gratis (10 productos), Plus $399 MXN (40 productos y 5 categorías) y Max $799 MXN (sin límites). Pedidos por WhatsApp.',
+  alternates: { canonical: '/planes' },
 };
 
 const { free, plus, max } = PLANS;
@@ -66,6 +70,35 @@ const FAQ = [
 
 const money = (n) => n.toLocaleString('es-MX');
 
+const STRUCTURED_DATA = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: SITE_NAME,
+    url: SITE_URL,
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    description: 'Plataforma para crear el catálogo en línea de tu negocio y recibir pedidos por WhatsApp.',
+    offers: PLAN_CARDS.map(({ plan, summary, features }) => ({
+      '@type': 'Offer',
+      name: `Plan ${plan.label}`,
+      price: plan.priceMxn,
+      priceCurrency: 'MXN',
+      description: `${summary} ${features.filter((f) => f.included && !f.soon).map((f) => f.text).join('. ')}.`,
+      url: `${SITE_URL}/planes`,
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  },
+];
+
 export default function PlanesPage() {
   const whatsappPhone = (process.env.CONTACT_WHATSAPP || '').replace(/[^0-9+]/g, '').replace(/^\+/, '');
   const whatsappHref = (text) =>
@@ -73,8 +106,9 @@ export default function PlanesPage() {
 
   return (
     <main className="mx-auto max-w-[1200px] space-y-10 px-4 py-6 sm:px-6 sm:py-10">
+      <JsonLd data={STRUCTURED_DATA} />
       <section className="mx-auto max-w-2xl space-y-2 text-center">
-        <h2 className="m-0 text-3xl font-extrabold leading-tight sm:text-5xl">Planes anuales de catálogo</h2>
+        <h1 className="m-0 text-3xl font-extrabold leading-tight sm:text-5xl">Planes anuales de catálogo</h1>
         <p className="m-0 text-[var(--muted)] sm:text-lg">
           Todos los precios son anuales, en pesos mexicanos. Elige el que mejor se adapta a tu negocio.
         </p>

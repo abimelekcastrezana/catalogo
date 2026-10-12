@@ -16,6 +16,8 @@ import { ArrowLeft, ArrowRight, Package } from 'lucide-react';
 import { MessageCircle } from 'lucide-react';
 import { getPlan, productForPublicPlan, visibleCategories } from '@/app/lib/plans';
 import { visibleProductIds } from '@/lib/plan-limits';
+import JsonLd from '@/app/components/JsonLd';
+import { SITE_URL, SITE_LOGO } from '@/app/lib/site';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -25,35 +27,29 @@ export async function generateMetadata({ params }) {
   const vendor = await db.Vendor.findOne({ where: { slug } });
   if (!vendor) return { title: 'Catálogo' };
 
-  const baseUrl = process.env.NEXTAUTH_URL || 'https://tiendatap.com';
-  const rawLogo = vendor.logoUrl;
-  const absoluteLogo = rawLogo
-    ? rawLogo.startsWith('http')
-      ? rawLogo
-      : `${baseUrl}/api/uploads${rawLogo.replace(/^\/uploads\/?/, '/')}`
-    : `${baseUrl}/tiendatap_logo.jpg`;
-
-  const description = vendor.slogan || `Catálogo digital de ${vendor.name}`;
-  const title = `${vendor.name} — TiendaTap`;
+  const slogan = (vendor.slogan || '').trim();
+  const sloganLead = slogan ? `${slogan}${/[.!?…]$/.test(slogan) ? '' : '.'} ` : '';
+  const description = `${sloganLead}Mira el catálogo de ${vendor.name} y haz tu pedido por WhatsApp.`;
+  const logo = vendorLogoAbsolute(vendor);
 
   return {
-    title,
+    title: vendor.name,
     description,
+    alternates: { canonical: `/${slug}` },
     openGraph: {
-      title,
+      title: vendor.name,
       description,
-      url: `${baseUrl}/${slug}`,
-      siteName: 'TiendaTap',
-      images: [{ url: absoluteLogo, width: 400, height: 400, alt: vendor.name }],
-      type: 'website',
+      url: `/${slug}`,
+      images: [{ url: logo, width: 400, height: 400, alt: vendor.name }],
     },
-    twitter: {
-      card: 'summary',
-      title,
-      description,
-      images: [absoluteLogo],
-    },
+    twitter: { card: 'summary', title: vendor.name, description, images: [logo] },
   };
+}
+
+function vendorLogoAbsolute(vendor) {
+  const raw = vendor.logoUrl;
+  if (!raw) return `${SITE_URL}${SITE_LOGO}`;
+  return raw.startsWith('http') ? raw : `${SITE_URL}/api/uploads${raw.replace(/^\/uploads\/?/, '/')}`;
 }
 
 const PAGE_SIZE = 12;
@@ -141,6 +137,22 @@ export default async function VendorPublicPage({ params, searchParams }) {
   return (
     <VendorPageClient vendorSlug={slug} vendorPhone={vendorPhone} vendorName={vendor.name}>
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <JsonLd data={{
+          '@context': 'https://schema.org',
+          '@type': 'Store',
+          name: vendor.name,
+          url: `${SITE_URL}/${slug}`,
+          image: vendorLogoAbsolute(vendor),
+          ...(vendor.slogan ? { description: vendor.slogan } : {}),
+          ...((vendor.state || vendor.city) ? {
+            address: {
+              '@type': 'PostalAddress',
+              ...(vendor.city ? { addressLocality: vendor.city } : {}),
+              ...(vendor.state ? { addressRegion: vendor.state } : {}),
+              addressCountry: 'MX',
+            },
+          } : {}),
+        }} />
         {/* Hero del vendor */}
         <section className="relative">
           {/* ThemeSwitcher — fixed para no afectar el centrado en absoluto */}
@@ -234,6 +246,21 @@ export default async function VendorPublicPage({ params, searchParams }) {
             )}
           </div>
         )}
+
+        {/* Pie: enlace a TiendaTap (cada tienda refuerza la marca y trae vendedores nuevos) */}
+        {/* pb-24: deja libre el botón flotante del carrito */}
+        <footer className="border-t-2 border-[var(--border)] pt-5 pb-24 text-center">
+          <Link
+            href="/"
+            className="group inline-flex flex-col items-center gap-1 text-sm font-bold text-[var(--muted)]"
+          >
+            <span className="inline-flex items-center gap-2">
+              <img src={SITE_LOGO} alt="" width={20} height={20} className="h-5 w-5 rounded-md" />
+              Tienda creada con TiendaTap
+            </span>
+            <span className="text-[var(--accent-text)] group-hover:underline">Crea la tuya gratis</span>
+          </Link>
+        </footer>
       </main>
     </VendorPageClient>
   );
