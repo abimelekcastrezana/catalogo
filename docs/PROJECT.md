@@ -25,6 +25,32 @@
 - Registro de vendor (crea `User` + `Vendor` juntos) y login vía NextAuth Credentials.
 - Roles `admin` / `vendor` en el modelo `User`.
 
+### Planes de suscripción
+- Tres planes anuales por vendor (`Vendor.plan`): **Free** (gratis), **Plus** ($399 MXN) y
+  **Max** ($799 MXN). Límites centralizados en `app/lib/plans.js`; validación de servidor en
+  `lib/plan-limits.js`.
+  - **Free**: máx. 10 productos, sin categorías; el producto solo tiene 2 fotos, nombre,
+    descripción de hasta 100 caracteres y precio (sin categoría, etiqueta, SKU, variantes ni
+    mayoreo).
+  - **Plus**: todas las funciones de producto, máx. 40 productos y 5 categorías.
+  - **Max**: sin límites. En el futuro tendrá cobro con tarjeta dentro de TiendaTap para los
+    clientes del vendor.
+- Suscripción anual: cada tienda guarda su vencimiento (`Vendor.planExpiresAt`; Free no vence).
+  Al asignar Plus/Max el admin propone hoy + 1 año y puede editar la fecha; el admin y el vendor
+  ven "vence el …". Todavía no pasa nada al vencer (ver Pendientes).
+- Página pública **`/planes`** con precios, qué incluye cada plan y preguntas frecuentes (los
+  números salen de `app/lib/plans.js`). Free lleva a registrarse; Plus/Max abren WhatsApp de
+  contacto (`CONTACT_WHATSAPP`). Enlazada desde el header, la home, el registro y el dashboard.
+- Slugs reservados (`app/lib/reserved-slugs.js`: `planes`, `admin`, `login`…) para que ninguna
+  tienda quede tapada por una página de la app.
+- Por ahora el plan solo lo asigna el admin (al crear o editar la tienda). El registro público
+  arranca en Free; las tiendas que existían antes de esta feature quedaron en Max.
+- **Bajar de plan no borra nada**: bloquea crear productos/categorías arriba del límite y la
+  tienda pública solo muestra los primeros N productos activos y las primeras N categorías
+  según su orden (el excedente queda oculto; el dashboard lo marca con "No se muestra: excede tu
+  plan"). En Free, los datos extra (categorías, etiqueta, variantes, mayoreo) se conservan en la
+  BD, se ocultan en la tienda y no se tocan al editar; reaparecen si el vendor vuelve a subir.
+
 ### Admin (`/admin`)
 - CRUD de vendors (crear, editar, ver detalle).
 - CRUD de categorías globales, asociables a vendors.
@@ -67,6 +93,20 @@
 - Sistema de likes por vendor (`VendorLike`, fingerprint + IP, sin cuenta requerida).
 - Dark mode con `ThemeSwitcher`.
 
+### SEO y visibilidad en buscadores / IA
+- Metadatos globales en `app/layout.js` (datos en `app/lib/site.js`): título con marca y servicio,
+  plantilla "Página | TiendaTap", Open Graph, `metadataBase` desde `NEXTAUTH_URL`.
+- Home: canónica, sección "¿Qué es TiendaTap?" con texto de servicio y datos estructurados
+  `Organization` + `WebSite` (búsqueda). El logo del header ya no es `h1`.
+- `/planes`: `SoftwareApplication` con los precios de cada plan + `FAQPage`.
+- Tiendas: título "Nombre | TiendaTap", canónica, `Store` con región y un pie "Tienda creada con
+  TiendaTap · Crea la tuya gratis" que enlaza a la home (refuerza la marca).
+- `/robots.txt` y `/sitemap.xml` (home, planes, registro y tiendas activas) generados por la app;
+  `/llms.txt` con el resumen del servicio para asistentes de IA.
+- Fuera del código (pendiente del dueño): Google Search Console y Bing Webmaster Tools (enviar
+  sitemap), redirigir `www` en Cloudflare, decidir si permitir `GPTBot`/`ClaudeBot` (hoy Cloudflare
+  los bloquea con 403) y presencia de marca en otros sitios.
+
 ### Infra / calidad
 - Migraciones Sequelize incrementales (`db/migrations/`), una por cambio de esquema.
 - `revalidatePath` aplicado tras mutaciones (categorías, productos, reorder) para evitar
@@ -78,9 +118,22 @@
   mayoreo aplica al precio base del producto sin importar la variante seleccionada; el vendedor
   puede aclarar condiciones por variante en el campo de descripción. Ver detalle técnico en
   el modelo `ProductVariant` y `ProductDetailSheet.js` si se retoma.
+- **Pagos in-app**: pendiente. Servirá para cobrar la suscripción a los vendors y, en Max, para
+  que los clientes del vendor paguen con tarjeta. Hoy el plan se cambia manualmente desde admin.
+- **Comisiones en Max**: se planea cobrar comisión por las ventas con pago in-app del plan Max
+  (por definir). Mientras tanto, no prometer "sin comisiones" en textos, SEO ni `llms.txt`.
+- **Vencimiento de la suscripción (anual)**: la fecha ya se guarda; falta lo que pasa con ella, que
+  va junto con los pagos: 5 días antes de que termine hay que avisar al vendor y pedirle que
+  registre sus datos de pago, y decidir qué pasa si no paga. Las tiendas legadas (las que existían al lanzar los planes, 2026-10-12) se quedan en Max
+  y su primer año vence el **2027-10-12**; no se les baja de plan.
 - (agregar aquí lo que vaya surgiendo)
 
 ## Changelog reciente
+
+- **2026-10-12** — planes de suscripción Free / Plus / Max con límites de productos, categorías
+  y funciones de producto; el admin asigna el plan y su vencimiento anual; página `/planes`.
+- **2026-10-12** — SEO: metadatos, datos estructurados, sitemap, robots, `llms.txt` y enlace a
+  TiendaTap en el pie de cada tienda.
 
 - **2026-08-20** — ajustes de feedback en el catálogo público: tab Vitrina solo con ícono
   (sin texto), botón de agregar vuelve a "+ Agregar" junto al precio (no flotante sobre la

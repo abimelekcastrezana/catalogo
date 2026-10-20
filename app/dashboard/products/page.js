@@ -7,6 +7,9 @@ import ProductRow from './ProductRow';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { ArrowLeft, ArrowRight, Package } from 'lucide-react';
+import PlanUsage from '@/app/components/PlanUsage';
+import { getPlan } from '@/app/lib/plans';
+import { visibleProductIds } from '@/lib/plan-limits';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -35,6 +38,9 @@ export default async function DashboardProductsPage({ searchParams }) {
   }
 
   const { vendorId } = session.user;
+  const vendor = await db.Vendor.findByPk(vendorId, { attributes: ['plan'] });
+  const plan = getPlan(vendor?.plan);
+  const vendorProductCount = await db.Product.count({ where: { vendorId } });
   const productWhere = { vendorId };
   if (categoryId) productWhere.categoryId = categoryId;
 
@@ -55,7 +61,8 @@ export default async function DashboardProductsPage({ searchParams }) {
     offset,
   });
   const products = productModels.map((p) => p.get({ plain: true }));
-  const categoryModels = await getCategories(vendorId);
+  const visibleIds = vendorProductCount > (plan.maxProducts ?? Infinity) ? await visibleProductIds(vendorId, plan) : null;
+  const categoryModels = plan.maxCategories === 0 ? [] : await getCategories(vendorId);
   const categories = categoryModels.map((c) => c.get({ plain: true }));
 
   const buildPageLink = (page) => {
@@ -78,11 +85,12 @@ export default async function DashboardProductsPage({ searchParams }) {
                 {categoryId ? ' en esta categoría' : ' en total'}
               </p>
             </div>
-            <ProductFilter categories={categories} />
+            {categories.length > 0 && <ProductFilter categories={categories} />}
           </div>
+          <PlanUsage plan={plan} count={vendorProductCount} limit={plan.maxProducts} noun="productos" />
 
           <div className="flex items-center gap-2 flex-wrap pt-1">
-            <AddProductCard vendorId={vendorId} categories={categories} />
+            <AddProductCard vendorId={vendorId} categories={categories} plan={plan} productCount={vendorProductCount} />
             <Link href="/dashboard/products/reorder">
               <Button variant="outline" size="sm">Reordenar</Button>
             </Link>
@@ -100,7 +108,7 @@ export default async function DashboardProductsPage({ searchParams }) {
             <div className="text-center py-12 space-y-3">
               <Package className="mx-auto h-10 w-10 text-[var(--muted)]" strokeWidth={1.5} aria-hidden="true" />
               <p className="text-[var(--muted)]">No hay productos aún.</p>
-              <AddProductCard vendorId={vendorId} categories={categories} />
+              <AddProductCard vendorId={vendorId} categories={categories} plan={plan} productCount={vendorProductCount} />
             </div>
           ) : (
             <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(min(220px,100%),1fr))]">
@@ -110,6 +118,8 @@ export default async function DashboardProductsPage({ searchParams }) {
                   product={p}
                   vendorId={vendorId}
                   categories={categories}
+                  plan={plan}
+                  hiddenByPlan={!!visibleIds && p.isActive && !visibleIds.includes(p.id)}
                 />
               ))}
             </div>

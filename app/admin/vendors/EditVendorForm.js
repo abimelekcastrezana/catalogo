@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import * as F from '@/app/lib/form-styles';
 import RegionSelect from '@/app/components/RegionSelect';
+import { getPlan } from '@/app/lib/plans';
+import PlanSelect from './PlanSelect';
 
 const COUNTRY_CODES = [
   { code: '+598', label: '+598 (Uruguay)' }, { code: '+57', label: '+57 (Colombia)' },
@@ -45,6 +47,8 @@ export default function EditVendorForm({ vendor }) {
   const [email, setEmail] = useState(vendor.userEmail || vendor.Users?.[0]?.email || '');
   const [newPassword, setNewPassword] = useState('');
   const [isActive, setIsActive] = useState(vendor.isActive ?? true);
+  const [plan, setPlan] = useState(getPlan(vendor.plan).key);
+  const [planExpiresAt, setPlanExpiresAt] = useState(vendor.planExpiresAt || '');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,7 +67,7 @@ export default function EditVendorForm({ vendor }) {
     const res = await fetch(`/api/admin/vendors/${vendor.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, slug, whatsappPhone: `${countryCode}${whatsappNumber.replace(/\D/g, '')}`, slogan, tag1, tag2, isActive, email, newPassword, state, city }),
+      body: JSON.stringify({ name, slug, whatsappPhone: `${countryCode}${whatsappNumber.replace(/\D/g, '')}`, slogan, tag1, tag2, isActive, email, newPassword, state, city, plan, planExpiresAt }),
     });
     const data = await res.json();
     if (!res.ok) { setMessage(data.error || 'Error actualizando la tienda'); setIsSubmitting(false); return; }
@@ -142,6 +146,13 @@ export default function EditVendorForm({ vendor }) {
           <input className={F.input} value={tag2} onChange={(e) => setTag2(e.target.value)} placeholder="Ej. uñas" />
         </div>
       </div>
+
+      <hr className={F.divider} />
+      <PlanSelect
+        plan={plan}
+        expiresAt={planExpiresAt}
+        onChange={(next) => { setPlan(next.plan); setPlanExpiresAt(next.expiresAt); }}
+      />
 
       <hr className={F.divider} />
       <p className={F.sectionTitle}>Usuario del vendedor</p>

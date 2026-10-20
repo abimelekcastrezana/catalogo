@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isReservedSlug, RESERVED_SLUG_ERROR } from '@/app/lib/reserved-slugs';
 import bcrypt from 'bcrypt';
 
 async function getDb() {
@@ -30,6 +31,10 @@ export async function POST(request) {
   }
   if (!slugRegex.test(slug)) {
     return NextResponse.json({ error: 'Invalid slug. Only letters, numbers and hyphens allowed.' }, { status: 400 });
+  }
+
+  if (isReservedSlug(slug)) {
+    return NextResponse.json({ error: RESERVED_SLUG_ERROR }, { status: 400 });
   }
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

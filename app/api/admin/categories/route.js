@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getUserSession } from '@/lib/auth/getSession';
 import db from '@/db/index.js';
+import { getPlan } from '@/app/lib/plans';
+import { categoryLimitError } from '@/lib/plan-limits';
 
 export async function POST(request) {
   const session = await getUserSession();
@@ -19,6 +21,9 @@ export async function POST(request) {
   if (!vendor) {
     return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
   }
+
+  const limitError = await categoryLimitError(vendorId, getPlan(vendor.plan));
+  if (limitError) return NextResponse.json({ error: limitError }, { status: 403 });
 
   const existing = await db.Category.findOne({ where: { vendorId, slug } });
   if (existing) {

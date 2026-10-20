@@ -4,6 +4,7 @@ import db from '@/db/index.js';
 import fs from 'fs';
 import path from 'path';
 import { uploadConfig } from '@/app/common/config.js';
+import { getVendorPlan, descriptionLimitError, productFieldsForPlan } from '@/lib/plan-limits';
 
 export async function PUT(request, { params }) {
   const session = await getUserSession();
@@ -14,7 +15,7 @@ export async function PUT(request, { params }) {
   const resolved = await params;
   const { vendorId, productId } = resolved;
   const body = await request.json();
-  const { name, sku, description, categoryId, isActive, price, wholesalePrice, wholesaleMinQty, wholesaleDescription, variants, badge } = body;
+  const { name, sku, description, isActive, price, variants } = body;
 
   if (!name || price === undefined || price === null) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -30,8 +31,13 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ error: 'Product not found' }, { status: 404 });
   }
 
+  const plan = await getVendorPlan(vendorId);
+  // Solo se valida si cambió, para no bloquear productos creados en un plan anterior.
+  const descriptionError = description !== product.description && descriptionLimitError(plan, description);
+  if (descriptionError) return NextResponse.json({ error: descriptionError }, { status: 400 });
+
   const normalizedSku = sku ? sku.trim() : null;
-  if (normalizedSku && normalizedSku !== product.sku) {
+  if (plan.fullProductFeatures && normalizedSku && normalizedSku !== product.sku) {
     const existingSku = await db.Product.findOne({ where: { vendorId, sku: normalizedSku } });
     if (existingSku) {
       return NextResponse.json({ error: 'SKU already exists for this vendor' }, { status: 409 });
@@ -40,17 +46,12 @@ export async function PUT(request, { params }) {
 
   try {
     await product.update({
-      name, sku: normalizedSku, description, categoryId: categoryId || null,
+      ...productFieldsForPlan(plan, body),
       isActive: typeof isActive === 'boolean' ? isActive : product.isActive,
-      price: normalizedPrice,
-      wholesalePrice: wholesalePrice ? Number(wholesalePrice) : null,
-      wholesaleMinQty: wholesaleMinQty ? parseInt(wholesaleMinQty, 10) : null,
-      wholesaleDescription: wholesaleDescription || null,
-      badge: badge || null,
     });
 
     let updatedVariants = [];
-    if (Array.isArray(variants)) {
+    if (plan.fullProductFeatures && Array.isArray(variants)) {
       await db.ProductVariant.destroy({ where: { productId } });
       updatedVariants = await Promise.all(
         variants.map((v, i) =>

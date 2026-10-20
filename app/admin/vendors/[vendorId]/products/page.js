@@ -6,6 +6,9 @@ import ProductRow from '@/app/dashboard/products/ProductRow';
 import BackButton from '@/app/components/BackButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
+import PlanUsage from '@/app/components/PlanUsage';
+import { getPlan } from '@/app/lib/plans';
+import { visibleProductIds } from '@/lib/plan-limits';
 
 export default async function AdminVendorProductsPage({ params, searchParams }) {
   const session = await getUserSession();
@@ -40,7 +43,8 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
     );
   }
 
-  const categoryModels = await db.Category.findAll({
+  const plan = getPlan(vendor.plan);
+  const categoryModels = plan.maxCategories === 0 ? [] : await db.Category.findAll({
     where: { vendorId },
     order: [['position', 'ASC'], ['name', 'ASC']],
   });
@@ -59,6 +63,8 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
     order: [['position', 'ASC'], ['createdAt', 'DESC']],
   });
   const products = productModels.map((p) => p.get({ plain: true }));
+  const vendorProductCount = categoryId ? await db.Product.count({ where: { vendorId } }) : products.length;
+  const visibleIds = vendorProductCount > (plan.maxProducts ?? Infinity) ? await visibleProductIds(vendorId, plan) : null;
 
   return (
     <main className="page-shell">
@@ -74,8 +80,9 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
             </div>
             <BackButton fallback="/admin" />
           </div>
+          <PlanUsage plan={plan} count={vendorProductCount} limit={plan.maxProducts} noun="productos" />
           <div className="flex gap-2 flex-wrap pt-2">
-            <AddProductCard vendorId={vendorId} categories={categories} apiBase="/api/admin/vendors" />
+            <AddProductCard vendorId={vendorId} categories={categories} apiBase="/api/admin/vendors" plan={plan} productCount={vendorProductCount} />
             <Link href={`/admin/vendors/${vendorId}/products/reorder`}>
               <Button variant="outline" size="sm">Reordenar</Button>
             </Link>
@@ -97,6 +104,8 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
                   vendorId={vendorId}
                   categories={categories}
                   apiBase="/api/admin/vendors"
+                  plan={plan}
+                  hiddenByPlan={!!visibleIds && product.isActive && !visibleIds.includes(product.id)}
                 />
               ))}
             </div>

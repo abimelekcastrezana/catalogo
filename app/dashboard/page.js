@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import OnlineToggle from "./OnlineToggle";
+import { Badge } from "@/app/components/ui/badge";
+import { getPlan, formatPlanExpiry } from "@/app/lib/plans";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -57,6 +59,10 @@ export default async function DashboardPage() {
           <div className="grid gap-1.5 text-sm">
             <p className="text-[var(--text)]">Usuario: <span className="font-medium">{session.user?.email}</span></p>
             <p className="text-[var(--text)]">Vendor: <span className="font-medium">{vendor?.slug || 'N/A'}</span></p>
+            <p className="text-[var(--text)] flex items-center gap-2">Plan: <Badge variant="outline">{getPlan(vendor?.plan).label}</Badge>
+              {vendor?.planExpiresAt && <span className="text-[var(--muted)]">vence el {formatPlanExpiry(vendor.planExpiresAt)}</span>}
+              <Link href="/planes" className="text-[var(--accent-text)] hover:underline font-bold">Ver planes</Link>
+            </p>
             <p className="text-[var(--text)]">URL pública: <a href={publicUrl} target="_blank" rel="noreferrer" className="text-[var(--accent-text)] hover:underline">{publicUrl}</a></p>
           </div>
           {vendor && (

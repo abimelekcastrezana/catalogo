@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isReservedSlug, RESERVED_SLUG_ERROR } from '@/app/lib/reserved-slugs';
 import { getUserSession } from '@/lib/auth/getSession';
 import db from '@/db/index.js';
 import { Sequelize } from 'sequelize';
@@ -20,6 +21,10 @@ export async function PUT(request, { params }) {
 
   if (!name || !slug || !whatsappPhone) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+  }
+
+  if (isReservedSlug(slug)) {
+    return NextResponse.json({ error: RESERVED_SLUG_ERROR }, { status: 400 });
   }
 
   const vendor = await db.Vendor.findByPk(vendorId);

@@ -62,6 +62,18 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    // Plan de suscripción: free | plus | max (límites en app/lib/plans.js).
+    plan: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'free',
+      validate: { isIn: [['free', 'plus', 'max']] },
+    },
+    // Vencimiento de la suscripción anual (Plus/Max). Free no vence: null.
+    planExpiresAt: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
   }, {
     tableName: 'vendors',
     timestamps: true,

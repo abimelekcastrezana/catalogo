@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getUserSession } from '@/lib/auth/getSession';
 import { UniqueConstraintError } from 'sequelize';
 import db from '@/db/index.js';
+import { getVendorPlan, productLimitError, descriptionLimitError, productFieldsForPlan } from '@/lib/plan-limits';
 
 export async function POST(request, { params }) {
   const session = await getUserSession();
@@ -13,17 +14,23 @@ export async function POST(request, { params }) {
   }
 
   const body = await request.json();
-  const { name, sku, description, categoryId, price, wholesalePrice, wholesaleMinQty, wholesaleDescription, variants, badge } = body;
+  const { name, description, price, variants } = body;
   if (!name || price === undefined || price === null) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
 
   const vendorId = resolvedParams.vendorId;
-  const normalizedSku = sku ? sku.trim() : null;
   const normalizedPrice = Number(price);
   if (Number.isNaN(normalizedPrice) || normalizedPrice < 0) {
     return NextResponse.json({ error: 'Price must be a positive number' }, { status: 400 });
   }
+
+  const plan = await getVendorPlan(vendorId);
+  if (!plan) return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
+  const limitError = await productLimitError(vendorId, plan);
+  if (limitError) return NextResponse.json({ error: limitError }, { status: 403 });
+  const descriptionError = descriptionLimitError(plan, description);
+  if (descriptionError) return NextResponse.json({ error: descriptionError }, { status: 400 });
 
   try {
     const maxPositionResult = await db.Product.findOne({
@@ -35,20 +42,12 @@ export async function POST(request, { params }) {
 
     const product = await db.Product.create({
       vendorId,
-      categoryId: categoryId || null,
-      name,
-      sku: normalizedSku,
-      description,
-      price: normalizedPrice,
       position: nextPosition,
-      wholesalePrice: wholesalePrice ? Number(wholesalePrice) : null,
-      wholesaleMinQty: wholesaleMinQty ? parseInt(wholesaleMinQty, 10) : null,
-      wholesaleDescription: wholesaleDescription || null,
-      badge: badge || null,
+      ...productFieldsForPlan(plan, body),
     });
 
     let createdVariants = [];
-    if (Array.isArray(variants) && variants.length > 0) {
+    if (plan.fullProductFeatures && Array.isArray(variants) && variants.length > 0) {
       createdVariants = await Promise.all(
         variants.map((v, i) =>
           db.ProductVariant.create({

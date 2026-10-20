@@ -124,18 +124,20 @@ export default function CategoryFilterBar({ vendorSlug, categories, currentCateg
       </form>
 
       <div className="flex gap-2 overflow-x-auto pb-1.5 -mx-1 px-1 pt-0.5">
-        <button
-          type="button"
-          onClick={() => setFiltersOpen((v) => !v)}
-          aria-expanded={filtersOpen}
-          className={[
-            CHIP,
-            'flex-shrink-0 flex items-center gap-1.5',
-            currentCategoryId ? CHIP_ON : CHIP_OFF,
-          ].join(' ')}
-        >
-          <LayoutGrid className="h-4 w-4" strokeWidth={2} aria-hidden="true" /> {activeCategoryName || 'Categorías'}
-        </button>
+        {categories.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            aria-expanded={filtersOpen}
+            className={[
+              CHIP,
+              'flex-shrink-0 flex items-center gap-1.5',
+              currentCategoryId ? CHIP_ON : CHIP_OFF,
+            ].join(' ')}
+          >
+            <LayoutGrid className="h-4 w-4" strokeWidth={2} aria-hidden="true" /> {activeCategoryName || 'Categorías'}
+          </button>
+        )}
 
         <div className="relative flex-shrink-0">
           <select
@@ -152,7 +154,7 @@ export default function CategoryFilterBar({ vendorSlug, categories, currentCateg
         </div>
       </div>
 
-      {filtersOpen && (
+      {filtersOpen && categories.length > 0 && (
         <div className="anim-pop-in flex gap-2 overflow-x-auto pb-1.5 -mx-1 px-1 pt-0.5">
           <a
             href={buildHref({ categoryId: '' })}

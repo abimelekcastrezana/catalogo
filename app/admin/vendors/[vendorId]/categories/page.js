@@ -5,6 +5,8 @@ import AddVendorCategoryForm from '../AddVendorCategoryForm';
 import BackButton from '@/app/components/BackButton';
 import SortableCategoryList from '@/app/components/SortableCategoryList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
+import PlanUsage from '@/app/components/PlanUsage';
+import { getPlan, isAtLimit, categoryLimitMessage } from '@/app/lib/plans';
 
 export default async function AdminVendorCategoriesPage({ params }) {
   const session = await getUserSession();
@@ -40,6 +42,8 @@ export default async function AdminVendorCategoriesPage({ params }) {
     where: { vendorId },
     order: [['position', 'ASC'], ['name', 'ASC']],
   });
+  const plan = getPlan(vendor.plan);
+  const atCategoryLimit = isAtLimit(plan.maxCategories, categories.length);
 
   return (
     <main className="page-shell">
@@ -52,6 +56,7 @@ export default async function AdminVendorCategoriesPage({ params }) {
             </div>
             <BackButton fallback="/admin" />
           </div>
+          <PlanUsage plan={plan} count={categories.length} limit={plan.maxCategories} noun="categorías" />
         </CardHeader>
       </Card>
 
@@ -62,7 +67,11 @@ export default async function AdminVendorCategoriesPage({ params }) {
             <CardTitle className="text-lg">Agregar categoría</CardTitle>
           </CardHeader>
           <CardContent>
-            <AddVendorCategoryForm vendorId={vendorId} />
+            {atCategoryLimit ? (
+              <p className="text-sm text-[var(--muted)]">{categoryLimitMessage(plan)}</p>
+            ) : (
+              <AddVendorCategoryForm vendorId={vendorId} />
+            )}
           </CardContent>
         </Card>
 

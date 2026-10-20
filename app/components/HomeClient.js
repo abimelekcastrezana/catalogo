@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { MapPin, Store, Search, ChevronDown, MessageCircle, X } from 'lucide-react';
+import { MapPin, Store, Search, ChevronDown, MessageCircle, X, Link2, ShoppingBag, Sparkles } from 'lucide-react';
 import { Badge } from '@/app/components/ui/badge';
 import { Button } from '@/app/components/ui/button';
 import OnlineIndicator from '@/app/components/OnlineIndicator';
@@ -116,9 +116,9 @@ export default function HomeClient({ vendors, total, page, tags, search, region,
       {/* Encabezado + buscador */}
       <section className="space-y-4">
         <div className="space-y-1.5">
-          <h2 className="m-0 text-2xl font-extrabold leading-tight sm:text-4xl">
+          <h1 className="m-0 text-2xl font-extrabold leading-tight sm:text-4xl">
             Encuentra tiendas cerca de ti y pide por WhatsApp
-          </h2>
+          </h1>
           <p className="m-0 text-[var(--muted)] sm:text-lg">
             Catálogos de negocios locales, sin descargar nada. Elige, arma tu pedido y listo.
           </p>
@@ -226,17 +226,39 @@ export default function HomeClient({ vendors, total, page, tags, search, region,
         </div>
       )}
 
-      {/* Franja para vendedores */}
-      <section className="flex flex-col items-start gap-4 rounded-3xl border-2 border-[var(--accent)] bg-[var(--accent-soft)] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-        <div className="space-y-1">
-          <h2 className="m-0 text-xl font-extrabold sm:text-2xl">¿Tienes un negocio? Crea tu tienda</h2>
-          <p className="m-0 max-w-xl text-[var(--muted)]">
-            Sube tus productos, comparte tu enlace y recibe los pedidos directo en tu WhatsApp.
+      {/* Qué es TiendaTap (para vendedores): texto real para buscadores e IA */}
+      <section aria-labelledby="que-es-tiendatap" className="space-y-5 rounded-3xl border-2 border-[var(--accent)] bg-[var(--accent-soft)] p-5 sm:p-8">
+        <div className="space-y-1.5">
+          <h2 id="que-es-tiendatap" className="m-0 text-xl font-extrabold sm:text-2xl">
+            ¿Tienes un negocio? Crea tu tienda en línea gratis con TiendaTap
+          </h2>
+          <p className="m-0 max-w-3xl text-[var(--muted)]">
+            TiendaTap es una plataforma mexicana para crear el catálogo digital de tu negocio: subes tus
+            productos con fotos y precios, compartes tu enlace y tus clientes te mandan el pedido directo a
+            tu WhatsApp. Sin descargar apps y sin saber de páginas web.
           </p>
         </div>
-        <div className="flex flex-shrink-0 flex-wrap gap-2">
+        <ul className="m-0 grid list-none gap-3 p-0 sm:grid-cols-3">
+          {[
+            { icon: Link2, title: 'Tu tienda con enlace propio', text: 'Comparte tiendatap.com/tu-negocio en redes, estados de WhatsApp o un código QR.' },
+            { icon: ShoppingBag, title: 'Pedidos por WhatsApp', text: 'Tus clientes arman su carrito y te llega el pedido listo en tu WhatsApp.' },
+            { icon: Sparkles, title: 'Empieza gratis', text: 'El plan Free incluye hasta 10 productos. Sube a Plus o Max cuando crezcas.' },
+          ].map(({ icon: Icon, title, text }) => (
+            <li key={title} className="flex gap-3 rounded-2xl bg-[var(--card)] p-4">
+              <Icon className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--accent-text)]" strokeWidth={2} aria-hidden="true" />
+              <div>
+                <h3 className="m-0 text-base font-extrabold">{title}</h3>
+                <p className="m-0 mt-0.5 text-sm text-[var(--muted)]">{text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="flex flex-wrap gap-2">
           <Button asChild size="lg">
-            <Link href="/register">Crear mi tienda</Link>
+            <Link href="/register">Crear mi tienda gratis</Link>
+          </Button>
+          <Button asChild size="lg" variant="outline">
+            <Link href="/planes">Ver planes</Link>
           </Button>
           {ctaHref && (
             <Button asChild size="lg" variant="outline">
