@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import OnlineToggle from "./OnlineToggle";
+import ShareStore from "./ShareStore";
 import { Badge } from "@/app/components/ui/badge";
 import { getPlan, formatPlanExpiry } from "@/app/lib/plans";
 
@@ -81,7 +82,7 @@ export default async function DashboardPage() {
               />
             </div>
           )}
-          {/* TUTORIAL-JOSE: aquí va <ShareStore /> (borra este comentario) */}
+          {vendor && <ShareStore url={publicUrl} storeName={vendor.name} />}
           <div className="flex gap-3 flex-wrap pt-2">
             <Link href="/dashboard/categories"><Button variant="outline">Categorías</Button></Link>
             <Link href="/dashboard/products"><Button variant="outline">Productos</Button></Link>
