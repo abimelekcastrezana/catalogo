@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import * as F from '@/app/lib/form-styles';
 import { DEFAULT_PLAN } from '@/app/lib/plans';
 import PlanSelect from './PlanSelect';
+import ImageFileInput from '@/app/components/ImageFileInput';
 
 const COUNTRY_CODES = [
   { code: '+598', label: '+598 (Uruguay)' }, { code: '+57', label: '+57 (Colombia)' },
@@ -101,7 +102,7 @@ export default function CreateVendorForm() {
 
       <div className={F.field}>
         <label className={F.label}>Logo (opcional)</label>
-        <input className={F.input} type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files[0] || null)} />
+        <ImageFileInput className={F.input} onChange={setLogoFile} />
       </div>
 
       <hr className={F.divider} />

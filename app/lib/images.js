@@ -16,6 +16,8 @@ export function uploadUrl(path) {
 
 // Se rechaza lo que pese más (el servicio lo vuelve a validar; aquí se avisa antes de subir).
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+// Lado máximo (px) de las fotos guardadas; el navegador reduce a este tamaño al convertir HEIC.
+export const MAX_IMAGE_SIDE = 2048;
 
 // "10 MB", "10.1 MB" (un decimal solo si hace falta).
 export function formatMegabytes(bytes) {

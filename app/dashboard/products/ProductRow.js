@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter } from "@/app/components/ui/card";
 import { ChevronLeft, ChevronRight, ChevronDown, Copy, EyeOff, Trash2, X } from 'lucide-react';
 import DescriptionField from './DescriptionField';
 import CardValuesEditor from './CardValuesEditor';
+import ImageFileInput from '@/app/components/ImageFileInput';
 import { applyDiscount } from '@/app/lib/pricing';
 import { oversizedMessage, thumbPath, uploadError, uploadUrl } from '@/app/lib/images';
 import { isCard as isCardProduct, WHOLESALE_UNIT_MAX_LENGTH, WHOLESALE_UNIT_SUGGESTIONS } from '@/app/lib/products';
@@ -40,6 +41,7 @@ function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onC
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [savedWithErrors, setSavedWithErrors] = useState(false);
+  const [converting, setConverting] = useState(false); // convirtiendo una foto HEIC
 
   const addVariantRow = () =>
     setVariants((prev) => [...prev, { tempId: Date.now(), name: '', price: '', imagePath: null, imageFile: null }]);
@@ -51,6 +53,7 @@ function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onC
     setVariants((prev) => prev.map((v, idx) => (idx === i ? { ...v, [field]: value } : v)));
 
   const handleSave = async () => {
+    if (converting) return;
     // Se avisa antes de guardar, para no dejar cambios a medias por una imagen demasiado grande.
     const tooBig = oversizedMessage([...imageFiles, ...variants.map((v) => v.imageFile)]);
     if (tooBig) { setMessage(tooBig); return; }
@@ -152,11 +155,11 @@ function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onC
       <div className="grid grid-cols-2 gap-3">
         <div className="grid gap-1.5">
           <label className="text-xs font-medium text-[var(--muted)]">Reemplazar imagen 1</label>
-          <input className="input text-xs" type="file" accept="image/*" onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])} />
+          <ImageFileInput className="input text-xs" onBusyChange={setConverting} onChange={(f) => setImageFiles((prev) => [f, prev[1]])} />
         </div>
         <div className="grid gap-1.5">
           <label className="text-xs font-medium text-[var(--muted)]">Reemplazar imagen 2</label>
-          <input className="input text-xs" type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
+          <ImageFileInput className="input text-xs" onBusyChange={setConverting} onChange={(f) => setImageFiles((prev) => [prev[0], f])} />
         </div>
       </div>
 
@@ -214,10 +217,10 @@ function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onC
                     <label className="text-xs text-[var(--muted)]">
                       {v.imagePath ? 'Reemplazar foto' : 'Foto (opcional)'}
                     </label>
-                    <input
+                    <ImageFileInput
                       className="input text-xs"
-                      type="file" accept="image/*"
-                      onChange={(e) => updateVariant(i, 'imageFile', e.target.files[0])}
+                      onBusyChange={setConverting}
+                      onChange={(f) => updateVariant(i, 'imageFile', f)}
                     />
                   </div>
                 </div>
@@ -270,7 +273,7 @@ function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onC
 
       {message && <p className="text-sm text-[var(--danger)]">{message}</p>}
       <div className="flex gap-2 pt-2">
-        <Button onClick={handleSave} disabled={submitting} className="flex-1">
+        <Button onClick={handleSave} disabled={submitting || converting} className="flex-1">
           {submitting ? 'Guardando…' : 'Guardar cambios'}
         </Button>
         <Button variant="outline" onClick={savedWithErrors ? onSuccess : onCancel}>{savedWithErrors ? 'Cerrar' : 'Cancelar'}</Button>

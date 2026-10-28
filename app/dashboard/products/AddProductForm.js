@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, X } from 'lucide-react';
 import DescriptionField from './DescriptionField';
 import CardValuesEditor from './CardValuesEditor';
+import ImageFileInput from '@/app/components/ImageFileInput';
 import { oversizedMessage, uploadError } from '@/app/lib/images';
 import { KIND_CARD, WHOLESALE_UNIT_MAX_LENGTH, WHOLESALE_UNIT_SUGGESTIONS } from '@/app/lib/products';
 
@@ -30,6 +31,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
 
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [converting, setConverting] = useState(false); // convirtiendo una foto HEIC
   const [created, setCreated] = useState(false); // creado, pero alguna imagen falló
 
   const addVariantRow = () =>
@@ -43,7 +45,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || converting) return;
     // Se avisa antes de crear el producto, para no dejarlo sin imagen.
     const tooBig = oversizedMessage([...imageFiles, ...variants.map((v) => v.imageFile)]);
     if (tooBig) { setMessage(`Error: ${tooBig}`); return; }
@@ -183,11 +185,11 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
       <div className="grid grid-cols-2 gap-3">
         <div className="grid gap-1.5">
           <label className="text-sm font-medium text-[var(--text)]">Imagen 1</label>
-          <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([e.target.files[0], imageFiles[1]])} />
+          <ImageFileInput className="input" onBusyChange={setConverting} onChange={(f) => setImageFiles((prev) => [f, prev[1]])} />
         </div>
         <div className="grid gap-1.5">
           <label className="text-sm font-medium text-[var(--text)]">Imagen 2</label>
-          <input className="input" type="file" accept="image/*" onChange={(e) => setImageFiles([imageFiles[0], e.target.files[0]])} />
+          <ImageFileInput className="input" onBusyChange={setConverting} onChange={(f) => setImageFiles((prev) => [prev[0], f])} />
         </div>
       </div>
 
@@ -244,10 +246,10 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
                   </div>
                   <div className="grid gap-1">
                     <label className="text-xs text-[var(--muted)]">Foto (opcional)</label>
-                    <input
+                    <ImageFileInput
                       className="input text-xs"
-                      type="file" accept="image/*"
-                      onChange={(e) => updateVariant(i, 'imageFile', e.target.files[0])}
+                      onBusyChange={setConverting}
+                      onChange={(f) => updateVariant(i, 'imageFile', f)}
                     />
                   </div>
                 </div>
@@ -301,7 +303,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
       {created ? (
         <button type="button" className="primary-button" onClick={() => onSuccess?.()}>Cerrar</button>
       ) : (
-        <button type="submit" className="primary-button" disabled={isSubmitting}>
+        <button type="submit" className="primary-button" disabled={isSubmitting || converting}>
           {isSubmitting ? 'Creando...' : isCard ? 'Crear suscripción' : 'Crear producto'}
         </button>
       )}

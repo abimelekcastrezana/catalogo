@@ -147,6 +147,11 @@
   completa. Logos: PNG de 512 px (conserva la transparencia y se ve bien al compartir el enlace).
 - Los formularios de producto avisan del límite **antes** de crear o guardar (así no queda un
   producto a medias) y muestran el error de la API si una imagen es rechazada.
+- **iPhone (HEIC):** `sharp` no trae el decodificador HEVC, así que el servidor rechaza HEIC. Para
+  que no sea un problema, los formularios usan `ImageFileInput`, que convierte el HEIC a JPG en el
+  navegador al elegir la foto (Safari sabe decodificarlo; reduce a 2048 px) y avisa si el
+  navegador no puede. Si en producción llegara HEIC por otra vía, la alternativa es decodificarlo
+  en el servidor con un paquete aparte.
 - Menos de 500 px no se bloquea: la API responde `warnings`. Las imágenes anteriores no se tocan
   (sin miniatura se sirven tal cual). Los parámetros viven en `IMAGE_PRESETS`.
 - `sharp` es dependencia declarada (`package.json`); antes solo venía como opcional de Next.
