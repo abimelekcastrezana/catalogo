@@ -145,6 +145,8 @@
 - Fotos de producto: se guarda `<nombre>_full.webp` y una miniatura `<nombre>_thumb.webp` (600 px,
   calidad 80) que usan la tarjeta, el dashboard y el buscador; el detalle y el lightbox cargan la
   completa. Logos: PNG de 512 px (conserva la transparencia y se ve bien al compartir el enlace).
+- Los formularios de producto avisan del límite **antes** de crear o guardar (así no queda un
+  producto a medias) y muestran el error de la API si una imagen es rechazada.
 - Menos de 500 px no se bloquea: la API responde `warnings`. Las imágenes anteriores no se tocan
   (sin miniatura se sirven tal cual). Los parámetros viven en `IMAGE_PRESETS`.
 - `sharp` es dependencia declarada (`package.json`); antes solo venía como opcional de Next.

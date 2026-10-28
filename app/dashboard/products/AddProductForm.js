@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, X } from 'lucide-react';
 import DescriptionField from './DescriptionField';
 import CardValuesEditor from './CardValuesEditor';
+import { oversizedMessage, uploadError } from '@/app/lib/images';
 import { KIND_CARD, WHOLESALE_UNIT_MAX_LENGTH, WHOLESALE_UNIT_SUGGESTIONS } from '@/app/lib/products';
 
 export default function AddProductForm({ vendorId, categories, apiBase = '/api/vendors', plan, kind = 'product', onSuccess }) {
@@ -29,6 +30,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
 
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [created, setCreated] = useState(false); // creado, pero alguna imagen falló
 
   const addVariantRow = () =>
     setVariants((prev) => [...prev, { tempId: Date.now(), name: "", price: "", imageFile: null }]);
@@ -42,6 +44,9 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
+    // Se avisa antes de crear el producto, para no dejarlo sin imagen.
+    const tooBig = oversizedMessage([...imageFiles, ...variants.map((v) => v.imageFile)]);
+    if (tooBig) { setMessage(`Error: ${tooBig}`); return; }
     setIsSubmitting(true);
     setMessage(isCard ? 'Creando suscripción...' : 'Creando producto...');
 
@@ -88,35 +93,28 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
         return;
       }
 
-      // Upload product images
-      const uploadPromises = imageFiles
-        .filter((f) => f)
-        .slice(0, 2)
-        .map(async (file) => {
-          const formData = new FormData();
-          formData.append('image', file);
-          const uploadRes = await fetch(`/api/products/${product.id}/images`, {
-            method: 'POST',
-            body: formData,
-          });
-          return uploadRes.json();
-        });
+      // Upload product images + variant images, collecting any rejection (size, format…)
+      const uploadErrors = [];
+      const track = async (request) => {
+        const message = await uploadError(await request);
+        if (message) uploadErrors.push(message);
+      };
 
-      await Promise.all(uploadPromises);
+      // En orden: el servidor asigna la posición según las que ya existen.
+      for (const file of imageFiles.filter((f) => f).slice(0, 2)) {
+        const formData = new FormData();
+        formData.append('image', file);
+        await track(fetch(`/api/products/${product.id}/images`, { method: 'POST', body: formData }));
+      }
 
-      // Upload variant images
       const createdVariants = data.variants || [];
       await Promise.all(
-        variants.map(async (v, i) => {
-          if (!v.imageFile) return;
+        variants.map((v, i) => {
           const savedVariant = createdVariants[i];
-          if (!savedVariant?.id) return;
+          if (!v.imageFile || !savedVariant?.id) return null;
           const fd = new FormData();
           fd.append('image', v.imageFile);
-          await fetch(`/api/products/${product.id}/variants/${savedVariant.id}/image`, {
-            method: 'POST',
-            body: fd,
-          });
+          return track(fetch(`/api/products/${product.id}/variants/${savedVariant.id}/image`, { method: 'POST', body: fd }));
         })
       );
 
@@ -137,7 +135,11 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
       setDiscountOnWholesale(false);
       setWholesaleDescription('');
       setIsSubmitting(false);
-      if (onSuccess) { onSuccess(); } else { setMessage('Producto creado.'); }
+      if (uploadErrors.length) {
+        // El producto ya existe: se avisa qué imagen falló y se puede reintentar desde "Editar".
+        setMessage(`Error: se creó, pero ${uploadErrors[0]} Puedes subirla de nuevo con "Editar".`);
+        setCreated(true);
+      } else if (onSuccess) { onSuccess(); } else { setMessage('Producto creado.'); }
     } catch (err) {
       setMessage(err.message || 'Error creando producto');
       setIsSubmitting(false);
@@ -296,9 +298,13 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
       </div>
       </>)}
 
-      <button type="submit" className="primary-button" disabled={isSubmitting}>
-        {isSubmitting ? 'Creando...' : isCard ? 'Crear suscripción' : 'Crear producto'}
-      </button>
+      {created ? (
+        <button type="button" className="primary-button" onClick={() => onSuccess?.()}>Cerrar</button>
+      ) : (
+        <button type="submit" className="primary-button" disabled={isSubmitting}>
+          {isSubmitting ? 'Creando...' : isCard ? 'Crear suscripción' : 'Crear producto'}
+        </button>
+      )}
       {message && (
         <p className={`text-sm ${message.includes('Error') ? 'text-[var(--danger)]' : 'text-[var(--muted)]'}`}>{message}</p>
       )}
