@@ -6,10 +6,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/app/components/u
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Separator } from '@/app/components/ui/separator';
+import { itemUnitPrice } from '@/app/lib/pricing';
 import { ShoppingBag, Minus, Plus, MessageCircle } from 'lucide-react';
 
 export default function CartDrawer() {
-  const { cart, showCart, setShowCart, removeFromCart, updateQuantity, clearCart, total, vendorPhone } = useCartContext();
+  const { cart, showCart, setShowCart, removeFromCart, updateQuantity, clearCart, total, savings, vendorPhone } = useCartContext();
   const [customerName, setCustomerName] = useState('');
   const [showAddress, setShowAddress] = useState(false);
   const [address, setAddress] = useState('');
@@ -24,7 +25,10 @@ export default function CartDrawer() {
     setError('');
 
     const productsList = cart
-      .map(item => `• ${item.name} x${item.quantity} — $${(item.price * item.quantity).toFixed(2)}`)
+      .map(item => {
+        const off = Number(item.discountPercent) ? ` (${Number(item.discountPercent)}% de descuento)` : '';
+        return `• ${item.name} x${item.quantity} — $${(itemUnitPrice(item) * item.quantity).toFixed(2)}${off}`;
+      })
       .join('\n');
 
     const lines = [
@@ -32,6 +36,7 @@ export default function CartDrawer() {
       productsList,
       `\nTotal: $${total.toFixed(2)}`,
     ];
+    if (savings > 0) lines.push(`Ahorro: $${savings.toFixed(2)}`);
 
     if (address) {
       lines.push(`\nDirección de entrega: ${address}`);
@@ -65,7 +70,9 @@ export default function CartDrawer() {
                 {/* Info del item */}
                 <div className="flex-1 min-w-0">
                   <p className="font-extrabold text-sm text-[var(--text)] leading-tight truncate">{item.name}</p>
-                  <p className="text-[var(--muted)] text-xs mt-0.5 tabular-nums">${Number(item.price).toFixed(2)} {item.name.includes('(Mayoreo)') ? 'c/lote' : 'c/u'}</p>
+                  <p className="text-[var(--muted)] text-xs mt-0.5 tabular-nums">
+                    {Number(item.discountPercent) > 0 && <s className="mr-1">${Number(item.price).toFixed(2)}</s>}
+                    ${itemUnitPrice(item).toFixed(2)} {item.lotSize || item.name.includes('(Mayoreo)') ? `c/${(item.lotUnit || 'Caja').toLowerCase()}` : 'c/u'}</p>
 
                   {/* Controles de cantidad */}
                   <div className="flex items-center gap-1 mt-2 w-fit bg-[var(--surface-strong)] rounded-xl p-1">
@@ -87,7 +94,7 @@ export default function CartDrawer() {
 
                 {/* Precio + remover */}
                 <div className="flex flex-col items-end justify-between flex-shrink-0">
-                  <span className="font-extrabold text-sm text-[var(--text)] tabular-nums">${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-extrabold text-sm text-[var(--text)] tabular-nums">${(itemUnitPrice(item) * item.quantity).toFixed(2)}</span>
                   <button
                     type="button"
                     onClick={() => removeFromCart(item.id)}
@@ -109,6 +116,9 @@ export default function CartDrawer() {
               <span className="text-sm text-[var(--muted)]">{cart.length} producto{cart.length !== 1 ? 's' : ''}</span>
               <span className="text-2xl font-extrabold text-[var(--text)] tabular-nums">${total.toFixed(2)}</span>
             </div>
+            {savings > 0 && (
+              <p className="m-0 text-right text-xs font-bold text-[var(--success)] tabular-nums">Ahorras ${savings.toFixed(2)}</p>
+            )}
 
             <Separator className="bg-[var(--border)]" />
 

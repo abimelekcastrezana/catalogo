@@ -6,6 +6,8 @@ import { useCartContext } from '@/app/context/CartContext';
 import ProductDetailSheet from '@/app/components/ProductDetailSheet';
 import { Button } from '@/app/components/ui/button';
 import { IconSwap } from '@/app/components/ui/icon-swap';
+import { isCard, wholesaleUnitLabel } from '@/app/lib/products';
+import { applyDiscount, discountFor } from '@/app/lib/pricing';
 
 const BADGE_LABELS = {
   nuevo: 'NUEVO',
@@ -25,7 +27,6 @@ const money = (n) => Number(n).toLocaleString('es-MX', { minimumFractionDigits: 
 
 export default function PublicProductCard({ product }) {
   const { addToCart, isInCart } = useCartContext();
-  const inCart = isInCart(product.id);
   const images = (product.ProductImages || []).slice(0, 2);
   const [current, setCurrent] = useState(0);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -34,8 +35,32 @@ export default function PublicProductCard({ product }) {
     ? `/api/uploads${(images[current].path || '').replace(/^\/?uploads?\/?/, '/')}`
     : null;
 
+  const variants = product.ProductVariants || [];
+  const card = isCard(product);
+  // Con variantes (o en una suscripción) hay que elegir una opción antes de agregar.
+  const needsChoice = variants.length > 0;
+  const startingPrice = card && variants.length ? Math.min(...variants.map((v) => Number(v.price))) : Number(product.price);
+
   const badgeKey = product.badge && BADGE_LABELS[product.badge] ? product.badge : null;
   const hasWholesaleDiscount = product.wholesalePrice && Number(product.wholesalePrice) < Number(product.price);
+
+  // Mayoreo desde la tarjeta: selector Pieza | Caja (con variantes se elige en el detalle).
+  const [mode, setMode] = useState('unit');
+  const lotSize = product.wholesaleMinQty || 1;
+  const lotUnit = wholesaleUnitLabel(product);
+  const showLotSelector = hasWholesaleDiscount && !needsChoice;
+  const lotActive = showLotSelector && mode === 'lot';
+  const lotPrice = Number(product.wholesalePrice) * lotSize;
+  // El descuento viaja con el renglón del carrito, que es quien calcula el total.
+  const unitPercent = discountFor(product);
+  const lotPercent = discountFor(product, { wholesale: true });
+  const cartItem = lotActive
+    ? { ...product, id: `${product.id}_lot`, name: `${product.name} (${lotUnit} ×${lotSize})`, price: lotPrice, lotSize, lotUnit, discountPercent: lotPercent }
+    : { ...product, price: Number(product.price), discountPercent: unitPercent };
+  const inCartNow = isInCart(cartItem.id);
+
+  const activePercent = lotActive ? lotPercent : unitPercent;
+  const listPrice = lotActive ? lotPrice : startingPrice;
 
   return (
     <>
@@ -62,10 +87,19 @@ export default function PublicProductCard({ product }) {
           )}
 
           {/* Badge de producto (nuevo/oferta/premium/más vendido) */}
-          {badgeKey && (
-            <span className={`absolute top-2 left-2 px-2 py-1 rounded-lg text-[11px] leading-none font-extrabold tracking-wide ${BADGE_STYLES[badgeKey]}`}>
-              {BADGE_LABELS[badgeKey]}
-            </span>
+          {(badgeKey || activePercent > 0) && (
+            <div className="absolute top-2 left-2 flex items-center gap-1.5">
+              {badgeKey && (
+                <span className={`px-2 py-1 rounded-lg text-[11px] leading-none font-extrabold tracking-wide ${BADGE_STYLES[badgeKey]}`}>
+                  {BADGE_LABELS[badgeKey]}
+                </span>
+              )}
+              {activePercent > 0 && (
+                <span className="px-2 py-1 rounded-lg border-2 border-[var(--accent)] bg-[var(--card)] text-[11px] leading-none font-extrabold tabular-nums text-[var(--accent-text)]">
+                  -{activePercent}%
+                </span>
+              )}
+            </div>
           )}
 
           {/* Carousel */}
@@ -99,7 +133,7 @@ export default function PublicProductCard({ product }) {
           )}
 
           {/* Indicador "en carrito" */}
-          {inCart && (
+          {(inCartNow || isInCart(product.id) || isInCart(`${product.id}_lot`)) && (
             <span className="absolute top-2 right-2 w-7 h-7 rounded-full bg-[var(--whatsapp-fill)] text-white flex items-center justify-center border-2 border-[var(--card)]">
               <Check className="h-4 w-4" strokeWidth={3} aria-label="En el carrito" />
             </span>
@@ -123,25 +157,54 @@ export default function PublicProductCard({ product }) {
             {product.description && (
               <p className="text-[var(--muted)] text-xs line-clamp-2 leading-relaxed">{product.description}</p>
             )}
-            {hasWholesaleDiscount && (
+            {card && variants.length > 0 && (
               <p className="m-0 text-xs font-bold text-[var(--accent-text)] tabular-nums">
-                Mayoreo desde ${money(product.wholesalePrice)}
+                {variants.map((v) => `$${money(v.price).replace(/\.00$/, '')}`).join(' · ')}
+              </p>
+            )}
+            {showLotSelector && (
+              <div role="group" aria-label="Presentación" className="flex gap-1.5 pt-1">
+                {[['unit', 'Pieza'], ['lot', lotSize > 1 ? `${lotUnit} ×${lotSize}` : 'Mayoreo']].map(([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={mode === key}
+                    onClick={() => setMode(key)}
+                    className={`hit h-8 flex-1 rounded-lg border-2 px-2 text-xs font-extrabold transition-[background-color,border-color,color,transform] duration-100 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      mode === key
+                        ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-text)]'
+                        : 'border-[var(--border-strong)] text-[var(--muted)] hover:border-[var(--accent)]'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {!showLotSelector && hasWholesaleDiscount && (
+              <p className="m-0 text-xs font-bold text-[var(--accent-text)] tabular-nums">
+                {lotSize > 1 ? `${lotUnit} de ${lotSize} pzas: ` : 'Mayoreo: '}${money(product.wholesalePrice)} c/u
               </p>
             )}
           </div>
 
           <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
             <span className="min-w-0 text-lg font-extrabold leading-tight text-[var(--text)] tabular-nums">
-              ${money(product.price)}
+              {card && variants.length > 1 && <span className="mr-1 text-xs font-bold text-[var(--muted)]">Desde</span>}
+              {activePercent > 0 && (
+                <s className="block text-xs font-bold leading-tight text-[var(--muted)]">${money(listPrice)}</s>
+              )}
+              ${money(applyDiscount(listPrice, activePercent))}
+              {lotActive && <span className="block text-xs font-bold leading-tight text-[var(--muted)]">${money(applyDiscount(product.wholesalePrice, lotPercent))} c/u</span>}
             </span>
             <Button
               size="sm"
-              variant={inCart ? 'whatsapp' : 'default'}
-              onClick={() => addToCart(product)}
+              variant={inCartNow ? 'whatsapp' : 'default'}
+              onClick={() => (needsChoice ? setDetailOpen(true) : addToCart(cartItem))}
               className="w-full shrink-0 rounded-[12px] sm:w-auto"
             >
-              <IconSwap active={inCart} from={Plus} to={Check} />
-              {inCart ? 'Agregado' : 'Agregar'}
+              <IconSwap active={inCartNow} from={Plus} to={Check} />
+              {inCartNow ? 'Agregado' : needsChoice ? 'Elegir' : 'Agregar'}
             </Button>
           </div>
         </div>

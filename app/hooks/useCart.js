@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { cartTotals } from '@/app/lib/pricing';
 
 export function useCart(vendorSlug) {
   const [cart, setCart] = useState([]);
@@ -60,7 +61,8 @@ export function useCart(vendorSlug) {
     return cart.some(item => item.id === productId);
   }, [cart]);
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // El descuento se calcula aquí: cada renglón guarda su precio de lista y su porcentaje.
+  const { total, savings } = cartTotals(cart);
   const itemCount = cart.length;
 
   return {
@@ -71,6 +73,7 @@ export function useCart(vendorSlug) {
     clearCart,
     isInCart,
     total,
+    savings,
     itemCount,
     isLoaded,
   };

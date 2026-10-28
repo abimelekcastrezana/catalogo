@@ -10,6 +10,7 @@ import { ArrowLeft, ArrowRight, Package } from 'lucide-react';
 import PlanUsage from '@/app/components/PlanUsage';
 import { getPlan } from '@/app/lib/plans';
 import { visibleProductIds } from '@/lib/plan-limits';
+import { withSortedRelations } from '@/app/lib/products';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -60,7 +61,7 @@ export default async function DashboardProductsPage({ searchParams }) {
     limit: ITEMS_PER_PAGE,
     offset,
   });
-  const products = productModels.map((p) => p.get({ plain: true }));
+  const products = productModels.map((p) => withSortedRelations(p.get({ plain: true })));
   const visibleIds = vendorProductCount > (plan.maxProducts ?? Infinity) ? await visibleProductIds(vendorId, plan) : null;
   const categoryModels = plan.maxCategories === 0 ? [] : await getCategories(vendorId);
   const categories = categoryModels.map((c) => c.get({ plain: true }));

@@ -6,6 +6,8 @@ import { Sheet, SheetContent, SheetTitle } from '@/app/components/ui/sheet';
 import { Button } from '@/app/components/ui/button';
 import { useCartContext } from '@/app/context/CartContext';
 import { IconSwap } from '@/app/components/ui/icon-swap';
+import { isCard, wholesaleUnitLabel } from '@/app/lib/products';
+import { applyDiscount, discountFor } from '@/app/lib/pricing';
 import { X, ChevronLeft, ChevronRight, Plus, Check, Package } from 'lucide-react';
 
 function imageUrl(path) {
@@ -101,6 +103,7 @@ export default function ProductDetailSheet({ product, open, onClose }) {
 
   const variants = product.ProductVariants || [];
   const hasVariants = variants.length > 0;
+  const card = isCard(product);
   const hasWholesale = !!product.wholesalePrice;
 
   const [selectedVariant, setSelectedVariant] = useState(null);
@@ -141,24 +144,34 @@ export default function ProductDetailSheet({ product, open, onClose }) {
   const basePrice = selectedVariant?.price != null
     ? Number(selectedVariant.price)
     : Number(product.price);
+  const cardFrom = card && !selectedVariant && variants.length > 1;
   const wholesaleUnit = Number(product.wholesalePrice);
   const wholesaleMin = product.wholesaleMinQty || 1;
   // Precio por lote mayorista (lo que se muestra y se cobra por "unidad" de carrito)
   const lotPrice = wholesaleUnit * wholesaleMin;
   const displayPrice = wholesaleActive ? lotPrice : basePrice;
+  // Descuento: se muestra el precio de lista tachado y el que queda; el carrito hace el cálculo.
+  const percent = discountFor(product, { wholesale: wholesaleActive });
+  const finalPrice = applyDiscount(displayPrice, percent);
+  const money = (n) => Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2 });
 
-  // Cart item a agregar
-  const cartId = selectedVariant
+  // Cart item a agregar: el lote de mayoreo es un renglón distinto al de la pieza.
+  const baseCartId = selectedVariant
     ? `${product.id}_variant_${selectedVariant.id}`
     : product.id;
+  const cartId = wholesaleActive ? `${baseCartId}_lot` : baseCartId;
   const baseCartName = selectedVariant
     ? `${product.name} — ${selectedVariant.name}`
     : product.name;
-  const cartName = wholesaleActive ? `${baseCartName} (Mayoreo)` : baseCartName;
-  const cartItem = { ...product, id: cartId, name: cartName, price: displayPrice, quantity: 1 };
+  const cartName = wholesaleActive ? `${baseCartName} (${wholesaleUnitLabel(product)} ×${wholesaleMin})` : baseCartName;
+  const cartItem = {
+    ...product, id: cartId, name: cartName, price: displayPrice, discountPercent: percent, quantity: 1,
+    ...(wholesaleActive ? { lotSize: wholesaleMin, lotUnit: wholesaleUnitLabel(product) } : {}),
+  };
 
   const inCart = isInCart(cartId);
-  const addDisabled = false;
+  // En una suscripción hay que elegir un valor antes de agregar.
+  const addDisabled = card && !selectedVariant;
 
   return (
     <>
@@ -217,9 +230,16 @@ export default function ProductDetailSheet({ product, open, onClose }) {
                   {product.name}
                 </h2>
                 <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                  {percent > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <s className="text-sm font-bold text-[var(--muted)] tabular-nums">${money(displayPrice)}</s>
+                      <span className="rounded-md border-2 border-[var(--accent)] px-1.5 py-0.5 text-[11px] leading-none font-extrabold tabular-nums text-[var(--accent-text)]">-{percent}%</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-extrabold text-[var(--text)] tabular-nums">
-                      ${displayPrice.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                      {cardFrom && <span className="mr-1 text-xs font-bold text-[var(--muted)]">Desde</span>}
+                      ${money(finalPrice)}
                     </span>
                     {hasWholesale && (
                       <button
@@ -239,7 +259,7 @@ export default function ProductDetailSheet({ product, open, onClose }) {
                   {wholesaleActive && (
                     <div className="text-right space-y-0.5">
                       <p className="text-xs text-[var(--muted)]">
-                        {wholesaleMin} piezas × ${wholesaleUnit.toLocaleString('es-MX', { minimumFractionDigits: 2 })} c/u
+                        {wholesaleMin} piezas × ${money(applyDiscount(wholesaleUnit, percent))} c/u
                       </p>
                       {product.wholesaleDescription && (
                         <p className="text-xs text-[var(--muted)]">{product.wholesaleDescription}</p>
@@ -278,7 +298,7 @@ export default function ProductDetailSheet({ product, open, onClose }) {
               {/* Variantes */}
               {hasVariants && (
                 <div className="space-y-2">
-                  <p className="text-sm font-extrabold text-[var(--text)]">Variante</p>
+                  <p className="text-sm font-extrabold text-[var(--text)]">{card ? 'Elige un valor' : 'Variante'}</p>
                   <div className="flex flex-wrap gap-2">
                     {variants.map((v) => (
                       <button
@@ -292,7 +312,9 @@ export default function ProductDetailSheet({ product, open, onClose }) {
                             : 'border-[var(--border-strong)] text-[var(--text)] shadow-[0_2px_0_0_var(--border-strong)] hover:bg-[var(--accent-soft)]'
                         }`}
                       >
-                        {v.name}{v.price != null ? ` — $${Number(v.price).toFixed(2)}` : ''}
+                        {card && v.name === `$${Number(v.price)}`
+                          ? v.name
+                          : `${v.name}${v.price != null ? ` — $${Number(v.price).toFixed(2)}` : ''}`}
                       </button>
                     ))}
                   </div>
@@ -311,7 +333,7 @@ export default function ProductDetailSheet({ product, open, onClose }) {
               >
                 {!addDisabled && <IconSwap active={inCart} from={Plus} to={Check} />}
                 {addDisabled
-                  ? 'Selecciona una variante'
+                  ? 'Selecciona un valor'
                   : inCart
                   ? 'Ya está en el carrito'
                   : 'Agregar al carrito'}
