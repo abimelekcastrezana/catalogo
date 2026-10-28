@@ -45,7 +45,7 @@ export default function AppHeader({ whatsappPhone }) {
         {isAuthenticated && <SignOutButton />}
         {!isAuthenticated && (
           <div className="flex gap-2 flex-wrap items-center">
-            <Link href="/planes"><Button variant="ghost">Planes</Button></Link>
+            <Link href="/planes"><Button variant="outline">Planes</Button></Link>
             <Link href="/login"><Button variant="outline">Iniciar sesión</Button></Link>
             <Link href="/register"><Button variant="outline">Registrarse</Button></Link>
           </div>
@@ -79,7 +79,7 @@ export default function AppHeader({ whatsappPhone }) {
             ) : (
               <>
                 <Link href="/planes" onClick={() => setMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full">Planes</Button>
+                  <Button variant="outline" className="w-full">Planes</Button>
                 </Link>
                 <Link href="/login" onClick={() => setMenuOpen(false)}>
                   <Button variant="outline" className="w-full">Iniciar sesión</Button>

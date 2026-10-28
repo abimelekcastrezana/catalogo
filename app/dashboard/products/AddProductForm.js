@@ -3,9 +3,13 @@
 import { useState } from "react";
 import { ChevronDown, X } from 'lucide-react';
 import DescriptionField from './DescriptionField';
+import CardValuesEditor from './CardValuesEditor';
+import { KIND_CARD, WHOLESALE_UNIT_MAX_LENGTH, WHOLESALE_UNIT_SUGGESTIONS } from '@/app/lib/products';
 
-export default function AddProductForm({ vendorId, categories, apiBase = '/api/vendors', plan, onSuccess }) {
+export default function AddProductForm({ vendorId, categories, apiBase = '/api/vendors', plan, kind = 'product', onSuccess }) {
   const full = plan.fullProductFeatures;
+  const isCard = kind === KIND_CARD;
+  const [cardValues, setCardValues] = useState([{ tempId: 1, name: '', price: '' }]);
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
@@ -18,6 +22,9 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
   const [wholesaleOpen, setWholesaleOpen] = useState(false);
   const [wholesalePrice, setWholesalePrice] = useState("");
   const [wholesaleMinQty, setWholesaleMinQty] = useState("");
+  const [wholesaleUnit, setWholesaleUnit] = useState("");
+  const [discountPercent, setDiscountPercent] = useState("");
+  const [discountOnWholesale, setDiscountOnWholesale] = useState(false);
   const [wholesaleDescription, setWholesaleDescription] = useState("");
 
   const [message, setMessage] = useState("");
@@ -36,17 +43,23 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
     e.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
-    setMessage('Creando producto...');
+    setMessage(isCard ? 'Creando suscripción...' : 'Creando producto...');
 
     try {
       const res = await fetch(`${apiBase}/${vendorId}/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: JSON.stringify(isCard ? {
+          kind, name, description, categoryId: categoryId || null, badge: badge || null,
+          variants: cardValues.map((v) => ({ name: v.name, price: v.price })),
+        } : {
           name, sku, description, categoryId: categoryId || null, price,
           badge: badge || null,
           wholesalePrice: wholesalePrice || null,
           wholesaleMinQty: wholesaleMinQty || null,
+          wholesaleUnit: wholesaleUnit || null,
+          discountPercent: discountPercent || null,
+          discountOnWholesale: Boolean(discountPercent && wholesalePrice && discountOnWholesale),
           wholesaleDescription: wholesaleDescription || null,
           variants: variants.map((v, i) => ({ name: v.name, price: v.price || null, position: i })),
         }),
@@ -114,10 +127,14 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
       setCategoryId('');
       setBadge('');
       setImageFiles([null, null]);
+      setCardValues([{ tempId: Date.now(), name: '', price: '' }]);
       setVariants([]);
       setWholesaleOpen(false);
       setWholesalePrice('');
       setWholesaleMinQty('');
+      setWholesaleUnit('');
+      setDiscountPercent('');
+      setDiscountOnWholesale(false);
       setWholesaleDescription('');
       setIsSubmitting(false);
       if (onSuccess) { onSuccess(); } else { setMessage('Producto creado.'); }
@@ -131,12 +148,14 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
     <form onSubmit={handleSubmit} className="grid gap-4 max-w-lg">
       <div className="grid gap-1.5">
         <label className="text-sm font-medium text-[var(--text)]">Nombre</label>
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre del producto" required />
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder={isCard ? 'Nombre de la suscripción' : 'Nombre del producto'} required />
       </div>
+      {!isCard && (
       <div className="grid gap-1.5">
         <label className="text-sm font-medium text-[var(--text)]">Precio</label>
         <input className="input" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" type="number" step="0.01" min="0" required />
       </div>
+      )}
       <DescriptionField plan={plan} value={description} onChange={setDescription} placeholder="Descripción del producto…" />
       {full && (<>
       <div className="grid gap-1.5">
@@ -170,7 +189,24 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
         </div>
       </div>
 
-      {full && (<>
+      {isCard && <CardValuesEditor values={cardValues} onChange={setCardValues} />}
+
+      {full && !isCard && (<>
+      <div className="grid gap-3 border-t border-[var(--border)] pt-3">
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--text)]">Descuento % <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span></label>
+          <input className="input" type="number" min="1" max="99" step="1" value={discountPercent}
+            onChange={(e) => setDiscountPercent(e.target.value)} placeholder="ej. 20" />
+        </div>
+        {discountPercent && wholesalePrice && (
+          <label className="flex items-center gap-2 text-sm font-medium text-[var(--text)]">
+            <input type="checkbox" className="h-4 w-4 accent-[var(--accent)]" checked={discountOnWholesale}
+              onChange={(e) => setDiscountOnWholesale(e.target.checked)} />
+            Aplicar también al precio de mayoreo
+          </label>
+        )}
+      </div>
+
       {/* Variantes */}
       <div className="grid gap-2 border-t border-[var(--border)] pt-3">
         <div className="flex items-center justify-between">
@@ -242,6 +278,14 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
                 onChange={(e) => setWholesaleMinQty(e.target.value)} placeholder="ej. 10" />
             </div>
             <div className="grid gap-1.5">
+              <label className="text-sm font-medium text-[var(--text)]">Unidad mayorista <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span></label>
+              <input className="input" list="wholesale-units" maxLength={WHOLESALE_UNIT_MAX_LENGTH} value={wholesaleUnit}
+                onChange={(e) => setWholesaleUnit(e.target.value)} placeholder="Caja" />
+              <datalist id="wholesale-units">
+                {WHOLESALE_UNIT_SUGGESTIONS.map((u) => <option key={u} value={u} />)}
+              </datalist>
+            </div>
+            <div className="grid gap-1.5">
               <label className="text-sm font-medium text-[var(--text)]">Descripción del trato</label>
               <input className="input" value={wholesaleDescription}
                 onChange={(e) => setWholesaleDescription(e.target.value)}
@@ -253,7 +297,7 @@ export default function AddProductForm({ vendorId, categories, apiBase = '/api/v
       </>)}
 
       <button type="submit" className="primary-button" disabled={isSubmitting}>
-        {isSubmitting ? 'Creando...' : 'Crear producto'}
+        {isSubmitting ? 'Creando...' : isCard ? 'Crear suscripción' : 'Crear producto'}
       </button>
       {message && (
         <p className={`text-sm ${message.includes('Error') ? 'text-[var(--danger)]' : 'text-[var(--muted)]'}`}>{message}</p>

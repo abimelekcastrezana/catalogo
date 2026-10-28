@@ -7,9 +7,16 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/app/components/u
 import { Card, CardContent, CardFooter } from "@/app/components/ui/card";
 import { ChevronLeft, ChevronRight, ChevronDown, Copy, EyeOff, Trash2, X } from 'lucide-react';
 import DescriptionField from './DescriptionField';
+import CardValuesEditor from './CardValuesEditor';
+import { applyDiscount } from '@/app/lib/pricing';
+import { isCard as isCardProduct, WHOLESALE_UNIT_MAX_LENGTH, WHOLESALE_UNIT_SUGGESTIONS } from '@/app/lib/products';
 
 function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onCancel }) {
   const full = plan.fullProductFeatures;
+  const isCard = isCardProduct(product);
+  const [cardValues, setCardValues] = useState(
+    (product.ProductVariants || []).map((v) => ({ id: v.id, name: v.name, price: v.price ?? '' }))
+  );
   const [name, setName] = useState(product.name);
   const [sku, setSku] = useState(product.sku || '');
   const [description, setDescription] = useState(product.description || '');
@@ -24,6 +31,9 @@ function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onC
   const [wholesaleOpen, setWholesaleOpen] = useState(!!product.wholesalePrice);
   const [wholesalePrice, setWholesalePrice] = useState(product.wholesalePrice ?? '');
   const [wholesaleMinQty, setWholesaleMinQty] = useState(product.wholesaleMinQty ?? '');
+  const [wholesaleUnit, setWholesaleUnit] = useState(product.wholesaleUnit ?? '');
+  const [discountPercent, setDiscountPercent] = useState(product.discountPercent ? String(Number(product.discountPercent)) : '');
+  const [discountOnWholesale, setDiscountOnWholesale] = useState(Boolean(product.discountOnWholesale));
   const [wholesaleDescription, setWholesaleDescription] = useState(product.wholesaleDescription ?? '');
 
   const [message, setMessage] = useState('');
@@ -43,13 +53,19 @@ function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onC
     const res = await fetch(`${apiBase}/${vendorId}/products/${product.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+      body: JSON.stringify(isCard ? {
+        name, description, categoryId: catId || null, isActive: product.isActive, badge: badge || null,
+        variants: cardValues.map((v) => ({ id: v.id, name: v.name, price: v.price })),
+      } : {
         name, sku, description, categoryId: catId || null, isActive: product.isActive, price,
         badge: badge || null,
         wholesalePrice: wholesalePrice || null,
         wholesaleMinQty: wholesaleMinQty || null,
+        wholesaleUnit: wholesaleUnit || null,
+        discountPercent: discountPercent || null,
+        discountOnWholesale: Boolean(discountPercent && wholesalePrice && discountOnWholesale),
         wholesaleDescription: wholesaleDescription || null,
-        variants: variants.map((v, i) => ({ name: v.name, price: v.price || null, position: i })),
+        variants: variants.map((v, i) => ({ id: v.id, name: v.name, price: v.price || null, position: i })),
       }),
     });
     let data = {};
@@ -91,10 +107,12 @@ function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onC
         <label className="text-sm font-medium text-[var(--text)]">Nombre</label>
         <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
       </div>
+      {!isCard && (
       <div className="grid gap-1.5">
         <label className="text-sm font-medium text-[var(--text)]">Precio</label>
         <input className="input" value={price} onChange={(e) => setPrice(e.target.value)} type="number" step="0.01" min="0" />
       </div>
+      )}
       <DescriptionField plan={plan} value={description} onChange={setDescription} placeholder="Descripción…" />
       {full && (<>
       <div className="grid gap-1.5">
@@ -126,7 +144,24 @@ function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onC
         </div>
       </div>
 
-      {full && (<>
+      {isCard && <CardValuesEditor values={cardValues} onChange={setCardValues} />}
+
+      {full && !isCard && (<>
+      <div className="grid gap-3 border-t border-[var(--border)] pt-3">
+        <div className="grid gap-1.5">
+          <label className="text-sm font-medium text-[var(--text)]">Descuento % <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span></label>
+          <input className="input" type="number" min="1" max="99" step="1" value={discountPercent}
+            onChange={(e) => setDiscountPercent(e.target.value)} placeholder="ej. 20" />
+        </div>
+        {discountPercent && wholesalePrice && (
+          <label className="flex items-center gap-2 text-sm font-medium text-[var(--text)]">
+            <input type="checkbox" className="h-4 w-4 accent-[var(--accent)]" checked={discountOnWholesale}
+              onChange={(e) => setDiscountOnWholesale(e.target.checked)} />
+            Aplicar también al precio de mayoreo
+          </label>
+        )}
+      </div>
+
       {/* Variantes */}
       <div className="grid gap-2 border-t border-[var(--border)] pt-3">
         <div className="flex items-center justify-between">
@@ -199,6 +234,14 @@ function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onC
                 onChange={(e) => setWholesaleMinQty(e.target.value)} placeholder="ej. 10" />
             </div>
             <div className="grid gap-1.5">
+              <label className="text-sm font-medium text-[var(--text)]">Unidad mayorista <span className="text-[var(--muted)] font-normal text-xs">(opcional)</span></label>
+              <input className="input" list="wholesale-units" maxLength={WHOLESALE_UNIT_MAX_LENGTH} value={wholesaleUnit}
+                onChange={(e) => setWholesaleUnit(e.target.value)} placeholder="Caja" />
+              <datalist id="wholesale-units">
+                {WHOLESALE_UNIT_SUGGESTIONS.map((u) => <option key={u} value={u} />)}
+              </datalist>
+            </div>
+            <div className="grid gap-1.5">
               <label className="text-sm font-medium text-[var(--text)]">Descripción del trato</label>
               <input className="input" value={wholesaleDescription}
                 onChange={(e) => setWholesaleDescription(e.target.value)}
@@ -250,6 +293,9 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
         badge: product.badge || null,
         wholesalePrice: product.wholesalePrice || null,
         wholesaleMinQty: product.wholesaleMinQty || null,
+        wholesaleUnit: product.wholesaleUnit || null,
+        discountPercent: product.discountPercent || null,
+        discountOnWholesale: Boolean(product.discountOnWholesale),
         wholesaleDescription: product.wholesaleDescription || null,
         isActive: !isActive,
       }),
@@ -329,7 +375,24 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
         <CardContent className="p-4 flex-1 space-y-1">
           <h3 className="font-extrabold text-base leading-tight text-[var(--text)]">{product.name}</h3>
           <p className="text-[var(--muted)] text-sm line-clamp-2">{product.description || 'Sin descripción'}</p>
-          <p className="font-extrabold text-lg text-[var(--text)] pt-1 tabular-nums">${Number(product.price).toFixed(2)}</p>
+          {isCardProduct(product) ? (
+            <p className="font-extrabold text-lg text-[var(--text)] pt-1 tabular-nums">
+              {(product.ProductVariants || []).map((v) => `$${Number(v.price)}`).join(' · ') || 'Sin valores'}
+            </p>
+          ) : (
+            <p className="font-extrabold text-lg text-[var(--text)] pt-1 tabular-nums">
+              {Number(product.discountPercent) > 0 && (
+                <s className="mr-1.5 text-sm font-bold text-[var(--muted)]">${Number(product.price).toFixed(2)}</s>
+              )}
+              ${applyDiscount(product.price, product.discountPercent).toFixed(2)}
+              {Number(product.discountPercent) > 0 && (
+                <span className="ml-1.5 text-xs font-bold text-[var(--accent-text)]">-{Number(product.discountPercent)}%</span>
+              )}
+            </p>
+          )}
+          {isCardProduct(product) && (
+            <Badge variant="secondary" className="bg-[var(--surface-strong)] text-[var(--muted)] text-xs">Suscripción</Badge>
+          )}
           {hiddenByPlan && (
             <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--muted)] pt-1">
               <EyeOff className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" /> No se muestra: excede tu plan

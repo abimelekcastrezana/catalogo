@@ -4,6 +4,7 @@ import db from '@/db/index.js';
 import fs from 'fs';
 import path from 'path';
 import { uploadConfig } from '@/app/common/config.js';
+import productQueries from '@/db/queries/products.js';
 import { getVendorPlan, productLimitError } from '@/lib/plan-limits';
 
 export async function POST(request, { params }) {
@@ -17,7 +18,10 @@ export async function POST(request, { params }) {
 
   const original = await db.Product.findOne({
     where: { id: productId, vendorId },
-    include: [{ model: db.ProductImage, order: [['position', 'ASC']] }],
+    include: [
+      { model: db.ProductImage, order: [['position', 'ASC']] },
+      { model: db.ProductVariant },
+    ],
   });
   if (!original) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
 
@@ -29,14 +33,25 @@ export async function POST(request, { params }) {
     const copy = await db.Product.create({
       vendorId,
       categoryId: original.categoryId || null,
+      kind: original.kind,
       name: `${original.name} (copia)`,
       sku: null,
       description: original.description,
       price: original.price,
       badge: original.badge || null,
+      wholesalePrice: original.wholesalePrice,
+      wholesaleMinQty: original.wholesaleMinQty,
+      wholesaleUnit: original.wholesaleUnit,
+      wholesaleDescription: original.wholesaleDescription,
+      discountPercent: original.discountPercent,
+      discountOnWholesale: original.discountOnWholesale,
       isActive: false,
       position: original.position,
     }, { transaction });
+
+    // Los valores de una suscripción se copian; las fotos de variantes no (apuntarían al mismo archivo).
+    const variants = [...(original.ProductVariants || [])].sort((a, b) => a.position - b.position);
+    await productQueries.createVariants(copy.id, variants.map((v) => ({ name: v.name, price: v.price })), { transaction });
 
     const originalImages = original.ProductImages || [];
     for (const img of originalImages) {

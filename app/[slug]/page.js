@@ -16,6 +16,7 @@ import { ArrowLeft, ArrowRight, Package } from 'lucide-react';
 import { MessageCircle } from 'lucide-react';
 import { getPlan, productForPublicPlan, visibleCategories } from '@/app/lib/plans';
 import { visibleProductIds } from '@/lib/plan-limits';
+import { withSortedRelations } from '@/app/lib/products';
 import JsonLd from '@/app/components/JsonLd';
 import { SITE_URL, SITE_LOGO } from '@/app/lib/site';
 
@@ -116,7 +117,7 @@ export default async function VendorPublicPage({ params, searchParams }) {
   });
 
   const products = productModels.map((model) => {
-    const p = productForPublicPlan(plan, model.get({ plain: true }));
+    const p = productForPublicPlan(plan, withSortedRelations(model.get({ plain: true })));
     // Producto en una categoría que quedó fuera del plan: se muestra sin categoría.
     return p.categoryId && !visibleCategoryIds.has(p.categoryId) ? { ...p, categoryId: null, Category: null } : p;
   });

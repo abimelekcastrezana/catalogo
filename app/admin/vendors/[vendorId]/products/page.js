@@ -9,6 +9,7 @@ import { Button } from '@/app/components/ui/button';
 import PlanUsage from '@/app/components/PlanUsage';
 import { getPlan } from '@/app/lib/plans';
 import { visibleProductIds } from '@/lib/plan-limits';
+import { withSortedRelations } from '@/app/lib/products';
 
 export default async function AdminVendorProductsPage({ params, searchParams }) {
   const session = await getUserSession();
@@ -62,7 +63,7 @@ export default async function AdminVendorProductsPage({ params, searchParams }) 
     ],
     order: [['position', 'ASC'], ['createdAt', 'DESC']],
   });
-  const products = productModels.map((p) => p.get({ plain: true }));
+  const products = productModels.map((p) => withSortedRelations(p.get({ plain: true })));
   const vendorProductCount = categoryId ? await db.Product.count({ where: { vendorId } }) : products.length;
   const visibleIds = vendorProductCount > (plan.maxProducts ?? Infinity) ? await visibleProductIds(vendorId, plan) : null;
 

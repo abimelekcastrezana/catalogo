@@ -51,6 +51,35 @@
   plan"). En Free, los datos extra (categorías, etiqueta, variantes, mayoreo) se conservan en la
   BD, se ocultan en la tienda y no se tocan al editar; reaparecen si el vendor vuelve a subir.
 
+### Suscripciones (tarjetas con valores)
+- Segunda modalidad de venta, mezclada con los productos en la Vitrina. Es una tarjeta prepago
+  (pavos de Fortnite, puntos Amazon/Nintendo): **nombre + imagen + 1 a 3 valores**
+  (monto y nombre opcional). No es el plan Free/Plus/Max de la tienda.
+- Modelo: `Product.kind = 'card'` y sus valores son `ProductVariant` (precio obligatorio);
+  `Product.price` guarda el valor más bajo. Por eso comparten límite de plan, orden, duplicar,
+  buscador y carrito con los productos.
+- Se crea y edita desde `/dashboard/products` y desde admin (mismos componentes). Disponible en
+  todos los planes; en Free cuenta dentro del límite de 10 junto con los productos (se puede
+  mezclar). Sin SKU ni mayoreo; categoría y etiqueta solo en Plus/Max.
+- La imagen no es obligatoria (igual que en los productos); sin imagen se muestra el ícono de marcador.
+- Código: reglas puras en `app/lib/products.js`, lógica en `lib/services/productService.js`,
+  consultas ORM en `db/queries/products.js`; las rutas API solo autorizan y llaman al servicio.
+- Editar un producto ya no borra las fotos de sus variantes (se actualizan por `id`).
+- **Descuento** (Plus/Max, solo productos; las suscripciones no): porcentaje 1–99 por producto
+  (`Product.discountPercent`) y casilla "Aplicar también al precio de mayoreo"
+  (`discountOnWholesale`, la elige el vendedor). La tarjeta y el detalle muestran el precio de
+  lista tachado y el que queda; el carrito calcula (cada renglón guarda precio de lista +
+  porcentaje; reglas en `app/lib/pricing.js`), muestra "Ahorras $X" y WhatsApp incluye el
+  descuento y el ahorro. En Free se ignora aunque llegue en la petición.
+- La tarjeta de producto con variantes o suscripción abre el detalle ("Elegir") en vez de agregar
+  el precio base.
+- **Mayoreo desde la tarjeta** (Plus/Max, productos con mayoreo y sin variantes): selector
+  `Pieza | <unidad> ×N`; la unidad mayorista es editable (`Product.wholesaleUnit`: Caja, Paquete,
+  Docena…; vacío = "Caja"); el precio y "Agregar" siguen a la opción elegida. Con variantes, el mayoreo
+  se elige en el detalle. En el carrito la caja es un renglón distinto de la pieza (`id` con
+  sufijo `_lot` y `lotSize`), así que pueden convivir. Falta contrastar con
+  `ejemplo_precio_pieza_mayoreo_caja_.png`.
+
 ### Admin (`/admin`)
 - CRUD de vendors (crear, editar, ver detalle).
 - CRUD de categorías globales, asociables a vendors.
@@ -130,6 +159,8 @@
 
 ## Changelog reciente
 
+- **2026-10-27** — suscripciones (tarjetas con valores), servicio de productos, variantes que
+  conservan su foto al editar, botón Planes del header en `outline`.
 - **2026-10-12** — planes de suscripción Free / Plus / Max con límites de productos, categorías
   y funciones de producto; el admin asigna el plan y su vencimiento anual; página `/planes`.
 - **2026-10-12** — SEO: metadatos, datos estructurados, sitemap, robots, `llms.txt` y enlace a

@@ -110,7 +110,11 @@ export function productForPublicPlan(plan, product) {
     badge: null,
     wholesalePrice: null,
     wholesaleMinQty: null,
+    wholesaleUnit: null,
+    discountPercent: null,
+    discountOnWholesale: false,
     wholesaleDescription: null,
-    ProductVariants: [],
+    // Los valores de una suscripción son el producto mismo: no se ocultan en Free.
+    ProductVariants: product.kind === 'card' ? product.ProductVariants : [],
   };
 }
