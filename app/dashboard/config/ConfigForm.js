@@ -3,6 +3,7 @@
 import { useState } from "react";
 import * as F from "@/app/lib/form-styles";
 import RegionSelect from "@/app/components/RegionSelect";
+import ImageFileInput from '@/app/components/ImageFileInput';
 
 const COUNTRY_CODES = [
   { code: '+598', label: '+598 (Uruguay)' },
@@ -64,8 +65,7 @@ export default function ConfigForm({ vendor }) {
     setMessage("Configuración actualizada exitosamente.");
   };
 
-  const handleLogoUpload = async (e) => {
-    const file = e.target.files?.[0];
+  const handleLogoUpload = async (file) => {
     if (!file) return;
 
     setUploading(true);
@@ -112,7 +112,7 @@ export default function ConfigForm({ vendor }) {
             )}
             <div className={F.field + ' flex-1'}>
               <label htmlFor="logo-input" className={F.label}>Logo de tienda</label>
-              <input id="logo-input" type="file" accept="image/*" onChange={handleLogoUpload} disabled={uploading}
+              <ImageFileInput id="logo-input" onChange={handleLogoUpload} disabled={uploading}
                 className="input text-xs py-2 cursor-pointer disabled:cursor-not-allowed" />
               {logoMessage && <p className={`text-xs ${F.msg(logoMessage)}`}>{logoMessage}</p>}
             </div>

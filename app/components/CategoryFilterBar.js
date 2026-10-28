@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { Search, Package, LayoutGrid, ChevronDown } from 'lucide-react';
+import { thumbPath, uploadUrl } from '@/app/lib/images';
 
 // Chips con canto inferior (mismo lenguaje que los botones con volumen).
 // El estado seleccionado se distingue por color de relleno + borde + texto, no solo por color.
@@ -95,7 +96,7 @@ export default function CategoryFilterBar({ vendorSlug, categories, currentCateg
             <div className="anim-pop-in absolute z-30 top-full left-0 right-0 mt-2 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] shadow-card overflow-hidden">
               {suggestions.map((product) => {
                 const imageUrl = product.image
-                  ? `/api/uploads${product.image.replace(/^\/?uploads?\/?/, '/')}`
+                  ? uploadUrl(thumbPath(product.image))
                   : null;
                 return (
                   <a

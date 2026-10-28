@@ -6,6 +6,7 @@ import * as F from '@/app/lib/form-styles';
 import RegionSelect from '@/app/components/RegionSelect';
 import { getPlan } from '@/app/lib/plans';
 import PlanSelect from './PlanSelect';
+import ImageFileInput from '@/app/components/ImageFileInput';
 
 const COUNTRY_CODES = [
   { code: '+598', label: '+598 (Uruguay)' }, { code: '+57', label: '+57 (Colombia)' },
@@ -52,8 +53,7 @@ export default function EditVendorForm({ vendor }) {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogoChange = (e) => {
-    const file = e.target.files[0] || null;
+  const handleLogoChange = (file) => {
     setLogoFile(file);
     if (file) setLogoPreview(URL.createObjectURL(file));
   };
@@ -95,7 +95,7 @@ export default function EditVendorForm({ vendor }) {
         )}
         <div className={F.field + ' flex-1'}>
           <label className={F.label}>Logo de la tienda</label>
-          <input className={F.input} type="file" accept="image/*" onChange={handleLogoChange} />
+          <ImageFileInput className={F.input} onChange={handleLogoChange} />
         </div>
       </div>
 

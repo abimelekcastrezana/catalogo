@@ -8,6 +8,7 @@ import { Button } from '@/app/components/ui/button';
 import { IconSwap } from '@/app/components/ui/icon-swap';
 import { isCard, wholesaleUnitLabel } from '@/app/lib/products';
 import { applyDiscount, discountFor } from '@/app/lib/pricing';
+import { thumbPath, uploadUrl } from '@/app/lib/images';
 
 const BADGE_LABELS = {
   nuevo: 'NUEVO',
@@ -31,9 +32,8 @@ export default function PublicProductCard({ product }) {
   const [current, setCurrent] = useState(0);
   const [detailOpen, setDetailOpen] = useState(false);
 
-  const imageUrl = images.length
-    ? `/api/uploads${(images[current].path || '').replace(/^\/?uploads?\/?/, '/')}`
-    : null;
+  // La tarjeta usa la miniatura (si la imagen la tiene); el detalle carga la imagen completa.
+  const imageUrl = images.length ? uploadUrl(thumbPath(images[current].path)) : null;
 
   const variants = product.ProductVariants || [];
   const card = isCard(product);
