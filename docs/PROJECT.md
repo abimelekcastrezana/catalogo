@@ -136,6 +136,19 @@
   sitemap), redirigir `www` en Cloudflare, decidir si permitir `GPTBot`/`ClaudeBot` (hoy Cloudflare
   los bloquea con 403) y presencia de marca en otros sitios.
 
+### Imágenes (subida y estandarización)
+- Todo archivo subido (fotos de producto, de variante y logos) pasa por `lib/services/imageService.js`:
+  máximo **10 MB** (si pesa más se rechaza sin procesarlo, también por el encabezado
+  `Content-Length`), se verifica que sea una imagen real (JPG, PNG, WebP, AVIF o GIF; SVG y archivos
+  falsos se rechazan) y se normaliza con `sharp`: orientación EXIF corregida, metadatos (GPS
+  incluido) eliminados, lado máximo **2048 px** sin agrandar las pequeñas y **WebP calidad 85**.
+- Fotos de producto: se guarda `<nombre>_full.webp` y una miniatura `<nombre>_thumb.webp` (600 px,
+  calidad 80) que usan la tarjeta, el dashboard y el buscador; el detalle y el lightbox cargan la
+  completa. Logos: PNG de 512 px (conserva la transparencia y se ve bien al compartir el enlace).
+- Menos de 500 px no se bloquea: la API responde `warnings`. Las imágenes anteriores no se tocan
+  (sin miniatura se sirven tal cual). Los parámetros viven en `IMAGE_PRESETS`.
+- `sharp` es dependencia declarada (`package.json`); antes solo venía como opcional de Next.
+
 ### Infra / calidad
 - Migraciones Sequelize incrementales (`db/migrations/`), una por cambio de esquema.
 - `revalidatePath` aplicado tras mutaciones (categorías, productos, reorder) para evitar

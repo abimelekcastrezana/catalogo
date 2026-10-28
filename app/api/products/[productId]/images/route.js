@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getUserSession } from '@/lib/auth/getSession';
 import db from '@/db/index.js';
-import fs from 'fs';
-import path from 'path';
-import { uploadConfig } from '@/app/common/config.js';
+import { assertUploadSize, removeImage, storeImage } from '@/lib/services/imageService';
+import { serviceErrorResponse } from '@/lib/services/serviceError';
 
 export const maxDuration = 60;
 
@@ -39,6 +38,7 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    assertUploadSize(request);
     const existingImages = await db.ProductImage.findAll({ where: { productId } });
 
     const { files, positions } = await parseForm(request);
@@ -46,11 +46,8 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    const basePath = uploadConfig.basePath;
-    const productDir = path.join(basePath, 'products', productId);
-    fs.mkdirSync(productDir, { recursive: true });
-
     const saved = [];
+    const warnings = [];
     let nextPosition = existingImages.length ? Math.max(...existingImages.map((img) => img.position || 0)) + 1 : 1;
 
     for (let i = 0; i < files.length; i++) {
@@ -64,35 +61,26 @@ export async function POST(request, { params }) {
         return NextResponse.json({ error: 'Max 2 images allowed' }, { status: 400 });
       }
 
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const ext = path.extname(file.name) || '.jpg';
-      const filename = `image_${Date.now()}_${i}${ext}`;
-      const filepath = path.join(productDir, filename);
-
-      fs.writeFileSync(filepath, buffer);
-
-      const relPath = path.join('/uploads/products', productId, filename);
+      const stored = await storeImage(file, { dir: `products/${productId}`, name: `image_${Date.now()}_${i}` });
+      if (stored.warning) warnings.push(stored.warning);
 
       if (replacePosition) {
         const existing = existingImages.find((img) => img.position === replacePosition);
         if (existing) {
-          const relativeExistingPath = existing.path.replace(/^\/uploads/, '').replace(/^\//, '');
-          const existingFilePath = path.join(uploadConfig.basePath, relativeExistingPath);
-          if (fs.existsSync(existingFilePath)) fs.unlinkSync(existingFilePath);
+          await removeImage(existing.path);
           await db.ProductImage.destroy({ where: { id: existing.id } });
         }
-        await db.ProductImage.create({ productId, path: relPath, position: targetPosition });
+        await db.ProductImage.create({ productId, path: stored.path, position: targetPosition });
       } else {
-        await db.ProductImage.create({ productId, path: relPath, position: targetPosition });
+        await db.ProductImage.create({ productId, path: stored.path, position: targetPosition });
         nextPosition += 1;
       }
 
-      saved.push({ productId, path: relPath, position: targetPosition });
+      saved.push({ productId, path: stored.path, position: targetPosition });
     }
 
-    return NextResponse.json({ saved });
+    return NextResponse.json(warnings.length ? { saved, warnings } : { saved });
   } catch (error) {
-    console.error('Image upload error:', error);
-    return NextResponse.json({ error: 'Server error uploading image' }, { status: 500 });
+    return serviceErrorResponse(error, 'Server error uploading image');
   }
 }

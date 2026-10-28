@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getUserSession } from '@/lib/auth/getSession';
 import db from '@/db/index.js';
-import fs from 'fs';
-import path from 'path';
-import { uploadConfig } from '@/app/common/config.js';
+import { assertUploadSize, removeImage, storeImage } from '@/lib/services/imageService';
+import { serviceErrorResponse } from '@/lib/services/serviceError';
 
 export const maxDuration = 60;
 
@@ -32,35 +31,21 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Variant not found' }, { status: 404 });
     }
 
+    assertUploadSize(request);
     const formData = await request.formData();
-    const file = formData.get('image');
-    if (!file || typeof file.arrayBuffer !== 'function') {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-    }
+    const stored = await storeImage(formData.get('image'), {
+      dir: `products/${productId}/variants/${variantId}`,
+      name: `variant_${Date.now()}`,
+      withThumb: false,
+    });
 
-    const variantDir = path.join(uploadConfig.basePath, 'products', productId, 'variants', variantId);
-    fs.mkdirSync(variantDir, { recursive: true });
+    // Se reemplaza la foto anterior de la variante.
+    const previous = variant.imagePath;
+    await variant.update({ imagePath: stored.path });
+    await removeImage(previous);
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const ext = path.extname(file.name) || '.jpg';
-    const filename = `variant_${Date.now()}${ext}`;
-    const filepath = path.join(variantDir, filename);
-    fs.writeFileSync(filepath, buffer);
-
-    const imagePath = `/uploads/products/${productId}/variants/${variantId}/${filename}`;
-
-    // Remove old image file if exists
-    if (variant.imagePath) {
-      const oldRelative = variant.imagePath.replace(/^\/uploads/, '').replace(/^\//, '');
-      const oldFilePath = path.join(uploadConfig.basePath, oldRelative);
-      if (fs.existsSync(oldFilePath)) fs.unlinkSync(oldFilePath);
-    }
-
-    await variant.update({ imagePath });
-
-    return NextResponse.json({ imagePath });
+    return NextResponse.json(stored.warning ? { imagePath: stored.path, warnings: [stored.warning] } : { imagePath: stored.path });
   } catch (error) {
-    console.error('Variant image upload error:', error);
-    return NextResponse.json({ error: 'Server error uploading variant image' }, { status: 500 });
+    return serviceErrorResponse(error, 'Server error uploading variant image');
   }
 }

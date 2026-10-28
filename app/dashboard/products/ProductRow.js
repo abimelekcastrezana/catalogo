@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight, ChevronDown, Copy, EyeOff, Trash2, X } from 
 import DescriptionField from './DescriptionField';
 import CardValuesEditor from './CardValuesEditor';
 import { applyDiscount } from '@/app/lib/pricing';
+import { thumbPath, uploadUrl } from '@/app/lib/images';
 import { isCard as isCardProduct, WHOLESALE_UNIT_MAX_LENGTH, WHOLESALE_UNIT_SUGGESTIONS } from '@/app/lib/products';
 
 function EditForm({ product, vendorId, categories, apiBase, plan, onSuccess, onCancel }) {
@@ -325,7 +326,7 @@ export default function ProductRow({ product, vendorId, categories, apiBase = '/
   const imageUrls = (product.ProductImages || [])
     .sort((a, b) => (a.position || 0) - (b.position || 0))
     .slice(0, 2)
-    .map((img) => `/api/uploads${(img.path || '').replace(/^\/uploads/, '')}`);
+    .map((img) => uploadUrl(thumbPath(img.path)));
 
   const categoryName = categories.find((c) => c.id === product.categoryId)?.name;
 
