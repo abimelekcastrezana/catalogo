@@ -63,6 +63,26 @@ module.exports = (sequelize) => {
       allowNull: true,
     },
     // Plan de suscripción: free | plus | max (límites en app/lib/plans.js).
+        about: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    hours: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    instagram: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    facebook: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     plan: {
       type: DataTypes.STRING,
       allowNull: false,
