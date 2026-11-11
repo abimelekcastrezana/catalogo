@@ -88,7 +88,9 @@ export default async function DashboardPage() {
             <Link href="/dashboard/products"><Button variant="outline">Productos</Button></Link>
             {/* TUTORIAL-CESAR: aquí va el botón "Estadísticas" (borra este comentario) */}
             <Link href="/dashboard/config"><Button variant="outline">Configuración</Button></Link>
-            {/* TUTORIAL-PHOEBE: aquí va el botón "Info del negocio" (borra este comentario) */}
+            {
+              <Link href="/dashboard/info"><Button variant="outline">Info del negocio</Button></Link>
+            }
           </div>
         </CardContent>
       </Card>

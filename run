@@ -1,0 +1,31 @@
+[1mdiff --git a/db/models/vendor.js b/db/models/vendor.js[m
+[1mindex 034e3e1..41cdc49 100644[m
+[1m--- a/db/models/vendor.js[m
+[1m+++ b/db/models/vendor.js[m
+[36m@@ -63,6 +63,26 @@[m [mmodule.exports = (sequelize) => {[m
+       allowNull: true,[m
+     },[m
+     // Plan de suscripción: free | plus | max (límites en app/lib/plans.js).[m
+[32m+[m[32m        about: {[m
+[32m+[m[32m      type: DataTypes.TEXT,[m
+[32m+[m[32m      allowNull: true,[m
+[32m+[m[32m    },[m
+[32m+[m[32m    address: {[m
+[32m+[m[32m      type: DataTypes.STRING,[m
+[32m+[m[32m      allowNull: true,[m
+[32m+[m[32m    },[m
+[32m+[m[32m    hours: {[m
+[32m+[m[32m      type: DataTypes.TEXT,[m
+[32m+[m[32m      allowNull: true,[m
+[32m+[m[32m    },[m
+[32m+[m[32m    instagram: {[m
+[32m+[m[32m      type: DataTypes.STRING,[m
+[32m+[m[32m      allowNull: true,[m
+[32m+[m[32m    },[m
+[32m+[m[32m    facebook: {[m
+[32m+[m[32m      type: DataTypes.STRING,[m
+[32m+[m[32m      allowNull: true,[m
+[32m+[m[32m    },[m
+     plan: {[m
+       type: DataTypes.STRING,[m
+       allowNull: false,[m
